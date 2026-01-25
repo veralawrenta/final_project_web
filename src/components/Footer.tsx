@@ -1,6 +1,6 @@
 "use client";
 
-import { Facebook, HousePlus, Icon, Instagram, Twitter } from "lucide-react";
+import { Facebook, Instagram, Twitter } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -56,60 +56,59 @@ const Footer = ({ className = "" }: FooterProps) => {
   ];
 
   return (
-    <footer className={`bg-primary text-primary-foreground ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
-          <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center space-x-2 mb-4">
-              <div className="flex items-center justify-center w-9 h-9 bg-primary-foreground rounded-lg">
+    <footer className={`bg-[#F8FAFC] border-t border-slate-200 text-[#334155] ${className}`}>
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+          
+          {/* Logo & About Section */}
+          <div className="lg:col-span-1 space-y-6">
+            <Link href="/" className="flex items-center space-x-3">
+              <div className="relative w-9 h-9">
                 <Image
-                src="/images/logos.png"
-                width={15}
-                height={5}
-                alt="website logo"
-                >
-
-                </Image>
+                  src="/images/nuit-logo.png"
+                  fill
+                  sizes="36px"
+                  className="object-contain"
+                  alt="Staynuit logo"
+                />
               </div>
-              <div className="flex flex-col">
-                <span className="font-heading font-bold text-2xl leading-none">
-                  Staynuit
-                </span>
-              </div>
+              <span className="font-bold text-2xl tracking-tight text-slate-900">
+                Staynuit
+              </span>
             </Link>
-            <p className="text-sm text-primary-foreground opacity-80 mb-4">
+            <p className="text-sm text-slate-500 leading-relaxed">
               Connecting quality-conscious travelers with exceptional properties
-              through intelligent hospitality.
+              through intelligent hospitality and curated experiences.
             </p>
-            <div className="flex space-x-3">
+            <div className="flex space-x-4">
               {socialLinks.map((social) => {
                 const Icon = social.icon;
-
                 return (
                   <a
                     key={social.name}
                     href={social.href}
                     aria-label={social.name}
-                    className="w-8 h-8 flex items-center justify-center rounded-md bg-primary-foreground bg-opacity-10 hover:bg-opacity-20 transition-all duration-200"
+                    className="w-9 h-9 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-[#334155] hover:bg-[#C7E1FB] hover:border-[#C7E1FB] transition-all duration-300"
                   >
-                    <Icon className="w-6 h-6 text-primary" />
+                    <Icon className="w-5 h-5" />
                   </a>
                 );
               })}
             </div>
           </div>
 
+          {/* Navigation Links */}
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="font-heading font-semibold text-base mb-4">
+              <h3 className="font-bold text-slate-900 text-sm uppercase tracking-widest mb-6">
                 {section.title}
               </h3>
-              <ul className="space-y-2">
+              <ul className="space-y-4">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-primary-foreground opacity-80 hover:opacity-100 hover:text-secondary transition-all duration-200"
+                      className="text-sm text-slate-500 hover:text-slate-900 transition-colors duration-200"
                     >
                       {link.label}
                     </Link>
@@ -120,33 +119,26 @@ const Footer = ({ className = "" }: FooterProps) => {
           ))}
         </div>
 
-        <div className="pt-8 border-t border-primary-foreground border-opacity-20">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="flex flex-wrap justify-center md:justify-start gap-4 text-sm text-primary-foreground opacity-80">
-              <Link
-                href="/"
-                className="hover:opacity-100 transition-opacity duration-200"
-              >
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-slate-200">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2 text-xs font-medium text-slate-400">
+              <Link href="/" className="hover:text-slate-600 transition-colors">
                 Privacy Policy
               </Link>
-              <span className="hidden md:inline">•</span>
-              <Link
-                href="/"
-                className="hover:opacity-100 transition-opacity duration-200"
-              >
+              <Link href="/" className="hover:text-slate-600 transition-colors">
                 Cookie Policy
               </Link>
-              <span className="hidden md:inline">•</span>
-              <Link
-                href="/"
-                className="hover:opacity-100 transition-opacity duration-200"
-              >
+              <Link href="/" className="hover:text-slate-600 transition-colors">
                 Accessibility
               </Link>
             </div>
-            <p className="text-sm text-primary-foreground opacity-80">
-              © {currentYear} Staynuit. All rights reserved.
-            </p>
+            
+            <div className="flex items-center gap-2">
+               <p className="text-xs text-slate-400 font-medium tracking-wide">
+                &copy; {currentYear} STAYNUIT. ALL RIGHTS RESERVED.
+              </p>
+            </div>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +23,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import z from "zod";
-import { changeEmailSchema } from "../../change-email/schema";
 
 interface ChangeEmailFormProps extends React.HTMLProps<HTMLDivElement> {
   className?: string;
@@ -106,4 +105,4 @@ export function ChangeEmailForm({ className, ...props }: ChangeEmailFormProps) {
       </FieldDescription>
     </div>
   );
-}
+}*/

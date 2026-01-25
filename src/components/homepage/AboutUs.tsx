@@ -42,52 +42,48 @@ const Features = [
 
 const HeroAboutUs = () => {
   return (
-    <section className="relative py-20 px-4 bg-white overflow-hidden">
-      {/* Subtle Background Decoration */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-cyan-50/50 blur-[120px]" />
-      </div>
+    <section className="py-20 px-6 bg-white border-b border-slate-100">
+      <div className="container mx-auto max-w-7xl">
 
-      <div className="container mx-auto max-w-7xl relative z-10">
-        <div className="mb-16 max-w-3xl">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="h-[2px] w-10 bg-primary"></span>
-            <span className="text-sm font-bold uppercase tracking-[0.2em] text-primary">
+        <div className="mb-16">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="h-px w-8 bg-slate-300"></span>
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">
               Why Staynuit
             </span>
           </div>
           
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 leading-tight">
             Reimagining the way {" "}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-600 to-blue-600">
+            <span className="bg-[#C7E1FB] px-2 py-0.5 rounded-sm">
               you experience travel.
             </span>
           </h2>
           
-          <p className="mt-8 text-lg md:text-xl text-slate-600 leading-relaxed max-w-2xl">
+          <p className="mt-6 text-base md:text-lg text-slate-500 max-w-2xl leading-relaxed">
             We combine the comforts of home with the reliability of a boutique hotel, 
-            ensuring every stay is memorable, seamless, and completely stress-free.
+            ensuring every stay is curated, seamless, and stress-free.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-px bg-slate-100 border border-slate-100 rounded-xl overflow-hidden md:grid-cols-2 lg:grid-cols-3">
           {Features.map((item, index) => {
             const Icon = item.icon;
             return (
               <div 
                 key={index} 
-                className="group p-8 rounded-3xl border border-slate-100 bg-white transition-all duration-500 hover:border-blue-100 hover:shadow-[0_20px_50px_rgba(8,112,184,0.07)] hover:-translate-y-2"
+                className="group bg-white p-10 transition-colors duration-200 hover:bg-slate-50/50"
               >
                 <div className="flex flex-col gap-6">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-primary transition-all duration-500 group-hover:bg-primary group-hover:text-white">
-                    <Icon size={28} strokeWidth={1.5} />
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-50 text-slate-400 transition-colors duration-300 group-hover:bg-[#C7E1FB] group-hover:text-[#334155]">
+                    <Icon size={24} strokeWidth={1.5} />
                   </div>
                   
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900 mb-3">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-bold text-slate-900">
                       {item.title}
                     </h3>
-                    <p className="text-slate-500 leading-relaxed">
+                    <p className="text-sm text-slate-500 leading-relaxed">
                       {item.description}
                     </p>
                   </div>

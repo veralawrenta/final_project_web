@@ -9,6 +9,7 @@ declare module "next-auth" {
     email: string;
     firstName: string;
     lastName: string;
+    avatar: string;
     role: "USER" | "TENANT";
     accessToken?: string;
   }
@@ -29,11 +30,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          scope: "openid email profile",
-        },
-      },
     }),
   ],
   session: {
@@ -47,21 +43,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
-        console.log("ACCOUNT OBJECT:", account);
+        //console.log("ACCOUNT OBJECT:", account);
 
         if (!account.id_token) {
-          console.error("Missing Google id_token");
+          //console.error("Missing Google id_token");
           return false;
         }
         const { data } = await axiosInstance.post("/oauth/google", {
           googleToken: account?.id_token!,
         });
 
-        user.id = data.id;
-        user.firstName = data.firstName;
-        user.lastName = data.lastName;
-        user.email = data.email;
-        user.role = data.role;
+        user.id = data.user.id;
+        user.firstName = data.user.firstName;
+        user.lastName = data.user.lastName;
+        user.email = data.user.email;
+        user.avatar = data.user.avatar;
+        user.role = data.user.role;
         user.accessToken = data.accessToken;
       }
       return true;

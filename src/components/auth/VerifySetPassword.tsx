@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
-import { toast } from "react-toastify";
 import { z } from "zod";
 import { axiosInstance } from "@/lib/axios";
 import { verifyAndSetPasswordSchema } from "../../lib/validator/auth.set-password.schema";
@@ -14,13 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import Link from "next/link";
 import Image from "next/image";
+import { toast, Toaster } from "sonner";
 
 type FormData = z.infer<typeof verifyAndSetPasswordSchema>;
 
 const VerifyAndSetPasswordForm = () => {
   const router = useRouter();
   const params = useSearchParams();
-  const verificationToken = params.get("verificationToken");
+  const verificationToken = params.get("token");
 
   const [isVerifying, setIsVerifying] = useState(true);
   const [isValid, setIsValid] = useState(false);
@@ -44,9 +44,14 @@ const VerifyAndSetPasswordForm = () => {
 
     const validateToken = async () => {
       try {
-        await axiosInstance.post("/auth/validate", {
-          verificationToken,
-        });
+        await axiosInstance.post(
+          "/auth/validate",
+         null, {
+          headers: {
+            Authorization: `Bearer ${verificationToken}`
+          }
+         }
+        );
 
         setIsValid(true);
       } catch {
@@ -67,10 +72,15 @@ const VerifyAndSetPasswordForm = () => {
     setError(null);
 
     try {
-      const response = await axiosInstance.patch("/auth/set-password", {
-        verificationToken,
-        password: data.password,
-      });
+      const response = await axiosInstance.patch(
+        "/auth/set-password", {
+        password: data.password},
+        {
+          headers: {
+            Authorization: `Bearer ${verificationToken}`
+        }
+      }
+      );
 
       toast.success("Your account has been verified successfully");
 
@@ -126,11 +136,12 @@ const VerifyAndSetPasswordForm = () => {
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-background px-6 py-20">
+      <Toaster position="top-right" richColors />
       <div className="w-full max-w-md">
-        <div className="border-border border-2 rounded-2xl shadow-lg p-8 md:p-12 space-y-8 text-left">
+        <div className="border-slate-300 border-2 rounded-2xl shadow-xl shadow-slate-200/50 p-8 md:p-12 space-y-8 text-left">
           <div className="flex justify-center">
             <Image
-              src={"/images/staynuit-name.png"}
+              src={"/images/nuit-logo.png"}
               width={150}
               height={150}
               alt="website logo"
@@ -138,47 +149,61 @@ const VerifyAndSetPasswordForm = () => {
               className="h-auto w-auto"
             ></Image>
           </div>
-          <div className="text-center">
-            <h1 className="text-xl md:text-2xl font-semibold">
+          <div className="text-center space-y-2">
+            <h1 className="text-xl md:text-2xl font-semibold text-slate-900 tracking-tight">
               Set Your Password
             </h1>
-            <p>One more step to become our verified member</p>
+            <p className="text-slate-500 text-sm">
+              One more step to become our verified member
+            </p>
           </div>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-200 p-4">
+              <div className="bg-red-50 border border-red-200 p-4 rounded-2xl">
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
 
-            <div>
-              <Label>Password</Label>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-slate-700 ml-1">
+                Password
+              </Label>
               <Input
                 type="password"
+                placeholder="••••••••"
+                className="h-11 border-slate-200 focus-visible:ring-[#C7E1FB] rounded-xl"
                 {...form.register("password")}
                 disabled={isSubmitting}
               />
-              <p className="text-sm text-red-600">
-                {form.formState.errors.password?.message}
-              </p>
+              {form.formState.errors.password && (
+                <p className="text-sm text-red-600">
+                  {form.formState.errors.password?.message}
+                </p>
+              )}
             </div>
 
-            <div>
-              <Label>Confirm Password</Label>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold text-slate-700 ml-1">
+                Confirm Password
+              </Label>
               <Input
                 type="password"
+                placeholder="••••••••"
+                className="h-11 border-slate-200 focus-visible:ring-[#C7E1FB] rounded-xl"
                 {...form.register("confirmPassword")}
                 disabled={isSubmitting}
               />
-              <p className="text-sm text-red-600">
-                {form.formState.errors.confirmPassword?.message}
-              </p>
+              {form.formState.errors.confirmPassword && (
+                <p className="text-sm text-red-600">
+                  {form.formState.errors.confirmPassword?.message}
+                </p>
+              )}
             </div>
 
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full h-12"
+              className="w-full h-11 bg-primary hover:bg-slate-600 text-white font-bold rounded-xl transition-all active:scale-[0.98]"
             >
               {isSubmitting ? "Setting Password…" : "Set Password"}
             </Button>

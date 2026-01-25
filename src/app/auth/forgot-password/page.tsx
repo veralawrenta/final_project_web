@@ -1,9 +1,9 @@
-import { ForgotPasswordForm } from "./components/ForgotPasswordForm";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 
 const ForgotPassword = () => {
   return (
-    <div className="container mx-auto flex flex-col items-center justify-center gap-6 p-6 md:p-10">
-      <div className="w-full max-w-sm border-2 rounded-2xl bg-gray-50">
+    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm md:max-w-4xl">
         <ForgotPasswordForm />
       </div>
     </div>

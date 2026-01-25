@@ -1,7 +1,7 @@
-import React from "react";
-import { ChangeEmailForm } from "./components/ChangeEmailForm";
-import Link from "next/link";
+
+import { ChangeEmailForm } from "@/components/auth/ChangeEmailForm";
 import Image from "next/image";
+import Link from "next/link";
 
 const ChangeEmail = () => {
   return (

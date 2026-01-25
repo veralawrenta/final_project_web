@@ -1,29 +1,20 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import z from "zod";
-import { resetPasswordSchema } from "../schema";
 import { useMutation } from "@tanstack/react-query";
-import { axiosInstance } from "@/lib/axios";
-import { toast } from "react-toastify"; 
+import { AxiosError } from "axios";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast, Toaster } from "sonner";
+import z from "zod";
+import { axiosInstance } from "../../lib/axios";
+import { cn } from "../../lib/utils";
+import { resetPasswordSchema } from "../../lib/validator/auth.reset-password.schema";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
+import { Input } from "../ui/input";
 
 interface ResetPasswordFormProps extends React.ComponentProps<"div"> {
   verificationToken: string;
@@ -31,9 +22,11 @@ interface ResetPasswordFormProps extends React.ComponentProps<"div"> {
 
 export function ResetPasswordForm({
   className,
+  verificationToken,
   ...props
 }: ResetPasswordFormProps) {
-  const router = useRouter()
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof resetPasswordSchema>>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: { password: "", confirmPassword: "" },
@@ -41,25 +34,17 @@ export function ResetPasswordForm({
 
   const { mutateAsync: resetPassword, isPending } = useMutation({
     mutationFn: async (body: z.infer<typeof resetPasswordSchema>) => {
-      const { data } = await axiosInstance.patch(
-        "/auth/reset-password",
-        body, 
-        {
-          headers: {
-            Authorization: `Bearer ${props.verificationToken}`,
-          },
-        }
-      )
+      const { data } = await axiosInstance.patch("/auth/reset-password", body, {
+        headers: { Authorization: `Bearer ${verificationToken}` },
+      });
       return data;
     },
     onSuccess: () => {
-      toast.success("reset password success");
-      router.push("/")
-      
+      toast.success("Reset password success");
+      router.push("/");
     },
-    onError: () => {
-      toast.error("reset password failed");
-      router.push("/error")
+    onError: (error: AxiosError<{ message: string }>) => {
+      const message = error.response?.data.message ?? "Authentication failed";
     },
   });
 
@@ -69,47 +54,64 @@ export function ResetPasswordForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Reset Password</CardTitle>
-          <CardDescription>Enter your password to confirm</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <Toaster position="top-right" richColors />
+      <Card className="overflow-hidden p-0">
+        <CardContent className="grid p-0 md:grid-cols-2">
+          <form className="p-6 md:p-8" onSubmit={form.handleSubmit(onSubmit)}>
             <FieldGroup>
+              <div className="flex flex-col items-center gap-2 text-center">
+                <Image
+                  src="/images/nuit-logo.png"
+                  width={100}
+                  height={100}
+                  alt="Staynuit"
+                  loading="eager"
+                />
+                <h1 className="text-2xl font-bold">Reset Password</h1>
+                <p className="text-muted-foreground text-sm text-balance">
+                  Enter details to reset your password
+                </p>
+              </div>
               <Field>
                 <FieldLabel htmlFor="password">New Password</FieldLabel>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your new password here."
+                  placeholder="Enter your password here..."
                   required
                   {...form.register("password")}
                 />
               </Field>
               <Field>
-                <Field>
-                  <FieldLabel htmlFor="password">Confirm Password</FieldLabel>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Confirm your new password here."
-                    required
-                    {...form.register("confirmPassword")}
-                  />
-                </Field>
+                <FieldLabel htmlFor="confirmPassword">
+                  Confirm Password
+                </FieldLabel>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm your password here..."
+                  required
+                  {...form.register("confirmPassword")}
+                />
               </Field>
               <Field>
                 <Button
                   type="submit"
                   disabled={isPending}
-                  className="font-bold"
+                  className="font-bold text-white rounded-l-lg bg-blue-500 hover:bg-blue-600 w-full h-12"
                 >
                   {isPending ? "Loading" : "Submit"}
                 </Button>
               </Field>
             </FieldGroup>
           </form>
+          <div className="bg-muted relative hidden md:block">
+            <img
+              src="https://images.unsplash.com/photo-1589649541232-009ea118927b?q=80&w=1548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Image"
+              className="absolute inset-0 h-full w-full object-cover bg-slate-600 dark:brightness-[0.2] dark:grayscale"
+            />
+          </div>
         </CardContent>
       </Card>
       <FieldDescription className="px-6 text-center">

@@ -1,14 +1,15 @@
-import HeroAboutUs from "./AboutUs"
-import PromoCarousel from "./PromoCarousel"
-import HeroCarousel from "./PromoCarousel"
+import HeroAboutUs from "./AboutUs";
+import HeroHero from "./HeroHero";
+import PromoCarousel from "./PromoCarousel";
 
 const Hero = () => {
   return (
     <div>
-        <PromoCarousel />
-        <HeroAboutUs />
+      <HeroHero />
+      <PromoCarousel />
+      <HeroAboutUs />
     </div>
-  )
-}
+  );
+};
 
-export default Hero
+export default Hero;
