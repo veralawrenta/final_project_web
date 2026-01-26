@@ -1,4 +1,5 @@
-import HeroAboutUs from "./AboutUs";
+"use client";
+import AboutUs from "./AboutUs";
 import HeroHero from "./HeroHero";
 import PromoCarousel from "./PromoCarousel";
 
@@ -7,7 +8,7 @@ const Hero = () => {
     <div>
       <HeroHero />
       <PromoCarousel />
-      <HeroAboutUs />
+      <AboutUs />
     </div>
   );
 };
