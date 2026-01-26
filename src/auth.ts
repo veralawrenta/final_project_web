@@ -11,6 +11,7 @@ declare module "next-auth" {
     lastName: string;
     avatar: string;
     role: "USER" | "TENANT";
+    provider: "GOOGLE" | "CREDENTIAL"
     accessToken?: string;
   }
   interface Session {
@@ -59,6 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         user.email = data.user.email;
         user.avatar = data.user.avatar;
         user.role = data.user.role;
+        user.provider = data.user.provider;
         user.accessToken = data.accessToken;
       }
       return true;

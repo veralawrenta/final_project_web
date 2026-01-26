@@ -40,7 +40,7 @@ const Features = [
   },
 ];
 
-const HeroAboutUs = () => {
+const AboutUs = () => {
   return (
     <section className="py-20 px-6 bg-white border-b border-slate-100">
       <div className="container mx-auto max-w-7xl">
@@ -97,4 +97,4 @@ const HeroAboutUs = () => {
   );
 };
 
-export default HeroAboutUs;
+export default AboutUs;

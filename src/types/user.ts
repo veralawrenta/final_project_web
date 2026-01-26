@@ -8,13 +8,15 @@ export interface User {
     firstName?: string;
     lastName?: string;
     email: string;
+    phone?: string;
+    avatar?: string;
     address?: string;
-    imageUrl?: string;
     aboutMe?: string;
+    provider?: "GOOGLE" | "CREDENTIAL"
+    isVerified? : boolean;
     role: Role;
     token?: string | null;
     expiredAt?: string| null;
-    isVerified: boolean;
     createdAt: string;
     updatedAt: string;
     deletedAt: string;

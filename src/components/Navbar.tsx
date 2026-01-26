@@ -105,18 +105,44 @@ const Navbar = () => {
 
       {mobileMenuOpen && (
         <div className="absolute top-full left-0 w-full bg-white border-t border-slate-100 p-6 flex flex-col gap-4 shadow-xl md:hidden">
-          <Link
-            href="/auth/login/tenant"
-            className="text-lg font-bold text-[#334155]"
-          >
-            List your property
-          </Link>
-          <Link
-            href="/auth/login/user"
-            className="text-lg font-bold text-[#334155]"
-          >
-            Sign In
-          </Link>
+          {session?.user ? (
+            <>
+              <Link
+                href="/profile/user"
+                className="text-lg font-bold text-[#334155]"
+              >
+                Profile
+              </Link>
+
+              <div className="flex items-center justify-between border-t pt-4">
+                <p className="text-sm font-bold text-[#334155]">
+                  {session.user.email?.split("@")[0]}
+                </p>
+                <button
+                  onClick={() => signOut()}
+                  className="text-xs uppercase font-bold text-red-500"
+                >
+                  Logout
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login/tenant"
+                className="text-lg font-bold text-[#334155]"
+              >
+                List your property
+              </Link>
+              <Link
+                href="/auth/login/user"
+                className="text-lg font-bold text-[#334155]"
+              >
+                Sign In
+              </Link>
+            </>
+          )}
+
           <hr className="border-slate-100" />
           <p className="text-sm text-slate-400 font-medium">
             Experience travel better with Staynuit.
