@@ -60,7 +60,6 @@ export function LoginForTenantForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Toaster position="top-right" richColors />
       <Card className="overflow-hidden p-0 border-slate-200 shadow-xl rounded-2xl bg-white">
         <CardContent className="grid p-0 md:grid-cols-2 ">
           <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">

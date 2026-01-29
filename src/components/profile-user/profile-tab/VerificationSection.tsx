@@ -2,16 +2,17 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useResendVerification } from '@/hooks/useProfile';
 
 interface VerificationSectionProps {
   isVerified: boolean;
-  onResendVerification: () => void;
 }
 
 export const VerificationSection: React.FC<VerificationSectionProps> = ({
   isVerified,
-  onResendVerification,
 }) => {
+  const { mutate: resendVerification, isPending } = useResendVerification();
+
   return (
     <Card>
       <CardHeader>
@@ -31,8 +32,13 @@ export const VerificationSection: React.FC<VerificationSectionProps> = ({
             <p className="text-sm text-muted-foreground">
               Your email hasn't been verified yet.
             </p>
-            <Button variant="outline" size="sm" onClick={onResendVerification}>
-              Verify Now
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => resendVerification()}
+              disabled={isPending}
+            >
+              {isPending ? "Sending..." : "Verify Now"}
             </Button>
           </div>
         ) : (

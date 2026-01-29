@@ -43,18 +43,12 @@ export function ResendVerificationForm({
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || "Failed to send verification email.";
-      toast.error("Process Failed", { description: message });
+      toast.error(message);
     },
   });
 
   async function onSubmit(values: z.infer<typeof resendVerificationSchema>) {
-    const toastId: string | number = toast.loading("Sending verification link...");
-    try {
       await resendVerification(values);
-      toast.dismiss(toastId);
-    } catch (err) {
-      toast.dismiss(toastId);
-    }
   }
 
   return (

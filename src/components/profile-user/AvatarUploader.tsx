@@ -1,6 +1,6 @@
-import React, { useRef, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Camera } from "lucide-react";
+import React, { useRef } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface AvatarUploaderProps {
   currentAvatar?: string | null;

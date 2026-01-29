@@ -93,11 +93,9 @@ const VerifyAndSetPasswordForm = () => {
       } else {
         router.replace("/");
       }
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        setError(
-          err.response?.data?.message ??
-            "Failed to verify account. Please try again."
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        setError(error.response?.data?.message ??"Failed to verify account. Please try again."
         );
         toast.error("Verification failed");
       } else {
@@ -136,7 +134,6 @@ const VerifyAndSetPasswordForm = () => {
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-background px-6 py-20">
-      <Toaster position="top-right" richColors />
       <div className="w-full max-w-md">
         <div className="border-slate-300 border-2 rounded-2xl shadow-xl shadow-slate-200/50 p-8 md:p-12 space-y-8 text-left">
           <div className="flex justify-center">

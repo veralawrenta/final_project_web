@@ -1,12 +1,15 @@
 import Footer from '@/components/Footer'
-import Hero from '@/components/homepage/Hero'
+import HeroEmbla from '@/components/homepage/HeroSection'
+import PromoCarousel from '@/components/homepage/PromoCarousel'
+
 import Navbar from '@/components/Navbar'
 
 const Homepage = () => {
   return (
     <div>
       <Navbar />
-      <Hero />
+      <HeroEmbla />
+      <PromoCarousel />
       <Footer />
     </div>
   )
