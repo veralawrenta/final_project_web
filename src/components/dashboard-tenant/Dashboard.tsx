@@ -1,33 +1,35 @@
 "use client";
 
-import React, { useState } from "react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { signOut } from "@/auth";
+import { useMeProfile } from "@/hooks/useProfile";
 import {
-  LayoutDashboard,
-  User,
-  Layers,
-  Home,
-  DoorOpen,
-  Wrench,
+  BadgeDollarSign,
+  BedDouble,
+  Building2,
   ChevronDown,
-  Menu,
-  X,
-  Settings,
+  DoorOpen,
+  Layers,
+  LayoutDashboard,
   LogOut,
+  Menu,
+  Settings,
+  User,
+  Wrench,
+  X
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuSeparator,
   DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import Image from "next/image";
-import { signOut } from "@/auth";
-import { useMeProfile } from "@/hooks/useProfile";
 
 interface NavItem {
   label: string;
@@ -52,19 +54,29 @@ const navItems: NavItem[] = [
     icon: <Layers className="w-5 h-5" />,
   },
   {
-    label: "Property",
+    label: "Property Management",
     href: "/dashboard/tenant/property",
-    icon: <Home className="w-5 h-5" />,
+    icon: <Building2 className="w-5 h-5" />,
   },
   {
     label: "Room Management",
     href: "/dashboard/tenant/room",
-    icon: <DoorOpen className="w-5 h-5" />,
+    icon: <BedDouble className="w-5 h-5" />,
   },
   {
     label: "Maintenance",
     href: "/dashboard/tenant/room/maintenance",
     icon: <Wrench className="w-5 h-5" />,
+  },
+  {
+    label: "Seasonal Rates",
+    href: "/dashboard/tenant/seasonalRates",
+    icon: <BadgeDollarSign className="w-5 h-5" />,
+  },
+  {
+    label: "Setting",
+    href: "/dashboard/tenant/setting",
+    icon: <Settings className="w-5 h-5" />,
   },
 ];
 

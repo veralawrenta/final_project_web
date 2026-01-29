@@ -15,11 +15,12 @@ export interface User {
     provider?: "GOOGLE" | "CREDENTIAL"
     isVerified? : boolean;
     role: Role;
+    tenant: Tenant;
     token?: string | null;
     expiredAt?: string| null;
     createdAt: string;
     updatedAt: string;
-    deletedAt: string;
+    deletedAt?: string;
 }
 
 export interface Tenant {

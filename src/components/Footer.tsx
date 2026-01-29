@@ -57,10 +57,8 @@ const Footer = ({ className = "" }: FooterProps) => {
 
   return (
     <footer className={`bg-[#F8FAFC] border-t border-slate-200 text-[#334155] ${className}`}>
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+      <div className="container mx-auto max-w-full px-6 lg:px-8 py-16 lg:ml-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
-          
-          {/* Logo & About Section */}
           <div className="lg:col-span-1 space-y-6">
             <Link href="/" className="flex items-center space-x-3">
               <div className="relative w-9 h-9">
@@ -96,8 +94,6 @@ const Footer = ({ className = "" }: FooterProps) => {
               })}
             </div>
           </div>
-
-          {/* Navigation Links */}
           {footerSections.map((section) => (
             <div key={section.title}>
               <h3 className="font-bold text-slate-900 text-sm uppercase tracking-widest mb-6">
@@ -118,8 +114,6 @@ const Footer = ({ className = "" }: FooterProps) => {
             </div>
           ))}
         </div>
-
-        {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-200">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-2 text-xs font-medium text-slate-400">

@@ -24,7 +24,7 @@ const PromoCarousel = () => {
   }, [emblaApi]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 my-10">
+    <div className="container mx-auto max-w-9xl px-4 my-10">
       <div className="flex items-center gap-2 mb-4 border-b pb-2">
         <Flame className="text-orange-500" />
         <h2 className="text-xl font-bold">Special Deals</h2>

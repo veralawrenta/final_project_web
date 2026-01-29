@@ -17,6 +17,7 @@ import { Label } from "@radix-ui/react-label";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Eye, EyeOff } from "lucide-react";
+import { Toaster } from "sonner";
 
 const SettingTabComponent = () => {
   const { data: profile, isPending } = useMeProfile();
@@ -71,6 +72,7 @@ const SettingTabComponent = () => {
 
   return (
     <div className="space-y-6">
+      <Toaster position="top-right" richColors />
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold text-foreground">Setting</h1>
         <p className="text-muted-foreground">Manage your account</p>
@@ -176,7 +178,7 @@ const SettingTabComponent = () => {
                     <input
                       id="newPassword"
                       name="newPassword"
-                      type={showPassword.newPassword ? 'text' : 'password'}
+                      type={showPassword.newPassword ? "text" : "password"}
                       value={passwordForm.newPassword}
                       onChange={handlePasswordInputChange}
                       className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
@@ -184,15 +186,30 @@ const SettingTabComponent = () => {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword((prev) => ({ ...prev, newPassword: !prev.newPassword }))}
+                      onClick={() =>
+                        setShowPassword((prev) => ({
+                          ...prev,
+                          newPassword: !prev.newPassword,
+                        }))
+                      }
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
-                      {showPassword.newPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword.newPassword ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">At least 8 characters</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    At least 8 characters
+                  </p>
                 </div>
-                <Button type="submit" disabled={isPending} className="bg-slate-600 hover:bg-primary">
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="bg-slate-600 hover:bg-primary"
+                >
                   {isPending ? "Updating..." : "Update Password"}
                 </Button>
               </form>
@@ -243,7 +260,11 @@ const SettingTabComponent = () => {
                     className="mt-1"
                   />
                 </div>
-                <Button type="submit" disabled={isPending} className="bg-slate-600 hover:bg-primary">
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  className="bg-slate-600 hover:bg-primary"
+                >
                   {isPending ? "Processing..." : "Update Email"}
                 </Button>
               </form>

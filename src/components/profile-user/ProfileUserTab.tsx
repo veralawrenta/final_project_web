@@ -1,21 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import {
   useMeProfile,
-  useResendVerification,
   useUpdateProfileUser,
   useUploadAvatar,
 } from "@/hooks/useProfile";
 import { updateDataUserSchema } from "@/lib/validator/profile.update-data.schema";
+import React, { useEffect, useState } from "react";
 
-import { ProfileHeader } from "./profile-tab/ProfileHeader";
 import { AvatarSection } from "./profile-tab/AvatarSection";
+import { PersonalInfoSection } from "./profile-tab/PersonalInfoSection";
+import { ProfileHeader } from "./profile-tab/ProfileHeader";
 import { ProviderSection } from "./profile-tab/ProviderSection";
 import { VerificationSection } from "./profile-tab/VerificationSection";
-import { PersonalInfoSection } from "./profile-tab/PersonalInfoSection";
 
-  type ProfileView = {
+type ProfileView = {
   firstName: string;
   lastName: string;
   email: string;
@@ -30,7 +29,6 @@ import { PersonalInfoSection } from "./profile-tab/PersonalInfoSection";
 const ProfileUserTab = () => {
   const { data: me, isPending } = useMeProfile();
   const updateProfile = useUpdateProfileUser();
-  const resendVerification = useResendVerification();
   const uploadAvatar = useUploadAvatar();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -38,13 +36,12 @@ const ProfileUserTab = () => {
   const [formData, setFormData] = useState<ProfileView | null>(null);
   const [editData, setEditData] = useState<ProfileView | null>(null);
 
-  console.log('Profile Debug:', {
+  /*console.log('Profile Debug:', {
     me,
     isPending,
     formData,
     editData
-  });
-
+  });*/
 
   useEffect(() => {
     if (!me) return;
@@ -126,10 +123,7 @@ const ProfileUserTab = () => {
 
       <ProviderSection provider={formData.provider} />
 
-      <VerificationSection
-        isVerified={!!formData.isVerified}
-        onResendVerification={() => resendVerification.mutate()}
-      />
+      <VerificationSection isVerified={!!formData.isVerified} />
 
       <PersonalInfoSection
         isEditing={isEditing}

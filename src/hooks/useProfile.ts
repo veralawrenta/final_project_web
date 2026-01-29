@@ -8,7 +8,7 @@ import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import z from "zod";
+import z, { set } from "zod";
 
 interface Payload {
   avatar: File;
@@ -20,7 +20,9 @@ export const useMeProfile = () => {
     queryKey: ["me-profile"],
     queryFn: async () => {
       const accessToken = session.data?.user.accessToken;
-      console.log(`Fetching profile with token:', ${accessToken}  ? 'Token exists' : 'No token`);
+      //console.log(
+      //  `Fetching profile with token:', ${accessToken}  ? 'Token exists' : 'No token`
+      //);
       const { data } = await axiosInstance.get("users/me", {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
@@ -47,7 +49,7 @@ export const useUpdateProfileUser = () => {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        },
+        }
       );
       return data;
     },
@@ -58,6 +60,36 @@ export const useUpdateProfileUser = () => {
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data.message || "Failed to update profile");
+    },
+  });
+};
+
+export const useUpdateProfileTenant = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      tenantName?: string;
+      address?: string;
+      aboutMe?: string;
+      bankName?: string;
+      bankNumber?: string;
+    }) => {
+      const { data } = await axiosInstance.patch("/tenant/profile", payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tenant-profile"] });
+      toast.success("Tenant profile updated successfully");
+      setTimeout(() => {
+        router.refresh();
+      }, 1000);
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      toast.error(
+        error.response?.data.message || "Failed to update tenant profile"
+      );
     },
   });
 };
@@ -104,15 +136,22 @@ export const useUploadAvatar = () => {
 
 export const useResendVerification = () => {
   const router = useRouter();
+  const session = useSession();
 
   return useMutation({
     mutationFn: async () => {
-      const { data } = await axiosInstance.post("/auth/resend-change-email");
+      const { data } = await axiosInstance.post("/auth/resend-change-email", {}, {
+        headers: {
+          Authorization: `Bearer ${session.data?.user.accessToken}`,
+        },
+      });
       return data;
     },
     onSuccess: () => {
       toast.success("Verification email sent successfully");
-      router.refresh();
+      setTimeout(() => {
+        router.refresh();
+      }, 1000);
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
@@ -135,7 +174,10 @@ export const useChangeEmail = () => {
     },
     onSuccess: () => {
       toast.success("Change email request sent successfully");
-      router.push("/dashboard/user/profile");
+      queryClient.invalidateQueries({ queryKey: ["me-profile"] });
+      setTimeout(() => {
+        router.push("/profile/user");
+      }, 1000);
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data.message || "Failed to change email");
@@ -150,14 +192,22 @@ export const useChangePassword = () => {
 
   return useMutation({
     mutationFn: async (body: z.infer<typeof changePasswordSchema>) => {
-      const { data } = await axiosInstance.post("/auth/change-password", body, {
-        headers: { Authorization: `Bearer ${session.data?.user.accessToken}` },
-      });
+      const { data } = await axiosInstance.patch(
+        "/auth/change-password",
+        body,
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        }
+      );
       return data;
     },
     onSuccess: () => {
       toast.success("Upload avatar success");
-      router.push("/dashboard/user/profile");
+      setTimeout(() => {
+        router.push("/profile/user");
+      }, 1000);
       queryClient.invalidateQueries({ queryKey: ["me-profile"] });
     },
     onError: (error: AxiosError<{ message: string }>) => {
