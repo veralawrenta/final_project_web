@@ -1,7 +1,10 @@
+import UpdateRoomForm from "@/components/dashboard-tenant/rooms/UpdateRoomForm"
 
 const UpdateRoomPage = () => {
   return (
-    <div>UpdateRoomPage</div>
+    <div>
+      <UpdateRoomForm />
+    </div>
   )
 }
 

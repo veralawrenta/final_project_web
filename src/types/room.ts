@@ -3,7 +3,7 @@ export interface Room {
     propertyId: number;
     name: string;
     totalGuests: number;
-    totalUnit: number;
+    totalUnits: number;
     basePrice: number;
     description?: string;
     roomImages : RoomImage[];
@@ -43,3 +43,16 @@ export interface RoomNonAvailability{
     updatedAt: string;
     deletedAt?: string | null;
 };
+
+export interface RoomManagementTypes {
+    id: number;
+    propertyId: number;
+    propertyName: string;
+    name: string;
+    type: string;
+    capacity: number;
+    price: number;
+    status: 'Available' | 'Occupied' | 'Maintenance';
+    description?: string;
+    roomImages?: string[];
+  }

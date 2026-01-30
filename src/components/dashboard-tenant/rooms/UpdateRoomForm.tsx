@@ -1,4 +1,15 @@
-// components/rooms/UpdateRoomPage.tsx
+"use client";
+import { useParams, useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { updateRoomSchema } from "@/lib/validator/dashboard.rooms.schema";
+import { useGetTenantRooms, useUpdateRoom } from "@/hooks/useRoom";
+import { useGetTenantProperties } from "@/hooks/useProperty";
+import { useSession } from "next-auth/react";
+import { axiosInstance } from "@/lib/axios";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -9,6 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -16,114 +28,132 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { useUploadRoomImages, useUpdateRoom } from "@/hooks/useRoom";
-import { updateRoomSchema } from "@/lib/validator/dashboard.rooms.schema";
-import { Room } from "@/types/room";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Upload, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import RoomImageUploader from "./RoomImageUploader";
 
-interface UpdateRoomFormProps {
-  onCancel: () => void;
-  tenantProperties: Array<{ id: number; title: string }>;
-  roomData: Room;
-}
+const UpdateRoomForm = () => {
+  const router = useRouter();
+  const params = useParams();
+  const session = useSession();
+  const roomId = Number(params.id);
 
-const UpdateRoomPage = ({
-  onCancel,
-  tenantProperties,
-  roomData,
-}: UpdateRoomFormProps) => {
-  const { mutateAsync: updateRoom, isPending } = useUpdateRoom();
+  const { data: tenantRooms, isPending: roomsLoading } = useGetTenantRooms();
+  const { data: tenantProperties, isPending: propertiesLoading } =
+    useGetTenantProperties();
+  const { mutateAsync: updateRoom } = useUpdateRoom();
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { mutateAsync: uploadRoomImages } = useUploadRoomImages();
-
-  // Existing images from server
-  const [existingImages, setExistingImages] = useState(
-    roomData.roomImages || []
-  );
-
-  // New images to upload
-  const [newImages, setNewImages] = useState<string[]>([]); // Preview URLs
-  const [newImageFiles, setNewImageFiles] = useState<File[]>([]); // Actual files
+  const [newImages, setNewImages] = useState<string[]>([]);
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const roomData = tenantRooms?.data?.find((room) => room.id === roomId);
 
   const form = useForm<z.infer<typeof updateRoomSchema>>({
     resolver: zodResolver(updateRoomSchema),
     defaultValues: {
-      propertyId: roomData.propertyId,
-      name: roomData.name,
-      description: roomData.description,
-      basePrice: roomData.basePrice,
-      totalGuests: roomData.totalGuests,
-      totalUnits: roomData.totalUnit,
+      propertyId: 0,
+      name: "",
+      description: "",
+      basePrice: 0,
+      totalGuests: 1,
+      totalUnits: 1,
     },
   });
 
-  // Update form when roomData changes
   useEffect(() => {
-    form.reset({
-      propertyId: roomData.propertyId,
-      name: roomData.name,
-      description: roomData.description,
-      basePrice: roomData.basePrice,
-      totalGuests: roomData.totalGuests,
-      totalUnits: roomData.totalUnit,
-    });
-    setExistingImages(roomData.roomImages || []);
+    if (roomData) {
+      form.reset({
+        propertyId: roomData.propertyId,
+        name: roomData.name,
+        description: roomData.description,
+        basePrice: roomData.basePrice,
+        totalGuests: roomData.totalGuests,
+        totalUnits: roomData.totalUnits,
+      });
+    }
   }, [roomData, form]);
 
-  // Submit form
-  const handleSubmit = async (values: z.infer<typeof updateRoomSchema>) => {
+  const handleCancel = () => {
+    newImages.forEach((url) => URL.revokeObjectURL(url));
+    router.push("/dashboard/tenant/rooms");
+  };
+
+  const onSubmit = async (values: z.infer<typeof updateRoomSchema>) => {
+    setIsSubmitting(true);
+
     try {
-      // Step 1: Update room basic info (JSON)
+      toast.loading("Updating room...", { id: "update-room" });
       await updateRoom(values);
+      toast.success("Room updated!", { id: "update-room" });
 
-      // Step 2: Upload new images if any (FormData)
+      // Step 2: Upload new images if any (one by one)
       if (newImageFiles.length > 0) {
-        const formData = new FormData();
-        newImageFiles.forEach((file) => {
-          formData.append("roomImages", file);
+        toast.loading(`Uploading ${newImageFiles.length} new image(s)...`, {
+          id: "upload-images",
         });
-        await uploadRoomImages({ roomImages: newImageFiles }); // separate hook
-      };
 
-      toast.success("Room updated successfully!");
+        const existingImagesCount = roomData?.roomImages?.length || 0;
 
-      // Cleanup previews
+        for (let i = 0; i < newImageFiles.length; i++) {
+          const file = newImageFiles[i];
+          const formData = new FormData();
+          formData.append("urlImage", file); // ✅ Correct field name
+          // Set as cover only if no existing images and this is the first new image
+          formData.append(
+            "isCover",
+            String(existingImagesCount === 0 && i === 0)
+          );
+
+          await axiosInstance.post(`/room-images/room/${roomId}`, formData, {
+            headers: {
+              Authorization: `Bearer ${session.data?.user.accessToken}`,
+            },
+          });
+        }
+
+        toast.success("All images uploaded!", { id: "upload-images" });
+      }
+
+      // Cleanup preview URLs
       newImages.forEach((url) => URL.revokeObjectURL(url));
-
-      onCancel();
+      toast.success("Room updated successfully!");
+      router.push("/dashboard/tenant/rooms");
     } catch (error) {
       console.error("Update room failed:", error);
       toast.error("Failed to update room");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Combine all images for display
-  const allImages = [
-    ...existingImages.map((img, index) => ({
-      type: "existing" as const,
-      url: img.urlImages,
-      index,
-    })),
-    ...newImages.map((url) => ({
-      type: "new" as const,
-      url,
-      index: newImages.indexOf(url),
-    })),
-  ];
+  if (roomsLoading || propertiesLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Loading room details...</p>
+      </div>
+    );
+  }
+  if (!roomData) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground mb-4">Room not found</p>
+        <Button onClick={handleCancel}>Back to Rooms</Button>
+      </div>
+    );
+  }
+
+  const existingImages = roomData.roomImages || [];
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={onCancel}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleCancel}
+          disabled={isSubmitting}
+        >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
@@ -136,10 +166,7 @@ const UpdateRoomPage = ({
 
       <div className="bg-card rounded-2xl border border-border p-6 max-w-2xl">
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Property Selection */}
             <FormField
               control={form.control}
@@ -148,9 +175,9 @@ const UpdateRoomPage = ({
                 <FormItem>
                   <FormLabel>Property</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value?.toString()}
-                    disabled // Usually can't change property when editing
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    value={field.value?.toString()}
+                    disabled
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -158,7 +185,7 @@ const UpdateRoomPage = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {tenantProperties.map((property) => (
+                      {tenantProperties?.data?.map((property: any) => (
                         <SelectItem
                           key={property.id}
                           value={property.id.toString()}
@@ -187,8 +214,6 @@ const UpdateRoomPage = ({
                 </FormItem>
               )}
             />
-
-            {/* Description */}
             <FormField
               control={form.control}
               name="description"
@@ -206,8 +231,6 @@ const UpdateRoomPage = ({
                 </FormItem>
               )}
             />
-
-            {/* Price and Guests */}
             <div className="grid grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -225,6 +248,9 @@ const UpdateRoomPage = ({
                           className="pl-7"
                           placeholder="0"
                           {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </div>
                     </FormControl>
@@ -232,7 +258,6 @@ const UpdateRoomPage = ({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="totalGuests"
@@ -246,6 +271,7 @@ const UpdateRoomPage = ({
                         max={20}
                         placeholder="2"
                         {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -254,7 +280,6 @@ const UpdateRoomPage = ({
               />
             </div>
 
-            {/* Total Units */}
             <FormField
               control={form.control}
               name="totalUnits"
@@ -262,33 +287,85 @@ const UpdateRoomPage = ({
                 <FormItem>
                   <FormLabel>Total Units Available</FormLabel>
                   <FormControl>
-                    <Input type="number" min={1} placeholder="1" {...field} />
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="1"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Room Images */}
-            <RoomImageUploader
-              images={newImages}
-              setImages={setNewImages}
-              imageFiles={newImageFiles}
-              setImageFiles={setNewImageFiles}
-            />
+            {/* Existing Room Images Display */}
+            {existingImages.length > 0 && (
+              <div className="space-y-2">
+                <FormLabel>Current Room Images</FormLabel>
+                <div className="grid grid-cols-5 gap-3">
+                  {existingImages.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <div className="aspect-square rounded-lg overflow-hidden bg-muted border border-border">
+                        <img
+                          src={img.urlImages}
+                          alt={`Room image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      {img.isCover && (
+                        <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-medium">
+                          Cover
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Upload New Room Images */}
+            <div className="space-y-2">
+              <FormLabel>
+                {existingImages.length > 0
+                  ? "Add More Images"
+                  : "Upload Room Images"}
+              </FormLabel>
+              <RoomImageUploader
+                images={newImages}
+                setImages={setNewImages}
+                imageFiles={newImageFiles}
+                setImageFiles={setNewImageFiles}
+                maxImages={5}
+              />
+              {newImageFiles.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {newImageFiles.length} new image(s) will be uploaded when you
+                  save.
+                </p>
+              )}
+            </div>
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-6 border-t border-border">
               <Button
                 type="button"
                 variant="outline"
-                onClick={onCancel}
-                disabled={isPending}
+                onClick={handleCancel}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Updating..." : "Update Room"}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  "Update Room"
+                )}
               </Button>
             </div>
           </form>
@@ -297,5 +374,4 @@ const UpdateRoomPage = ({
     </div>
   );
 };
-
-export default UpdateRoomPage;
+export default UpdateRoomForm;
