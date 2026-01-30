@@ -1,5 +1,7 @@
 import { axiosInstance } from "@/lib/axios";
 import { categoryFormSchema } from "@/lib/validator/dashboard.category.schema";
+import { Category } from "@/types/category";
+import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
@@ -7,26 +9,23 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
 
-export const useGetCategories = () => {
-  const session = useSession();
+interface GetCategoriesQuery extends PaginationQueryParams{
+  search?: string;
+}
 
+export const useGetCategories = (queries?: GetCategoriesQuery) => {
   return useQuery({
-    queryKey: ["getCategories"],
+    queryKey: ["getCategories", queries],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/categories/`, {
-        headers: {
-          Authorization: `Bearer ${session.data?.user.accessToken}`,
-        },
-      });
+      const { data } = await axiosInstance.get<PageableResponse<Category>>(`/categories/`, {params : queries}
+      );
       return data;
     },
   });
 };
 
-
 export const useGetCategory = (id: number) => {
   const session = useSession();
-
   return useQuery({
     queryKey: ["getCategoryId", id],
     queryFn: async () => {
@@ -56,9 +55,9 @@ export const useCreateCategory = () => {
     },
     onSuccess: () => {
       toast.success("Your category successfully created");
-      queryClient.invalidateQueries({ queryKey: ["create-category"] });
+      queryClient.invalidateQueries({ queryKey: ["getCategories"] });
       setTimeout(() => {
-        router.push("/dashboard/category");
+        router.push("/dashboard/tenant/category");
       }, 1500);
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -83,9 +82,9 @@ export const useUpdateCategory = (id: number) => {
     },
     onSuccess: () => {
       toast.success("Your category successfully updated");
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["getCategories"] });
       setTimeout(() => {
-        router.push("/dashboard/category");
+        router.push("/dashboard/tenant/category");
       }, 1500);
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -93,3 +92,30 @@ export const useUpdateCategory = (id: number) => {
     },
   });
 };
+
+export const useDeleteCategory = () => {
+  const router = useRouter();
+  const session = useSession();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { data } = await axiosInstance.delete(`/categories/${id}`, {
+        headers: {
+          Authorization: `Bearer ${session.data?.user.accessToken}`,
+        },
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getCategories"] });
+      toast.success("Category deleted");
+      setTimeout(() => {
+        router.push("/dashboard/tenant/category");
+      }, 1500);
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      toast.error(error.response?.data.message || "Failed to delete category");
+    },
+  });
+}

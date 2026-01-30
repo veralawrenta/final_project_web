@@ -1,8 +1,10 @@
-import React from 'react'
+import CreateRoomForm from '@/components/dashboard-tenant/rooms/CreateRoomForm'
 
 const CreateRoomPage = () => {
   return (
-    <div>CreateRoomPage</div>
+    <div>
+      <CreateRoomForm />
+    </div>
   )
 }
 
