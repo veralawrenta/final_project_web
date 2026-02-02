@@ -22,9 +22,11 @@ export interface RoomImage {
     deletedAt?: string | null;
 };
 
-export interface SeasonalRate {
+export interface SeasonalRates {
     id: number;
     roomId: number;
+    name?: string;
+    propertyName?: string;
     startDate: string;
     endDate: string;
     fixedPrice: number;
@@ -38,10 +40,20 @@ export interface RoomNonAvailability{
     roomId: number;
     startDate: string;
     endDate: string;
-    reason?: string;
-    createdAt: string;
-    updatedAt: string;
+    reason: string;
+    roomInventory: number;
+    createdAt?: string;
+    updatedAt?: string;
     deletedAt?: string | null;
+    room? : {
+        id: number;
+        name: string;
+        totalUnits: number;
+        property?: {
+            id: number;
+            name: string;
+        };
+    };
 };
 
 export interface RoomManagementTypes {
@@ -55,4 +67,4 @@ export interface RoomManagementTypes {
     status: 'Available' | 'Occupied' | 'Maintenance';
     description?: string;
     roomImages?: string[];
-  }
+  };

@@ -1,3 +1,4 @@
+"use client"
 import CategoryManagementTab from "@/components/dashboard-tenant/category/CategoryManagementTab";
 import { Category } from "@/types/category";
 import { useRouter } from "next/navigation";

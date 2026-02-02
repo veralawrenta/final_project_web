@@ -74,7 +74,7 @@ const UpdateRoomForm = () => {
 
   const handleCancel = () => {
     newImages.forEach((url) => URL.revokeObjectURL(url));
-    router.push("/dashboard/tenant/rooms");
+    router.push("/dashboard/tenant/room");
   };
 
   const onSubmit = async (values: z.infer<typeof updateRoomSchema>) => {
@@ -116,7 +116,7 @@ const UpdateRoomForm = () => {
       // Cleanup preview URLs
       newImages.forEach((url) => URL.revokeObjectURL(url));
       toast.success("Room updated successfully!");
-      router.push("/dashboard/tenant/rooms");
+      router.push("/dashboard/tenant/room");
     } catch (error) {
       console.error("Update room failed:", error);
       toast.error("Failed to update room");

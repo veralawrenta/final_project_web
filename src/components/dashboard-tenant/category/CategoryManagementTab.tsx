@@ -40,22 +40,21 @@ const CategoryManagementTab = ({
       search: debounceValue,
     });
 
-  const { data: deleteCategory, isPending: deleteCategoryPending } =
+  const { mutate: deleteCategoryMutate, isPending: deleteCategoryPending } =
     useDeleteCategory();
-  //pagination
+
   const onChangePage = (page: number) => {
     setPage(page);
   };
-  //create handle delete untuk delete category
+
   const handleDelete = async () => {
     if (!isDeletingCategory) return;
-    deleteCategory.mutate(isDeletingCategory.id);
+    deleteCategoryMutate(isDeletingCategory.id);
     setIsDeletingCategory(null);
   };
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-heading font-bold">
@@ -71,7 +70,6 @@ const CategoryManagementTab = ({
         </Button>
       </div>
 
-      {/* Search */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -82,27 +80,19 @@ const CategoryManagementTab = ({
         />
       </div>
 
-      {!getCategoriesPending && !getCategories?.data.length && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No categories found</p>
-        </div>
-      )}
-
-      {/* Categories List */}
       <div className="bg-card rounded-2xl border border-border divide-y divide-border">
         {getCategoriesPending && (
           <div className="flex justify-center py-12">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         )}
-
-        {!getCategoriesPending && getCategories?.data.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No categories found</p>
-          </div>
-        )}
-
-        {getCategories?.data.map((category) => (
+        {!getCategoriesPending &&
+          (getCategories?.data?.length ?? 0) === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No categories found</p>
+            </div>
+          )}
+        {(getCategories?.data ?? []).map((category) => (
           <div
             key={category.id}
             className="flex items-center justify-between p-4"
@@ -120,6 +110,10 @@ const CategoryManagementTab = ({
                     {category.name}
                   </h3>
                 </div>
+                <p className="text-sm text-muted-foreground">
+                  {category.propertiesCount}{" "}
+                  {category.propertiesCount === 1 ? "property" : "properties"}
+                </p>
               </div>
             </div>
             <div className="flex gap-1">
@@ -141,19 +135,19 @@ const CategoryManagementTab = ({
                 disabled={deleteCategoryPending}
               >
                 {deleteCategoryPending ? (
-                  "Loading"
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )};
+                    "Loading"
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
               </Button>
             </div>
           </div>
-        ))};
+        ))}
       </div>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog
-        open={!!deleteCategory}
+        open={!!isDeletingCategory}
         onOpenChange={() => setIsDeletingCategory(null)}
       >
         <AlertDialogContent>
@@ -162,7 +156,7 @@ const CategoryManagementTab = ({
             <AlertDialogDescription className="space-y-2">
               <p>
                 Are you sure you want to delete "
-                <strong>{deleteCategory?.name}</strong>"?
+                <strong>{isDeletingCategory?.name}</strong>"?
               </p>
               <p className="text-sm font-medium">
                 This action cannot be undone.
