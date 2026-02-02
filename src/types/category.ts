@@ -4,4 +4,5 @@ export interface Category {
   createdAt: string;
   updatedAt: string;
   deletedAt?: string | null;
+  propertiesCount : number;
 };

@@ -58,7 +58,7 @@ const CreateRoomForm = () => {
   const handleCancel = () => {
     // Cleanup preview URLs
     images.forEach((url) => URL.revokeObjectURL(url));
-    router.push("/dashboard/tenant/rooms");
+    router.push("/dashboard/tenant/room");
   };
 
   const onSubmit = async (values: z.infer<typeof createRoomSchema>) => {
@@ -99,7 +99,7 @@ const CreateRoomForm = () => {
 
       // Success!
       toast.success("Room created successfully with images!");
-      router.push("/dashboard/tenant/rooms");
+      router.push("/dashboard/tenant/room");
     } catch (error) {
       console.error("Create room failed:", error);
       toast.error("Failed to create room");

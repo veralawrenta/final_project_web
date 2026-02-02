@@ -54,7 +54,6 @@ export const useGetRoomsProperty = () => {
 
 export const useCreateRoom = () => {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const session = useSession();
 
   return useMutation({
@@ -127,7 +126,7 @@ export const useDeleteRoom = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenantRooms"] });
-      router.push("/dashboard/tenant/rooms");
+      router.push("/dashboard/tenant/room");
     },
   });
 };

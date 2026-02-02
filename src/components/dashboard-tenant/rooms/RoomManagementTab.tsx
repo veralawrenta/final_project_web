@@ -59,11 +59,11 @@ const RoomManagementTab = () => {
   };
 
   const handleAddRoom = () => {
-    router.push("/dashboard/tenant/rooms/create");
+    router.push("/dashboard/tenant/room/create");
   };
 
   const handleEditRoom = (room: Room) => {
-    router.push(`/dashboard/tenant/rooms/update/${room.id}`)
+    router.push(`/dashboard/tenant/room/update/${room.id}`);
   };
 
   const handleDelete = () => {

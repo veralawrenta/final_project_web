@@ -70,7 +70,7 @@ const navItems: NavItem[] = [
   },
   {
     label: "Seasonal Rates",
-    href: "/dashboard/tenant/seasonalRates",
+    href: "/dashboard/tenant/seasonal-rates",
     icon: <BadgeDollarSign className="w-5 h-5" />,
   },
   {
