@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDeleteCategory, useGetCategories } from "@/hooks/useCategory";
+import { useDeleteCategory, useGetCategoriesForTenant } from "@/hooks/useCategory";
 import { Category } from "@/types/category";
 import {
   Edit,
@@ -44,9 +44,9 @@ const CategoryManagementTab = ({
     null
   );
 
-  const { data: getCategories, isPending } = useGetCategories({
+  const { data: getCategories, isPending } = useGetCategoriesForTenant({
     page,
-    take: 6, // Increased take for a better grid feel
+    take: 6, 
     search: debounceSearch,
   });
 
@@ -118,7 +118,6 @@ const CategoryManagementTab = ({
             </div>
           ))}
 
-        {/* Empty State */}
         {!isPending && categories.length === 0 && (
           <div className="col-span-full relative overflow-hidden flex flex-col items-center justify-center py-24 px-8 p-4 border-2 border-dashed border-border/60 rounded-2xl bg-linear-to-b from-muted/20 to-transparent">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-primary/5 blur-[120px] -z-10" />

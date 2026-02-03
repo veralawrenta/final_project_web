@@ -1,15 +1,14 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { Button } from "../../ui/button";
-import { Input } from "../../ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useCreateCategory, useUpdateCategory } from "@/hooks/useCategory";
 import { categoryFormSchema } from "@/lib/validator/dashboard.category.schema";
 import { Category } from "@/types/category";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft } from "lucide-react";
+import { useForm } from "react-hook-form";
 import z from "zod";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 
 interface CategoryFormProps {
   category?: Category | null; //this is for creating props to command if you are starting to edit or you create

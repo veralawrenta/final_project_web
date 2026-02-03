@@ -45,13 +45,11 @@ export default function PropertyDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
 
   const propertyId = Number(params.id);
-
-  // Get initial values from URL or use defaults
   const checkInParam = searchParams.get("checkIn");
   const checkOutParam = searchParams.get("checkOut");
   const guestsParam = searchParams.get("guests");
 
-  // Initialize dates properly
+
   const [checkIn, setCheckIn] = useState<Date>(() => {
     if (checkInParam) {
       return normalizeLocalDate(fromDateString(checkInParam));
@@ -72,7 +70,6 @@ export default function PropertyDetail() {
     guestsParam ? Number(guestsParam) : 1
   );
 
-  // Sync state with URL params when they change
   useEffect(() => {
     if (checkInParam) {
       setCheckIn(normalizeLocalDate(fromDateString(checkInParam)));
@@ -85,7 +82,6 @@ export default function PropertyDetail() {
     }
   }, [checkInParam, checkOutParam, guestsParam]);
 
-  // Fetch property with availability
   const {
     data: property,
     isLoading,
@@ -181,15 +177,12 @@ export default function PropertyDetail() {
       </div>
 
       <main className="container pb-32 md:pb-12">
-        {/* Search Bar */}
         <div className="mt-6 px-4 md:px-0">
           <PropertyDetailSearchBar
             propertyId={propertyId}
             maxGuests={Math.max(...property.rooms.map((r) => r.totalGuests))}
           />
         </div>
-
-        {/* Image Gallery */}
         <div className="relative mt-6">
           <div className="aspect-4/3 md:aspect-21/9 overflow-hidden md:rounded-2xl">
             <img
@@ -298,8 +291,6 @@ export default function PropertyDetail() {
               </div>
             )}
           </div>
-
-          {/* Booking Card */}
           <div className="hidden md:block">
             <div className="sticky top-24 bg-card rounded-2xl p-6 shadow-lg border border-border">
               <div className="flex items-baseline justify-between mb-6">
@@ -379,7 +370,6 @@ export default function PropertyDetail() {
         </div>
       </main>
 
-      {/* Mobile Booking Bar */}
       <div className="fixed bottom-0 inset-x-0 bg-card border-t border-border p-4 md:hidden z-50">
         <div className="flex items-center justify-between gap-4">
           <div>

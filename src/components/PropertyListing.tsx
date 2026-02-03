@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import PropertyCardForm from "./PropertyCard";
+import PropertyCardForm from "./property/PropertyCard";
 
 type PropertyTypeFilter = "all" | PropertyType;
 type SortBy = "name" | "price";
@@ -34,7 +34,7 @@ const propertyTypeLabels: Record<PropertyTypeFilter, string> = {
   HOUSE: "House",
 };
 
-export default function PropertyListingPage() {
+const PropertyListingComponent= () => {
   const searchParams = useSearchParams();
   const cityId = searchParams.get("cityId");
   const checkIn = searchParams.get("checkIn");
@@ -316,3 +316,4 @@ export default function PropertyListingPage() {
     </div>
   );
 };
+export default PropertyListingComponent;

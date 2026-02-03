@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import {
   Card,
@@ -21,6 +20,7 @@ import {
 } from "@/hooks/useProfile";
 import AvatarUploader from "../profile-user/AvatarUploader";
 import { updateDataTenantSchema } from "@/lib/validator/dashboard.update-data.schema";
+import { Skeleton } from "../ui/skeleton";
 
 type TenantProfileView = {
   tenantName: string;
@@ -69,13 +69,50 @@ const ProfileTenantTab = () => {
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">
-            Loading tenant profile...
-          </p>
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-2">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-4 w-48" />
         </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-20 w-20 rounded-full" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-8 w-24" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-4 w-60" />
+              </div>
+              <Skeleton className="h-9 w-20" />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-8">
+            <div className="grid gap-6 md:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -275,7 +312,6 @@ const ProfileTenantTab = () => {
                   <p className="text-sm">{formData.bankName || "-"}</p>
                 )}
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="bankNumber">Account Number</Label>
                 {isEditing ? (
@@ -300,26 +336,35 @@ const ProfileTenantTab = () => {
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               Account Owner
             </h3>
-
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label>Owner Name</Label>
-                <p className="text-sm">
-                  {`${formData.firstName} ${formData.lastName}`.trim() || "-"}
-                </p>
+                <Label htmlFor="firstName">First Name</Label>
+                {isEditing ? (
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    value={editData.firstName}
+                    onChange={handleInputChange}
+                    placeholder="Enter first name"
+                  />
+                ) : (
+                  <p className="text-sm">{formData.firstName || "-"}</p>
+                )}
               </div>
-
               <div className="space-y-2">
-                <Label>Email</Label>
-                <p className="text-sm">{formData.email || "-"}</p>
+                <Label htmlFor="lastName">Last Name</Label>
+                {isEditing ? (
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    value={editData.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Enter last name"
+                  />
+                ) : (
+                  <p className="text-sm">{formData.lastName || "-"}</p>
+                )}
               </div>
-            </div>
-
-            <div className="bg-muted/50 p-3 rounded-md">
-              <p className="text-xs text-muted-foreground">
-                Owner information is managed in your personal profile settings
-                and cannot be edited here.
-              </p>
             </div>
           </div>
         </CardContent>
@@ -327,5 +372,4 @@ const ProfileTenantTab = () => {
     </div>
   );
 };
-
 export default ProfileTenantTab;

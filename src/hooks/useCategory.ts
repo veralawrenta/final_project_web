@@ -5,7 +5,6 @@ import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -13,59 +12,66 @@ interface GetCategoriesQuery extends PaginationQueryParams {
   search?: string;
 }
 
-export const useGetCategories = (queries?: GetCategoriesQuery) => {
+export const useGetCategoriesForTenant = (queries?: GetCategoriesQuery) => {
+  const session = useSession();
   return useQuery({
-    queryKey: ["getCategories", queries],
+    queryKey: ["categories-tenant", queries],
     queryFn: async () => {
       const { data } = await axiosInstance.get<PageableResponse<Category>>(
         `/categories`,
-        { params: queries }
+        { 
+          params: queries,
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        }
       );
       return data;
     },
+    enabled: !!session.data?.user.accessToken,
   });
 };
 
-export const useGetCategoriesForCreateProperty = () => {
+export const useGetCategories = () => {
   const session = useSession();
   return useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get("/categories", {
+      const { data } = await axiosInstance.get<Category[]>("/categories", {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
       });
-      return data;
+      return data; // Returns array directly
     },
     enabled: !!session.data?.user.accessToken,
     staleTime: 10 * 60 * 1000,
   });
 };
 
-export const useGetCategory = (id: number) => {
+export const useGetCategory = (categoryId: number) => {
   const session = useSession();
   return useQuery({
-    queryKey: ["getCategoryId", id],
+    queryKey: ["category", categoryId],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/categories/${id}`, {
+      const { data } = await axiosInstance.get(`/categories/${categoryId}`, {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
       });
       return data;
     },
+    enabled: !!categoryId && !!session.data?.user.accessToken,
   });
 };
 
 export const useCreateCategory = () => {
-  const router = useRouter();
   const session = useSession();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: z.infer<typeof categoryFormSchema>) => {
-      const { data } = await axiosInstance.post(`/categories/`, payload, {
+      const { data } = await axiosInstance.post(`/categories`, payload, {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
@@ -73,11 +79,9 @@ export const useCreateCategory = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success("Your category successfully created");
-      queryClient.invalidateQueries({ queryKey: ["getCategories"] });
-      setTimeout(() => {
-        router.push("/dashboard/tenant/category");
-      }, 1500);
+      toast.success("Category created successfully");
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories-tenant"] });
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data.message || "Failed to create category");
@@ -85,14 +89,13 @@ export const useCreateCategory = () => {
   });
 };
 
-export const useUpdateCategory = (id: number) => {
-  const router = useRouter();
+export const useUpdateCategory = (categoryId: number) => {
   const session = useSession();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (payload: z.infer<typeof categoryFormSchema>) => {
-      const { data } = await axiosInstance.patch(`/categories/${id}`, payload, {
+      const { data } = await axiosInstance.patch(`/categories/${categoryId}`, payload, {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
@@ -100,26 +103,24 @@ export const useUpdateCategory = (id: number) => {
       return data;
     },
     onSuccess: () => {
-      toast.success("Your category successfully updated");
-      queryClient.invalidateQueries({ queryKey: ["getCategories"] });
-      setTimeout(() => {
-        router.push("/dashboard/tenant/category");
-      }, 1500);
+      toast.success("Category updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories-tenant"] });
+      queryClient.invalidateQueries({ queryKey: ["category", categoryId] });
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data.message || "Failed to edit category");
+      toast.error(error.response?.data.message || "Failed to update category");
     },
   });
 };
 
 export const useDeleteCategory = () => {
-  const router = useRouter();
   const session = useSession();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: number) => {
-      const { data } = await axiosInstance.delete(`/categories/${id}`, {
+    mutationFn: async (categoryId: number) => {
+      const { data } = await axiosInstance.delete(`/categories/${categoryId}`, {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
@@ -127,11 +128,9 @@ export const useDeleteCategory = () => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["getCategories"] });
-      toast.success("Category deleted");
-      setTimeout(() => {
-        router.push("/dashboard/tenant/category");
-      }, 1500);
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories-tenant"] });
+      toast.success("Category deleted successfully");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data.message || "Failed to delete category");

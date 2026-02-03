@@ -5,6 +5,7 @@ import PromoCarousel from "@/components/homepage/PromoCarousel";
 import { SearchBar } from "@/components/homepage/SearchBar";
 
 import Navbar from "@/components/Navbar";
+import PropertyListingComponent from "@/components/PropertyListing";
 import { redirect } from "next/navigation";
 
 const Homepage = async () => {
@@ -16,6 +17,7 @@ const Homepage = async () => {
       <HeroSection />
       <SearchBar />
       <PromoCarousel />
+      <PropertyListingComponent />
       <Footer />
     </div>
   );

@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Form } from "@/components/ui/form";
 import { createPropertySchema } from "@/lib/validator/dashboard.property.schema";
-import { CreatePropertyPayload, PropertyRoom } from "@/types/property";
+import { PropertyPayload, PropertyRoom } from "@/types/property";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -23,7 +23,7 @@ interface PropertyFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   property?: any | null;
-  onSubmit: (data: CreatePropertyPayload) => void;
+  onSubmit: (data: PropertyPayload) => void;
 }
 
 const PropertyFormDialog = ({
@@ -67,7 +67,7 @@ const PropertyFormDialog = ({
   });
 
   const handleSubmit = (data: z.infer<typeof createPropertySchema>) => {
-    const submitData : CreatePropertyPayload = {
+    const submitData : PropertyPayload = {
       ...data,
       amenities: selectedAmenities, 
       propertyImages: propertyImageFiles,

@@ -175,7 +175,7 @@ export const useCreateProperty = () => {
   return useMutation({
     mutationFn: async (payload: PropertyPayload) => {
       const { data } = await axiosInstance.post(
-        "property/",
+        "/properties",
         {
           name: payload.name,
           description: payload.description,

@@ -11,8 +11,9 @@ import { PersonalInfoSection } from "./profile-tab/PersonalInfoSection";
 import { ProfileHeader } from "./profile-tab/ProfileHeader";
 import { ProviderSection } from "./profile-tab/ProviderSection";
 import { VerificationSection } from "./profile-tab/VerificationSection";
+import { Skeleton } from "../ui/skeleton";
 
-type TenantDashboardProfileForm = {
+type UserProfileForm = {
   firstName: string;
   lastName: string;
   email: string;
@@ -20,11 +21,8 @@ type TenantDashboardProfileForm = {
   address: string;
   aboutMe: string;
   avatar?: string | null;
-  provider?: "CREDENTIAL";
+  provider?: "CREDENTIAL" | "GOOGLE";
   isVerified: boolean | undefined;
-  tenantName: string;
-  bankName: string;
-  bankNumber: string;
 };
 
 const ProfileUserTab = () => {
@@ -34,17 +32,13 @@ const ProfileUserTab = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isLoadingAvatar, setIsLoadingAvatar] = useState(false);
-  const [formData, setFormData] = useState<TenantDashboardProfileForm | null>(
-    null
-  );
-  const [editData, setEditData] = useState<TenantDashboardProfileForm | null>(
-    null
-  );
+  const [formData, setFormData] = useState<UserProfileForm | null>(null);
+  const [editData, setEditData] = useState<UserProfileForm | null>(null);
 
   useEffect(() => {
     if (!me) return;
 
-    const mapped: TenantDashboardProfileForm = {
+    const mapped: UserProfileForm = {
       firstName: me.firstName ?? "",
       lastName: me.lastName ?? "",
       email: me.email,
@@ -52,11 +46,8 @@ const ProfileUserTab = () => {
       address: me.address ?? "",
       aboutMe: me.aboutMe ?? "",
       avatar: me.avatar,
-      provider: "CREDENTIAL",
+      provider: me.provider,
       isVerified: me.isVerified,
-      tenantName: me.tenant.tenantName,
-      bankName: me.tenant.bankName,
-      bankNumber: me.tenant.bankNumber,
     };
 
     setFormData(mapped);
@@ -65,10 +56,28 @@ const ProfileUserTab = () => {
 
   if (isPending) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading profile...</p>
+      <div className="space-y-8 animate-pulse">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="flex items-center gap-4 p-4 border rounded-xl">
+          <Skeleton className="h-20 w-20 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-9 w-24" />
+          </div>
+        </div>
+        <div className="grid gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="p-6 border rounded-xl space-y-4">
+              <Skeleton className="h-5 w-40" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );

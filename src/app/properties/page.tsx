@@ -1,8 +1,10 @@
-import React from 'react'
+import PropertyListingComponent from '@/components/PropertyListing'
 
 const PropertyListingPage = () => {
   return (
-    <div>PropertyListingPage</div>
+    <div>
+      <PropertyListingComponent />
+    </div>
   )
 }
 

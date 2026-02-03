@@ -1,3 +1,4 @@
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   FormControl,
   FormField,
@@ -15,17 +16,16 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useGetMasterAmenities } from '@/hooks/useAmenities';
-import { useGetCategoriesForCreateProperty } from '@/hooks/useCategory';
 import { useGetCities } from '@/hooks/useGetCities';
+import { CreatePropertyForm } from '@/lib/validator/dashboard.property.schema';
 import { UseFormReturn } from 'react-hook-form';
 import { InteractiveMap } from './MapComponent';
-import { MasterAmenity } from '@/types/amenity';
-import { Checkbox } from '@/components/ui/checkbox';
+import { useGetCategories } from '@/hooks/useCategory';
 
 const propertyTypes = ['VILLA', 'HOTEL', 'HOUSE', 'APARTMENT'] as const;
 
 interface PropertyBasicInfoProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<CreatePropertyForm>;
   selectedAmenities: string[];
   onAmenitiesChange: (amenities: string[]) => void;
 };
@@ -35,12 +35,9 @@ export function PropertyBasicInfo({
   selectedAmenities,
   onAmenitiesChange,
 }: PropertyBasicInfoProps) {
-  const { data: citiesData, isPending: citiesLoading } = useGetCities();
-  const { data: categoriesData, isPending: categoriesLoading } = useGetCategoriesForCreateProperty();
+  const { data: cities, isPending: citiesLoading } = useGetCities();
+  const { data: categories, isPending: categoriesLoading } = useGetCategories();
   const { data: amenities, isPending: amenitiesLoading } = useGetMasterAmenities();
-
-  const cities = citiesData?.data || [];
-  const categories = categoriesData?.data || [];
 
   const toggleAmenity = (amenityCode: string) => {
     onAmenitiesChange(
@@ -219,7 +216,7 @@ export function PropertyBasicInfo({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {cities.map((city: any) => (
+                  {cities?.map((city) => (
                     <SelectItem key={city.id} value={city.id.toString()}>
                       {city.name}
                     </SelectItem>
@@ -254,7 +251,7 @@ export function PropertyBasicInfo({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {categories.map((cat: any) => (
+                  {categories?.map((cat : any) => (
                     <SelectItem key={cat.id} value={cat.id.toString()}>
                       {cat.name}
                     </SelectItem>
@@ -278,7 +275,7 @@ export function PropertyBasicInfo({
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 border border-border rounded-lg">
-            {amenities?.map((amenity: MasterAmenity) => (
+            {amenities?.map((amenity) => (
               <div key={amenity.code} className="flex items-center space-x-2">
                 <Checkbox
                   id={`amenity-${amenity.code}`}
