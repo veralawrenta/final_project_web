@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useMeProfile,
   useUpdateProfileUser,
@@ -46,8 +47,11 @@ const ProfileUserTab = () => {
       address: me.address ?? "",
       aboutMe: me.aboutMe ?? "",
       avatar: me.avatar,
-      provider: me.provider,
+      provider: "CREDENTIAL",
       isVerified: me.isVerified,
+      tenantName: me.tenant.tenantName,
+      bankName: me.tenant.bankName,
+      bankNumber: me.tenant.bankNumber,
     };
 
     setFormData(mapped);
@@ -123,6 +127,7 @@ const ProfileUserTab = () => {
     <div className="space-y-6">
       <ProfileHeader />
 
+
       <AvatarSection
         avatar={formData.avatar}
         firstName={formData.firstName}
@@ -149,3 +154,4 @@ const ProfileUserTab = () => {
 };
 
 export default ProfileUserTab;
+

@@ -15,6 +15,20 @@ import { Badge } from "@/components/ui/badge";
 import { Pencil, X, Save, CheckCircle, XCircle } from "lucide-react";
 import {
   useMeProfile,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Pencil, X, Save, CheckCircle, XCircle } from "lucide-react";
+import {
+  useMeProfile,
   useUpdateProfileTenant,
   useUploadAvatar,
 } from "@/hooks/useProfile";
@@ -29,6 +43,8 @@ type TenantProfileView = {
   bankName: string;
   address: string;
   aboutMe: string;
+  address: string;
+  aboutMe: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -38,7 +54,9 @@ type TenantProfileView = {
 
 const ProfileTenantTab = () => {
   const { data: me, isPending } = useMeProfile();
+  const { data: me, isPending } = useMeProfile();
   const updateProfile = useUpdateProfileTenant();
+  const uploadImage = useUploadAvatar();
   const uploadImage = useUploadAvatar();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -48,8 +66,20 @@ const ProfileTenantTab = () => {
 
   useEffect(() => {
     if (!me || !me.tenant) return;
+    if (!me || !me.tenant) return;
 
     const mapped: TenantProfileView = {
+      tenantName: me.tenant.tenantName ?? "",
+      bankNumber: me.tenant.bankNumber ?? "",
+      bankName: me.tenant.bankName ?? "",
+      firstName: me.firstName ?? "",
+      lastName: me.lastName ?? "",
+      email: me.email,
+      phone: me.phone ?? "",
+      isVerified: me.isVerified,
+      imageUrl: me.avatar ?? "",
+      address: me.address ?? "",
+      aboutMe: me.aboutMe ?? "",
       tenantName: me.tenant.tenantName ?? "",
       bankNumber: me.tenant.bankNumber ?? "",
       bankName: me.tenant.bankName ?? "",
@@ -65,6 +95,7 @@ const ProfileTenantTab = () => {
 
     setFormData(mapped);
     setEditData(mapped);
+  }, [me]);
   }, [me]);
 
   if (isPending) {
@@ -130,6 +161,7 @@ const ProfileTenantTab = () => {
   };
 
   const handleSave = () => {
+    const payload = updateDataTenantSchema.parse(editData);
     const payload = updateDataTenantSchema.parse(editData);
     updateProfile.mutate(payload, {
       onSuccess: () => {

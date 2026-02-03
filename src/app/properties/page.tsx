@@ -5,6 +5,7 @@ const PropertyListingPage = () => {
     <div>
       <PropertyListingComponent />
     </div>
+
   )
 }
 
