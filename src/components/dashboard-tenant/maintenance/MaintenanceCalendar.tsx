@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Loader2 } from "lucide-react";
 import { RoomNonAvailability } from "@/types/room";
-import { fromDateString } from "@/lib/date";
+import { fromDateString } from "@/lib/date/date";
 
 interface MaintenanceCalendarProps {
   records: RoomNonAvailability[] | undefined;
@@ -18,7 +18,6 @@ const MaintenanceCalendar = ({
   selectedDate,
   onSelectDate,
 }: MaintenanceCalendarProps) => {
-  // Expand every blocked range into individual dates for calendar highlighting
   const blockedDates = useMemo(() => {
     if (!records) return [];
     const dates: Date[] = [];
@@ -58,7 +57,20 @@ const MaintenanceCalendar = ({
           borderRadius: "50%",
         },
       }}
-      className="w-full"
+      className="w-full h-full"
+      classNames={{
+        months: "w-full",
+        month: "w-full space-y-4",
+        table: "w-full border-collapse",
+        head_row: "flex w-full justify-between mb-2",
+        head_cell: "text-muted-foreground rounded-md flex-1 font-medium text-[0.8rem] text-center",
+        row: "flex w-full mt-2 justify-between",
+        cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 flex-1 h-10",
+        day: "h-10 w-10 p-0 font-normal aria-selected:opacity-100 hover:bg-accent rounded-full transition-all mx-auto flex items-center justify-center",
+        nav_button_previous: "absolute left-1",
+        nav_button_next: "absolute right-1",
+        caption: "flex justify-center pt-1 relative items-center mb-4",
+      }}
     />
   );
 };

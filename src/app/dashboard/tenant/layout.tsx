@@ -9,7 +9,7 @@ export default async function DashboardLayout({
 }) {
   const session = await auth();
 
-  if (session?.user.role !== "TENANT") redirect("/login");
+  if (session?.user.role !== "TENANT") redirect("/");
   
   return <Dashboard>{children}</Dashboard>;
 }

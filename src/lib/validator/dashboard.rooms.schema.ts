@@ -1,5 +1,5 @@
 import z from "zod";
-import { imageFileSchema } from "./dashboard.create-property.schema";
+import { imageFileSchema } from "./dashboard.property.schema";
 
 export const createRoomSchema = z.object({
     propertyId: z.number().min(1, "Please select a property"),

@@ -65,7 +65,7 @@ const navItems: NavItem[] = [
   },
   {
     label: "Maintenance",
-    href: "/dashboard/tenant/room/maintenance",
+    href: "/dashboard/tenant/maintenance",
     icon: <Wrench className="w-5 h-5" />,
   },
   {
@@ -99,13 +99,14 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
             : "w-64 -translate-x-full md:translate-x-0 md:w-20"
         )}
       >
-        <div className="h-16 flex items-center justify-center border-b border-sidebar-border px-4">
+        <div className="h-16 flex items-center justify-center border-b border-sidebar-border px-4 mt-2">
           {sidebarOpen ? (
             <Image
-              src="/images/nuit2.png"
+              src="/images/nuit-name.png"
               width={180}
               height={180}
               alt="Website Logo"
+              priority
             />
           ) : (
             <DoorOpen className="w-6 h-6 text-slate-600" />
@@ -137,6 +138,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
             variant="outline"
             className="w-full bg-transparent"
             size={sidebarOpen ? "default" : "icon"}
+            onClick={() => signOut}
           >
             {sidebarOpen ? "Logout" : <span className="text-xs">Logout</span>}
           </Button>
@@ -168,6 +170,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               <button className="flex items-center gap-2 p-1.5 hover:bg-muted rounded-lg">
                 <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
                   {me?.avatar ? (
+                   
                     <Image
                       src={me.avatar}
                       alt="Avatar"
@@ -176,13 +179,13 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                     />
                   ) : (
                     <span className="text-primary-foreground font-semibold text-sm">
-                      {me?.name?.[0]}
+                      {me?.tenant?.tenantName[0]}
                     </span>
                   )}
                 </div>
 
                 <div className="hidden md:flex flex-col items-start">
-                  <span className="text-xs font-semibold">{me?.name}</span>
+                  <span className="text-xs font-semibold">{me?.tenant?.tenantName}</span>
                   <span className="text-xs text-muted-foreground">
                     {me?.role}
                   </span>
@@ -192,9 +195,9 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
 
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
-                <p className="text-sm font-semibold">John Doe</p>
+                <p className="text-sm font-semibold">{me?.tenant.tenantName}</p>
                 <p className="text-xs text-muted-foreground">
-                  john.doe@example.com
+                  {me?.email}
                 </p>
               </div>
               <DropdownMenuSeparator />
@@ -217,7 +220,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive gap-2">
                 <Button onClick={() => signOut}>
-                  <LogOut className="w-4 h-4" /> Logout
+                  <LogOut className="w-4 h-4 text-primary-foreground" /> Logout
                 </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>

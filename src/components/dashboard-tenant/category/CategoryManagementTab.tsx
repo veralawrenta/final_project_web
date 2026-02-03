@@ -1,3 +1,4 @@
+"use client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,9 +11,18 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useDeleteCategory, useGetCategories } from "@/hooks/useCategory";
 import { Category } from "@/types/category";
-import { Edit, Loader2, Plus, Search, Tag, Trash2 } from "lucide-react";
+import {
+  Edit,
+  LayoutGrid,
+  Loader2,
+  Plus,
+  Search,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
@@ -26,150 +36,213 @@ const CategoryManagementTab = ({
   onAddCategory,
   onEditCategory,
 }: CategoryManagementTabProps) => {
-  const [input, setInput] = useQueryState("search", { defaultValue: "" });
-  const [debounceValue] = useDebounceValue(input, 500);
+  const [search, setSearch] = useQueryState("search", { defaultValue: "" });
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [debounceSearch] = useDebounceValue(search, 500);
+
   const [isDeletingCategory, setIsDeletingCategory] = useState<Category | null>(
-    null,
+    null
   );
 
-  const { data: getCategories, isPending: getCategoriesPending } =
-    useGetCategories({
-      page,
-      take: 3,
-      search: debounceValue,
-    });
+  const { data: getCategories, isPending } = useGetCategories({
+    page,
+    take: 6, // Increased take for a better grid feel
+    search: debounceSearch,
+  });
 
   const { mutate: deleteCategoryMutate, isPending: deleteCategoryPending } =
     useDeleteCategory();
 
-  const onChangePage = (page: number) => {
-    setPage(page);
+  const handleDelete = () => {
+    if (isDeletingCategory?.id) {
+      deleteCategoryMutate(isDeletingCategory.id);
+      setIsDeletingCategory(null);
+    }
   };
 
-  const handleDelete = async () => {
-    if (!isDeletingCategory) return;
-    deleteCategoryMutate(isDeletingCategory.id);
-    setIsDeletingCategory(null);
-  };
+  const categories = getCategories?.data ?? [];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Header Section */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-heading font-bold">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-heading font-bold tracking-tight">
             Category Management
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Organize your properties with categories
+          <p className="text-muted-foreground">
+            Classify and organize your property portfolio for better
+            searchability.
           </p>
         </div>
-        <Button className="gap-2" onClick={onAddCategory}>
+        <Button
+          className="gap-2 rounded-xl px-6 h-11 shadow-sm transition-all hover:shadow-md"
+          onClick={onAddCategory}
+        >
           <Plus className="h-4 w-4" />
           Add Category
         </Button>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search categories..."
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="pl-10"
-        />
+      <div className="flex flex-col md:flex-row items-center gap-4 bg-card p-4 rounded-2xl border border-border/60 shadow-sm">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
+          <Input
+            placeholder="Search by category name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-10 rounded-xl bg-muted/20 border-none focus-visible:ring-1 focus-visible:ring-primary"
+          />
+        </div>
       </div>
 
-      <div className="bg-card rounded-2xl border border-border divide-y divide-border">
-        {getCategoriesPending && (
-          <div className="flex justify-center py-12">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {isPending &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="border rounded-4xl p-6 space-y-4 bg-card shadow-sm"
+            >
+              <div className="flex justify-between">
+                <Skeleton className="h-6 w-20 rounded-full" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-8 rounded-xl" />
+                  <Skeleton className="h-8 w-8 rounded-xl" />
+                </div>
+              </div>
+              <Skeleton className="h-8 w-3/4 rounded-lg" />
+              <div className="pt-4 border-t flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+          ))}
+
+        {/* Empty State */}
+        {!isPending && categories.length === 0 && (
+          <div className="col-span-full relative overflow-hidden flex flex-col items-center justify-center py-24 px-8 p-4 border-2 border-dashed border-border/60 rounded-2xl bg-linear-to-b from-muted/20 to-transparent">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 bg-primary/5 blur-[120px] -z-10" />
+            <div className="h-24 w-24 bg-background rounded-[2.5rem] shadow-xl border border-border flex items-center justify-center mb-8 transition-all hover:scale-105 duration-500">
+              <Tag className="h-12 w-12 text-primary/40" />
+            </div>
+            <h3 className="text-3xl font-bold tracking-tight text-center mb-3">
+              No categories found
+            </h3>
+            <p className="text-muted-foreground text-center max-w-sm mb-10 leading-relaxed text-lg font-medium">
+              {search
+                ? "We couldn't find any categories matching your search term."
+                : "Organize your properties by adding your first category, such as 'Hotels' or 'Apartments'."}
+            </p>
+            {search ? (
+              <Button
+                variant="outline"
+                className="rounded-2xl px-12 h-14"
+                onClick={() => setSearch("")}
+              >
+                Clear search
+              </Button>
+            ) : (
+              <Button
+                className="rounded-2xl px-12 h-14 text-lg font-semibold shadow-sm"
+                onClick={onAddCategory}
+              >
+                <Plus className="h-5 w-5 mr-3" />
+                Add First Category
+              </Button>
+            )}
           </div>
         )}
-        {!getCategoriesPending &&
-          (getCategories?.data?.length ?? 0) === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No categories found</p>
-            </div>
-          )}
-        {(getCategories?.data ?? []).map((category) => (
-          <div
-            key={category.id}
-            className="flex items-center justify-between p-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Tag className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-bold font-mono">
-                    ID: {category.id}
-                  </span>
-                  <h3 className="font-heading font-semibold">
-                    {category.name}
-                  </h3>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {category.propertiesCount}{" "}
-                  {category.propertiesCount === 1 ? "property" : "properties"}
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                title="Edit Category"
-                onClick={() => onEditCategory(category)}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-destructive hover:text-destructive"
-                title="Delete Category"
-                onClick={() => setIsDeletingCategory(category)}
-                disabled={deleteCategoryPending}
-              >
-                {deleteCategoryPending ? (
-                    "Loading"
-                  ) : (
+
+        {/* Category Cards */}
+        {!isPending &&
+          categories.map((category) => (
+            <div
+              key={category.id}
+              className="group relative bg-card rounded-[2.5rem] border border-border p-6 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold tracking-tight uppercase">
+                  ID: {category.id}
+                </span>
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-9 w-9 rounded-xl shadow-sm"
+                    onClick={() => onEditCategory(category)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-9 w-9 rounded-xl shadow-sm text-destructive hover:bg-destructive/10"
+                    onClick={() => setIsDeletingCategory(category)}
+                    disabled={deleteCategoryPending}
+                  >
                     <Trash2 className="h-4 w-4" />
-                  )}
-              </Button>
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 mb-6">
+                <h3 className="font-heading font-bold text-2xl line-clamp-1">
+                  {category.name}
+                </h3>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <LayoutGrid className="h-4 w-4" />
+                  <p className="text-sm font-medium">
+                    {category.propertiesCount}{" "}
+                    {category.propertiesCount === 1
+                      ? "Property linked"
+                      : "Properties linked"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-border/50 flex justify-end">
+                <span className="text-[11px] font-bold text-muted-foreground/60 tracking-widest uppercase">
+                  System Category
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <AlertDialog
         open={!!isDeletingCategory}
         onOpenChange={() => setIsDeletingCategory(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-[2.5rem] p-8 border-none shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Category</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p>
-                Are you sure you want to delete "
-                <strong>{isDeletingCategory?.name}</strong>"?
-              </p>
-              <p className="text-sm font-medium">
-                This action cannot be undone.
-              </p>
+            <div className="h-14 w-14 bg-destructive/10 rounded-2xl flex items-center justify-center mb-4">
+              <Trash2 className="h-7 w-7 text-destructive" />
+            </div>
+            <AlertDialogTitle className="text-2xl font-bold">
+              Remove Category?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base text-muted-foreground leading-relaxed pt-2">
+              Are you sure you want to delete{" "}
+              <span className="font-bold text-foreground">
+                "{isDeletingCategory?.name}"
+              </span>
+              ? Properties linked to this category may lose their
+              classification. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="pt-6 gap-3">
+            <AlertDialogCancel className="rounded-xl px-6 border-none bg-muted/50 hover:bg-muted">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90 rounded-xl px-8 shadow-lg shadow-destructive/20"
             >
-              Delete Category
+              {deleteCategoryPending ? (
+                <Loader2 className="h-4 w-4 animate-spin text-white" />
+              ) : (
+                "Delete Category"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

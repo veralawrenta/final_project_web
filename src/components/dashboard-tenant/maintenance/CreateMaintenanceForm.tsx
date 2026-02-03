@@ -37,7 +37,7 @@ import {
   createMaintenanceBlockSchema,
   CreateMaintenanceBlockValues,
 } from "@/lib/validator/dashboard.maintenance.schema";
-import { formatLocalDate } from "@/lib/date";
+import { formatLocalDate } from "@/lib/date/date";
 import { Property } from "@/types/property";
 
 const CreateMaintenanceBlockForm = () => {

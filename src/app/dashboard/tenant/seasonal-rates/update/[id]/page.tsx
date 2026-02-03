@@ -4,7 +4,7 @@ import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetSeasonalRateById, useUpdateSeasonalRates } from "@/hooks/useSeasonalRates";
-import { fromDateString } from "@/lib/date";
+import { fromDateString } from "@/lib/date/date";
 import z from "zod";
 import { updateSeasonalRatesSchema } from "@/lib/validator/dashboard.seasonalrates.schema";
 import { SeasonalRateForm } from "@/components/dashboard-tenant/seasonal-rates/SeasonalRateForm";

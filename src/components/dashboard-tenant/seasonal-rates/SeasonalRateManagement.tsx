@@ -1,13 +1,17 @@
+"use client";
+import { useState } from "react";
+import { useQueryState, parseAsInteger } from "nuqs";
+import { useDebounceValue } from "usehooks-ts";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Plus,
+  Edit,
+  Trash2,
+  CalendarIcon,
+  DollarSign,
+  Search,
+  Filter,
+  TrendingUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,21 +22,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  CalendarIcon,
-  DollarSign,
-  Edit,
-  Loader2,
-  Plus,
-  Search,
-  Trash2,
-} from "lucide-react";
-import { useGetSeasonalRatesbyTenant, useDeleteSeasonalRates } from "@/hooks/useSeasonalRates";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SeasonalRates } from "@/types/room";
-import { parseAsInteger, useQueryState } from "nuqs";
-import { useState } from "react";
-import { useDebounceValue } from "usehooks-ts";
+import { useGetSeasonalRatesbyTenant, useDeleteSeasonalRates } from "@/hooks/useSeasonalRates";
+import PaginationSection from "@/components/PaginationSection";
 import { format } from "date-fns";
-import { fromDateString } from "@/lib/date";
+import { fromDateString } from "@/lib/date/date";
 
 interface SeasonalRateManagementTabProps {
   onAddRate: () => void;
@@ -44,85 +48,75 @@ const SeasonalRateManagementTab = ({
   onEditRate,
 }: SeasonalRateManagementTabProps) => {
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
-  const [debouncedSearch] = useDebounceValue(search, 500);
-  const [page, setPage] = useQueryState(
-    "page",
-    parseAsInteger.withDefault(1),
-  );
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [debounceSearch] = useDebounceValue(search, 500);
+
   const [selectedProperty, setSelectedProperty] = useState<string>("all");
   const [deleteRate, setDeleteRate] = useState<SeasonalRates | null>(null);
 
-  const {
-    data: seasonalRates,
-    isPending: getRatesPending,
-  } = useGetSeasonalRatesbyTenant({
+  const { data: seasonalRates, isPending } = useGetSeasonalRatesbyTenant({
     page,
     take: 6,
-    search: debouncedSearch || undefined,
+    search: debounceSearch || undefined,
   });
 
-  const {
-    mutate: deleteSeasonalRate,
-    isPending: deleteRatePending,
-  } = useDeleteSeasonalRates();
+  const deleteRateMutation = useDeleteSeasonalRates();
 
-  const allRates: SeasonalRates[] = seasonalRates?.data ?? [];
-
-  const propertyOptions = Array.from(
-    new Set(allRates.map((rate) => rate.propertyName).filter(Boolean)),
-  ) as string[];
-
-  const filteredRates = allRates.filter((rate) => {
-    const matchesSearch =
-      !debouncedSearch ||
-      rate.name?.toLowerCase().includes(debouncedSearch.toLowerCase());
-    const matchesProperty =
-      selectedProperty === "all" ||
-      (rate.propertyName && rate.propertyName === selectedProperty);
-    return matchesSearch && matchesProperty;
-  });
-
-  const handleChangePage = (nextPage: number) => {
+  const onChangePage = (nextPage: number) => {
     setPage(nextPage);
   };
 
   const handleDelete = () => {
-    if (!deleteRate) return;
-    deleteSeasonalRate(deleteRate.id);
-    setDeleteRate(null);
+    if (deleteRate?.id) {
+      deleteRateMutation.mutate(deleteRate.id);
+      setDeleteRate(null);
+    }
   };
+
+  // Get unique property names for the filter dropdown
+  const allRates: SeasonalRates[] = seasonalRates?.data ?? [];
+  const propertyOptions = Array.from(
+    new Set(allRates.map((rate) => rate.propertyName).filter(Boolean))
+  ) as string[];
+
+  const filteredRates = allRates.filter((rate) => {
+    if (selectedProperty === "all") return true;
+    return rate.propertyName === selectedProperty;
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-heading font-bold">
+          <h1 className="text-2xl md:text-3xl font-heading font-bold tracking-tight">
             Seasonal Rates
           </h1>
           <p className="text-muted-foreground mt-1">
-            Manage seasonal pricing for your properties
+            Manage and monitor seasonal pricing rules across your property portfolio.
           </p>
         </div>
-        <Button className="gap-2" onClick={onAddRate}>
+        <Button className="gap-2 shadow-sm" onClick={onAddRate}>
           <Plus className="h-4 w-4" />
           Add Seasonal Rate
         </Button>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search rates..."
+            placeholder="Search by rate name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 focus-visible:ring-primary"
           />
         </div>
         <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-          <SelectTrigger className="w-full sm:w-[240px]">
-            <SelectValue placeholder="Filter by property" />
+          <SelectTrigger className="w-full sm:w-[240px] bg-background">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <SelectValue placeholder="Filter by property" />
+            </div>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Properties</SelectItem>
@@ -135,109 +129,147 @@ const SeasonalRateManagementTab = ({
         </Select>
       </div>
 
-      {/* Rates List */}
-      {getRatesPending && (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      )}
-
-      {!getRatesPending && filteredRates.length === 0 && (
-        <div className="text-center py-12 bg-card rounded-2xl border border-border">
-          <p className="text-muted-foreground">No seasonal rates found</p>
-        </div>
-      )}
-
-      {!getRatesPending && filteredRates.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredRates.map((rate) => (
-            <div
-              key={rate.id}
-              className="bg-card rounded-2xl border border-border p-5"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-bold font-mono">
-                    ID: {rate.id}
-                  </span>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    title="Edit Rate"
-                    onClick={() => onEditRate(rate)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    title="Delete Rate"
-                    onClick={() => setDeleteRate(rate)}
-                    disabled={deleteRatePending}
-                  >
-                    {deleteRatePending ? (
-                      "Loading"
-                    ) : (
-                      <Trash2 className="h-4 w-4" />
-                    )}
-                  </Button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Loading State: Skeleton Cards */}
+        {isPending &&
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="border rounded-2xl p-5 space-y-4">
+              <div className="flex justify-between">
+                <Skeleton className="h-5 w-16" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                  <Skeleton className="h-8 w-8 rounded-md" />
                 </div>
               </div>
-
-              <h3 className="font-heading font-semibold text-lg">{rate.name}</h3>
-              <p className="text-sm text-muted-foreground">{rate.propertyName}</p>
-
-              <div className="flex items-center gap-2 mt-4">
-                <DollarSign className="h-5 w-5 text-primary" />
-                <span className="text-xl font-bold text-primary">
-                  ${rate.fixedPrice}
-                </span>
-                <span className="text-sm text-muted-foreground">/ night</span>
-              </div>
-
-              <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border text-sm text-muted-foreground">
-                <CalendarIcon className="h-4 w-4" />
-                <span>
-                  {format(fromDateString(rate.startDate), "MMM d, yyyy")} -{" "}
-                  {format(fromDateString(rate.endDate), "MMM d, yyyy")}
-                </span>
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <div className="pt-4 border-t flex justify-between">
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-5 w-24" />
               </div>
             </div>
           ))}
+
+        {/* Empty State */}
+        {!isPending && filteredRates.length === 0 && (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed rounded-3xl bg-muted/30">
+            <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
+              <TrendingUp className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-semibold">No seasonal rates found</h3>
+            <p className="text-muted-foreground text-center max-w-xs mt-2">
+              {search || selectedProperty !== "all" 
+                ? "Try adjusting your filters or search terms to find what you're looking for." 
+                : "You haven't added any seasonal rates yet. Start by creating your first price adjustment."}
+            </p>
+            {search || selectedProperty !== "all" ? (
+              <Button 
+                variant="outline" 
+                className="mt-6" 
+                onClick={() => {setSearch(""); setSelectedProperty("all");}}
+              >
+                Clear all filters
+              </Button>
+            ) : (
+              <Button className="mt-6" onClick={onAddRate}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Your First Rate
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* Seasonal Rate Grid */}
+        {!isPending && filteredRates.map((rate) => (
+          <div
+            key={rate.id}
+            className="group bg-card rounded-2xl border border-border p-5 hover:shadow-md transition-all duration-200"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <span className="px-2.5 py-1 bg-secondary text-secondary-foreground rounded-lg text-[10px] font-bold tracking-wider uppercase">
+                ID: {rate.id}
+              </span>
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 rounded-full"
+                  onClick={() => onEditRate(rate)}
+                >
+                  <Edit className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
+                  onClick={() => setDeleteRate(rate)}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <h3 className="font-heading font-bold text-xl leading-tight mb-1 line-clamp-1">
+              {rate.name}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              {rate.propertyName}
+            </p>
+
+            <div className="flex items-center gap-3 py-3 border-t border-border mt-auto">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                <CalendarIcon className="h-4 w-4" />
+                <span>{format(fromDateString(rate.startDate), "MMM d")} - {format(fromDateString(rate.endDate), "MMM d")}</span>
+              </div>
+              <div className="ml-auto flex items-baseline gap-1">
+                <span className="text-sm font-medium text-primary">$</span>
+                <span className="text-xl font-bold tracking-tight text-foreground">
+                  {rate.fixedPrice.toLocaleString()}
+                </span>
+                <span className="text-[12px] text-muted-foreground font-medium">/night</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {!!seasonalRates?.meta && !isPending && filteredRates.length > 0 && (
+        <div className="pt-4">
+          <PaginationSection
+            meta={seasonalRates.meta}
+            onChangePage={onChangePage}
+          />
         </div>
       )}
+
+      {/* AlertDialog Logic */}
       <AlertDialog open={!!deleteRate} onOpenChange={() => setDeleteRate(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[400px]">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Seasonal Rate</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
+            <AlertDialogTitle className="text-xl">Delete Seasonal Rate</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4 pt-2">
               <p>
-                Are you sure you want to delete "
-                <strong>{deleteRate?.name}</strong>"?
+                Are you sure you want to delete <span className="font-semibold text-foreground">"{deleteRate?.name}"</span>? 
+                Pricing will revert to the standard base rate for this period.
               </p>
-              <p className="text-destructive font-medium">
-                ⚠️ This action will permanently delete:
-              </p>
-              <ul className="list-disc list-inside text-sm text-muted-foreground">
-                <li>This seasonal rate configuration</li>
-                <li>Any associated booking price adjustments</li>
-              </ul>
-              <p className="text-sm font-medium">
-                This action cannot be undone.
-              </p>
+              <div className="bg-destructive/5 border border-destructive/20 p-3 rounded-lg">
+                <p className="text-destructive text-xs font-bold uppercase tracking-wider mb-2">
+                  Permanent Action
+                </p>
+                <ul className="space-y-1 text-sm text-muted-foreground">
+                  <li className="flex items-center gap-2">• Pricing rules will be removed</li>
+                  <li className="flex items-center gap-2">• This cannot be undone</li>
+                </ul>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90 rounded-xl"
             >
-              Delete Rate
+              Delete Permanently
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

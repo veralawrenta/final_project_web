@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { Plus, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Room, RoomNonAvailability } from "@/types/room";
-import { fromDateString, isWithinRange } from "@/lib/date";
+import { fromDateString, isWithinRange } from "@/lib/date/date";
 
 interface SelectedDatePanelProps {
   selectedDate: Date | undefined;

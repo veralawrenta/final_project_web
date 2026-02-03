@@ -33,4 +33,28 @@ export function normalizeDateRange(start: Date, end: Date) {
     start: normalizeLocalDate(start),
     end: normalizeLocalDate(end),
   };
+};
+
+// count number of nights between two dates (check-out exclusive)
+export function countNights(
+  start?: Date,
+  end?: Date
+): number {
+  if (!start || !end) return 0;
+
+  const s = normalizeLocalDate(start);
+  const e = normalizeLocalDate(end);
+
+  const diff =
+    e.getTime() - s.getTime();
+
+  if (diff <= 0) return 0;
+
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+};
+
+export function isBeforeToday(date: Date): boolean {
+  const today = normalizeLocalDate(new Date());
+  const d = normalizeLocalDate(date);
+  return d < today;
 }

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Room, RoomNonAvailability } from "@/types/room";
 import PaginationSection from "@/components/PaginationSection";
 import { PageableResponse } from "@/types/pagination";
-import { fromDateString } from "@/lib/date";
+import { fromDateString } from "@/lib/date/date";
 
 interface MaintenanceListProps {
   data: PageableResponse<RoomNonAvailability> | undefined;

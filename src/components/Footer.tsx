@@ -56,7 +56,9 @@ const Footer = ({ className = "" }: FooterProps) => {
   ];
 
   return (
-    <footer className={`bg-[#F8FAFC] border-t border-slate-200 text-[#334155] ${className}`}>
+    <footer
+      className={`bg-[#F8FAFC] border-t border-slate-200 text-[#334155] ${className}`}
+    >
       <div className="container mx-auto max-w-full px-6 lg:px-8 py-16 lg:ml-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           <div className="lg:col-span-1 space-y-6">
@@ -127,9 +129,9 @@ const Footer = ({ className = "" }: FooterProps) => {
                 Accessibility
               </Link>
             </div>
-            
+
             <div className="flex items-center gap-2">
-               <p className="text-xs text-slate-400 font-medium tracking-wide">
+              <p className="text-xs text-slate-400 font-medium tracking-wide">
                 &copy; {currentYear} STAYNUIT. ALL RIGHTS RESERVED.
               </p>
             </div>

@@ -1,5 +1,5 @@
 import { axiosInstance } from "@/lib/axios";
-import { formatLocalDate } from "@/lib/date";
+import { formatLocalDate } from "@/lib/date/date";
 import {
   createSeasonalRatesSchema,
   updateSeasonalRatesSchema,
