@@ -1,4 +1,4 @@
-import RoomManagementTab from '@/components/dashboard-tenant/rooms/RoomManagementTab'
+import RoomManagementTab from '@/components/dashboard-tenant/RoomManagementTab'
 import React from 'react'
 
 const RoomManagementPage = () => {

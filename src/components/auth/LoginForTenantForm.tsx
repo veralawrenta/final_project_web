@@ -47,7 +47,7 @@ export function LoginForTenantForm({
       });
       toast.success("Login success. Welcome Tenant!");
       setTimeout(() => {
-        router.push("/");
+        router.push("/dashboard/tenant");
       }, 1000);
     },
     onError: (error: AxiosError<{ message: string }>) => {

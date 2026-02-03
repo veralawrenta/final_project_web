@@ -1,5 +1,5 @@
 import z from "zod";
-import { normalizeLocalDate } from "../date";
+import { normalizeLocalDate } from "../date/date";
 
 export const createMaintenanceBlockSchema = z
   .object({

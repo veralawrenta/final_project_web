@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
 
-interface GetCategoriesQuery extends PaginationQueryParams{
+interface GetCategoriesQuery extends PaginationQueryParams {
   search?: string;
 }
 
@@ -17,10 +17,29 @@ export const useGetCategories = (queries?: GetCategoriesQuery) => {
   return useQuery({
     queryKey: ["getCategories", queries],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<PageableResponse<Category>>(`/categories/`, {params : queries}
+      const { data } = await axiosInstance.get<PageableResponse<Category>>(
+        `/categories`,
+        { params: queries }
       );
       return data;
     },
+  });
+};
+
+export const useGetCategoriesForCreateProperty = () => {
+  const session = useSession();
+  return useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get("/categories", {
+        headers: {
+          Authorization: `Bearer ${session.data?.user.accessToken}`,
+        },
+      });
+      return data;
+    },
+    enabled: !!session.data?.user.accessToken,
+    staleTime: 10 * 60 * 1000,
   });
 };
 
@@ -118,4 +137,4 @@ export const useDeleteCategory = () => {
       toast.error(error.response?.data.message || "Failed to delete category");
     },
   });
-}
+};

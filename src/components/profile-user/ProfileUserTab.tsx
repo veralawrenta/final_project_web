@@ -1,20 +1,18 @@
 "use client";
-
+import React, { useEffect, useState } from "react";
 import {
   useMeProfile,
   useUpdateProfileUser,
   useUploadAvatar,
 } from "@/hooks/useProfile";
 import { updateDataUserSchema } from "@/lib/validator/profile.update-data.schema";
-import React, { useEffect, useState } from "react";
-
 import { AvatarSection } from "./profile-tab/AvatarSection";
 import { PersonalInfoSection } from "./profile-tab/PersonalInfoSection";
 import { ProfileHeader } from "./profile-tab/ProfileHeader";
 import { ProviderSection } from "./profile-tab/ProviderSection";
 import { VerificationSection } from "./profile-tab/VerificationSection";
 
-type ProfileView = {
+type TenantDashboardProfileForm = {
   firstName: string;
   lastName: string;
   email: string;
@@ -22,8 +20,11 @@ type ProfileView = {
   address: string;
   aboutMe: string;
   avatar?: string | null;
-  provider?: "GOOGLE" | "CREDENTIAL";
-  isVerified?: boolean;
+  provider?: "CREDENTIAL";
+  isVerified: boolean | undefined;
+  tenantName: string;
+  bankName: string;
+  bankNumber: string;
 };
 
 const ProfileUserTab = () => {
@@ -33,20 +34,17 @@ const ProfileUserTab = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [isLoadingAvatar, setIsLoadingAvatar] = useState(false);
-  const [formData, setFormData] = useState<ProfileView | null>(null);
-  const [editData, setEditData] = useState<ProfileView | null>(null);
-
-  /*console.log('Profile Debug:', {
-    me,
-    isPending,
-    formData,
-    editData
-  });*/
+  const [formData, setFormData] = useState<TenantDashboardProfileForm | null>(
+    null
+  );
+  const [editData, setEditData] = useState<TenantDashboardProfileForm | null>(
+    null
+  );
 
   useEffect(() => {
     if (!me) return;
 
-    const mapped: ProfileView = {
+    const mapped: TenantDashboardProfileForm = {
       firstName: me.firstName ?? "",
       lastName: me.lastName ?? "",
       email: me.email,
@@ -54,8 +52,11 @@ const ProfileUserTab = () => {
       address: me.address ?? "",
       aboutMe: me.aboutMe ?? "",
       avatar: me.avatar,
-      provider: me.provider,
+      provider: "CREDENTIAL",
       isVerified: me.isVerified,
+      tenantName: me.tenant.tenantName,
+      bankName: me.tenant.bankName,
+      bankNumber: me.tenant.bankNumber,
     };
 
     setFormData(mapped);
@@ -112,7 +113,7 @@ const ProfileUserTab = () => {
   return (
     <div className="space-y-6">
       <ProfileHeader />
-      
+
       <AvatarSection
         avatar={formData.avatar}
         firstName={formData.firstName}

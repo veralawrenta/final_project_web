@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import L from "leaflet";
+import { useEffect, useRef, useState } from "react";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 
 if (typeof window !== "undefined") {
   delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -13,132 +13,99 @@ if (typeof window !== "undefined") {
   });
 }
 
-interface MapComponentProps {
-  latitude?: number;
-  longitude?: number;
-  onLocationSelect?: (lat: number, lng: number, address?: string) => void;
+interface InteractiveMapProps {
+  latitude: number;
+  longitude: number;
+  onLocationChange: (lat: number, lng: number) => void;
   height?: string;
   className?: string;
 }
 
-function MapClickHandler({
-  onLocationSelect,
+function MapController({
+  position,
+  onLocationChange,
 }: {
-  onLocationSelect?: (lat: number, lng: number, address?: string) => void;
+  position: [number, number];
+  onLocationChange: (lat: number, lng: number) => void;
 }) {
-  const [address, setAddress] = useState<string>("");
+  const map = useMap();
+  const markerRef = useRef<L.Marker>(null);
 
-  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
-    try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-        {
-          headers: {
-            "User-Agent": "PropertyApp/1.0",
-          },
-        }
-      );
-      const data = await response.json();
-      if (data && data.display_name) {
-        setAddress(data.display_name);
-        return data.display_name;
-      }
-      return "";
-    } catch (error) {
-      console.error("Reverse geocoding error:", error);
-      return "";
-    }
-  }, []);
+  useEffect(() => {
+    map.setView(position, map.getZoom());
+  }, [position, map]);
 
   useMapEvents({
-    click: async (e) => {
+    click: (e) => {
       const { lat, lng } = e.latlng;
-      const addr = await reverseGeocode(lat, lng);
-      if (onLocationSelect) {
-        onLocationSelect(lat, lng, addr);
-      }
+      onLocationChange(lat, lng);
     },
   });
 
-  return null;
+  return (
+    <Marker
+      position={position}
+      draggable={true}
+      eventHandlers={{
+        dragend: (e) => {
+          const marker = e.target;
+          const pos = marker.getLatLng();
+          onLocationChange(pos.lat, pos.lng);
+        },
+      }}
+      ref={markerRef}
+    />
+  );
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({
+export function InteractiveMap({
   latitude,
   longitude,
-  onLocationSelect,
-  height = "400px",
+  onLocationChange,
+  height = "300px",
   className = "",
-}) => {
-  const [position, setPosition] = useState<[number, number] | null>(null);
-  const [selectedAddress, setSelectedAddress] = useState<string>("");
-
-  const defaultCenter: [number, number] = [-6.2088, 106.8456];
+}: InteractiveMapProps) {
+  const [mounted, setMounted] = useState(false);
+  const position: [number, number] = [latitude || -6.2088, longitude || 106.8456];
 
   useEffect(() => {
-    if (latitude && longitude) {
-      setPosition([latitude, longitude]);
-    };
-  }, [latitude, longitude]);
+    setMounted(true);
+  }, []);
 
-  const handleLocationSelect = useCallback(
-    async (lat: number, lng: number, address?: string) => {
-      setPosition([lat, lng]);
-      if (address) {
-        setSelectedAddress(address);
-        onLocationSelect?.(lat, lng, address);
-      };
-    },
-    [onLocationSelect]
-  );
-
-  const center = position || (latitude && longitude ? [latitude, longitude] : defaultCenter);
+  if (!mounted) {
+    return (
+      <div
+        className={`w-full ${className} bg-muted rounded-lg flex items-center justify-center`}
+        style={{ height }}
+      >
+        <p className="text-sm text-muted-foreground">Loading map...</p>
+      </div>
+    );
+  }
 
   return (
     <div className={`w-full ${className}`} style={{ height }}>
       <div className="relative w-full h-full rounded-lg overflow-hidden border border-border">
         <MapContainer
-          center={center}
-          zoom={position ? 15 : 13}
+          center={position}
+          zoom={13}
           scrollWheelZoom={true}
           className="w-full h-full z-0"
           style={{ height: "100%", width: "100%" }}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          <MapClickHandler onLocationSelect={handleLocationSelect} />
-          {position && (
-            <Marker position={position}>
-              <Popup>
-                <div className="text-sm">
-                  <p className="font-semibold mb-1">Selected Location</p>
-                  {selectedAddress && (
-                    <p className="text-xs text-muted-foreground mb-1">{selectedAddress}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Lat: {position[0].toFixed(6)}, Lng: {position[1].toFixed(6)}
-                  </p>
-                </div>
-              </Popup>
-            </Marker>
-          )}
+          <MapController position={position} onLocationChange={onLocationChange} />
         </MapContainer>
-        <div className="absolute top-4 left-4 z-999 bg-background/90 backdrop-blur-sm px-3 py-2 rounded-md border border-border shadow-sm">
+        
+        <div className="absolute top-2 left-2 z-1000 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-md border border-border shadow-sm">
           <p className="text-xs text-muted-foreground">
-            Click on the map to select a location
+            Click or drag marker to set location
           </p>
         </div>
       </div>
-      {selectedAddress && (
-        <div className="mt-2 p-2 bg-muted rounded-md">
-          <p className="text-sm font-medium">Selected Address:</p>
-          <p className="text-sm text-muted-foreground">{selectedAddress}</p>
-        </div>
-      )}
     </div>
   );
-};
-
-export default MapComponent;
+}

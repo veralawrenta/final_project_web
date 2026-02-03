@@ -23,7 +23,7 @@ export const useMeProfile = () => {
       //console.log(
       //  `Fetching profile with token:', ${accessToken}  ? 'Token exists' : 'No token`
       //);
-      const { data } = await axiosInstance.get("users/me", {
+      const { data } = await axiosInstance.get<User>("users/me", {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },

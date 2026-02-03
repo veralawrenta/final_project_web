@@ -12,15 +12,15 @@ import { IoMdSettings } from "react-icons/io";
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  //const { data: session, status } = useSession();
+  const { data: session, status } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  //if (status === "loading") return null;
+  if (status === "loading") return null;
 
- // if (!session?.user.id || session?.user.role !== "USER") {
-  //  router.push("/");
-  //  return null;
- // }
+  if (!session?.user.id || session?.user.role !== "USER") {
+    router.push("/");
+    return null;
+  }
 
   const navItems = [
     {
@@ -52,10 +52,7 @@ export default function Sidebar() {
         }`}
       >
         <div className="p-6 border-b border-border">
-          <Link
-            href="/"
-            className="flex items-center gap-2"
-          >
+          <Link href="/" className="flex items-center gap-2">
             <Image
               src={"/images/nuit-name.png"}
               width={200}

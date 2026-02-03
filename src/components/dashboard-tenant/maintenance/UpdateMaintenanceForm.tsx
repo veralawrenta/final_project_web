@@ -37,7 +37,7 @@ import {
   useUpdateRoomNonAvailability,
 } from "@/hooks/useRoomNonAvailability";
 import { updateMaintenanceBlockSchema, UpdateMaintenanceBlockValues } from "@/lib/validator/dashboard.maintenance.schema";
-import { formatLocalDate, fromDateString } from "@/lib/date";
+import { formatLocalDate, fromDateString } from "@/lib/date/date";
 import { Property } from "@/types/property";
 
 export default function UpdateMaintenanceBlockPage() {

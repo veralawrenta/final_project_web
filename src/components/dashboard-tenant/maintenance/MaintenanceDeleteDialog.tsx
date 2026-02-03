@@ -11,7 +11,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Room, RoomNonAvailability } from "@/types/room";
-import { fromDateString } from "@/lib/date";
+import { fromDateString } from "@/lib/date/date";
 
 interface MaintenanceDeleteDialogProps {
   record: RoomNonAvailability | null;

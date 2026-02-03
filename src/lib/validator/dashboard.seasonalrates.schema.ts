@@ -1,5 +1,5 @@
 import z from "zod";
-import { fromDateString, normalizeLocalDate } from "../date";
+import { fromDateString, normalizeLocalDate } from "../date/date";
 
 export const createSeasonalRatesSchema = z
   .object({

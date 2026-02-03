@@ -16,9 +16,9 @@ import { AxiosError } from "axios";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 import { registerSchemaTenant } from "../../lib/validator/auth.register-tenant.schema";
-import { toast, Toaster } from "sonner";
 
 
 export function RegisterForTenantForm({
