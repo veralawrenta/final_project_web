@@ -6,9 +6,6 @@ import { useState } from "react";
 import { createRoomSchema } from "@/lib/validator/dashboard.rooms.schema";
 import { useCreateRoom } from "@/hooks/useRoom";
 import { useGetTenantProperties } from "@/hooks/useProperty";
-import { useSession } from "next-auth/react";
-import { axiosInstance } from "@/lib/axios";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,12 +28,9 @@ import {
 import { ArrowLeft, Loader2 } from "lucide-react";
 import RoomImageUploader from "./RoomImageUploader";
 
-
 const CreateRoomForm = () => {
   const router = useRouter();
-  const session = useSession();
-  const { data: tenantProperties, isLoading: propertiesLoading } =
-    useGetTenantProperties();
+  const { data: tenantProperties, isLoading: propertiesLoading } = useGetTenantProperties();
   const { mutateAsync: createRoom } = useCreateRoom();
 
   const [images, setImages] = useState<string[]>([]);
@@ -46,12 +40,13 @@ const CreateRoomForm = () => {
   const form = useForm<z.infer<typeof createRoomSchema>>({
     resolver: zodResolver(createRoomSchema),
     defaultValues: {
-      propertyId: 0,
+      propertyId: undefined,
       name: "",
       description: "",
       basePrice: 0,
       totalGuests: 1,
       totalUnits: 1,
+      urlImages: [],
     },
   });
 
@@ -65,47 +60,38 @@ const CreateRoomForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Step 1: Create the room
-      toast.loading("Creating room...", { id: "create-room" });
-      const createdRoom = await createRoom(values);
-      const roomId = createdRoom.id; // Get the newly created room ID
-      toast.success("Room created!", { id: "create-room" });
-
-      // Step 2: Upload images if any (one by one)
-      if (imageFiles.length > 0) {
-        toast.loading(`Uploading ${imageFiles.length} image(s)...`, {
-          id: "upload-images",
-        });
-
-        for (let i = 0; i < imageFiles.length; i++) {
-          const formData = new FormData();
-          formData.append("urlImage", imageFiles[i]);
-          formData.append("isCover", String(i === 0));
-
-          await axiosInstance.post(
-            `/room-images/room/${roomId}`,
-            formData,
-            {
-              headers: {
-                Authorization: `Bearer ${session.data?.user.accessToken}`,
-              },
-            }
-          );
-        }
-
-        toast.success("All images uploaded!", { id: "upload-images" });
+      const roomData = {
+        name: values.name,
+        description: values.description,
+        basePrice: values.basePrice,
+        totalGuests: values.totalGuests,
+        totalUnits: values.totalUnits,
+        urlImages: imageFiles,
       };
+
+      await createRoom({
+        propertyId: values.propertyId,
+        room: roomData,
+      });
+
+      // Cleanup preview URLs
       images.forEach((url) => URL.revokeObjectURL(url));
 
-      // Success!
-      toast.success("Room created successfully with images!");
+      // Navigate to room list
       router.push("/dashboard/tenant/room");
     } catch (error) {
+      // Error is already handled by the hook with toast
       console.error("Create room failed:", error);
-      toast.error("Failed to create room");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Sync imageFiles state with form's urlImages field
+  const handleImagesChange = (newImages: string[], newFiles: File[]) => {
+    setImages(newImages);
+    setImageFiles(newFiles);
+    form.setValue("urlImages", newFiles, { shouldValidate: true });
   };
 
   if (propertiesLoading) {
@@ -147,7 +133,7 @@ const CreateRoomForm = () => {
               name="propertyId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Property</FormLabel>
+                  <FormLabel>Property *</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={field.value?.toString()}
@@ -179,7 +165,7 @@ const CreateRoomForm = () => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Room Name</FormLabel>
+                  <FormLabel>Room Name *</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., Ocean View Suite" {...field} />
                   </FormControl>
@@ -187,12 +173,14 @@ const CreateRoomForm = () => {
                 </FormItem>
               )}
             />
+
+            {/* Description */}
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description *</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Describe the room amenities, view, etc."
@@ -204,13 +192,15 @@ const CreateRoomForm = () => {
                 </FormItem>
               )}
             />
+
+            {/* Base Price and Total Guests */}
             <div className="grid grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="basePrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Base Price (per night)</FormLabel>
+                    <FormLabel>Base Price (per night) *</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -237,7 +227,7 @@ const CreateRoomForm = () => {
                 name="totalGuests"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Maximum Guests</FormLabel>
+                    <FormLabel>Maximum Guests *</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -260,7 +250,7 @@ const CreateRoomForm = () => {
               name="totalUnits"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Total Units Available</FormLabel>
+                  <FormLabel>Total Units Available *</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -276,20 +266,26 @@ const CreateRoomForm = () => {
             />
 
             {/* Room Images Upload */}
-            <div className="space-y-2">
-              <RoomImageUploader
-                images={images}
-                setImages={setImages}
-                imageFiles={imageFiles}
-                setImageFiles={setImageFiles}
-                maxImages={3}
-              />
-              {imageFiles.length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {imageFiles.length} image(s) selected. The first image will be set as the cover photo.
-                </p>
+            <FormField
+              control={form.control}
+              name="urlImages"
+              render={({ field }) => (
+                <FormItem>
+                  <RoomImageUploader
+                    images={images}
+                    imageFiles={imageFiles}
+                    onImagesChange={handleImagesChange}
+                    maxImages={10}
+                  />
+                  <FormMessage />
+                  {imageFiles.length > 0 && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {imageFiles.length} image(s) selected. The first image will be set as the cover photo.
+                    </p>
+                  )}
+                </FormItem>
               )}
-            </div>
+            />
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-6 border-t border-border">
@@ -318,4 +314,5 @@ const CreateRoomForm = () => {
     </div>
   );
 };
+
 export default CreateRoomForm;

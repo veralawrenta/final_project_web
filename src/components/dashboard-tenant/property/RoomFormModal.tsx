@@ -1,4 +1,4 @@
-// components/property/room-form-modal.tsx
+"use client"
 
 import { useState, useRef } from 'react';
 import { Upload, X, Plus, Minus, Star } from 'lucide-react';

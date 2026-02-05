@@ -1,12 +1,13 @@
 import { axiosInstance } from "@/lib/axios";
 import { formatLocalDate } from "@/lib/date/date";
+import { StepOneFormData } from "@/lib/validator/dashboard.create-property.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import {
   CalendarResponse,
   Property,
   PropertyDetail,
-  PropertyPayload,
   PropertyType,
+  TenantPropertyId,
 } from "@/types/property";
 import {
   useMutation,
@@ -154,7 +155,6 @@ export const useGetMonthCalendarSearch = (
 };
 
 export const useGetTenantProperties = (queries?: GetPropertiesQuery) => {
-  const session = useSession();
   return useQuery({
     queryKey: ["tenant-properties", queries],
     queryFn: async () => {
@@ -167,93 +167,84 @@ export const useGetTenantProperties = (queries?: GetPropertiesQuery) => {
   });
 };
 
-export const useCreateProperty = () => {
-  const router = useRouter();
+export const useGetTenantPropertyId = (propertyId: number) => {
   const session = useSession();
+
+  return useQuery({
+    queryKey: ["tenant-property-id", propertyId],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<TenantPropertyId>(`/properties/${propertyId}`, {
+        headers: {
+          Authorization: `Bearer ${session.data?.user.accessToken}`
+        },
+      });
+      return data;
+    },
+  });
+}
+
+export const useCreateProperty = () => {
+  const session = useSession();
+
+  return useMutation({
+    mutationFn: async (data: StepOneFormData) => {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("address", data.address);
+      formData.append("cityId", data.cityId.toString());
+      formData.append("categoryId", data.categoryId.toString());
+      formData.append("latitude", data.latitude.toString());
+      formData.append("longitude", data.longitude.toString());
+      formData.append("propertyType", data.propertyType);
+      formData.append("amenities", JSON.stringify(data.amenities));
+      
+      data.urlImages.forEach((file) => {
+        formData.append("urlImages", file);
+      });
+
+      const response = await axiosInstance.post("/properties", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${session.data?.user.accessToken}`,
+        },
+      });
+
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.success("Property created successfully");
+      return data;
+    },
+    onError: (error: AxiosError<{ message: string }>) => {toast.error(error.response?.data.message || "Failed to create property")},
+  });
+};
+
+export const usePublishProperty = () => {
+  const session = useSession();
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: PropertyPayload) => {
-      const { data } = await axiosInstance.post(
-        "/properties",
-        {
-          name: payload.name,
-          description: payload.description,
-          categoryId: payload.categoryId,
-          cityId: payload.cityId,
-          address: payload.address,
-          latitude: payload.latitude,
-          longitude: payload.longitude,
-          propertyType: payload.propertyType,
-        },
+    mutationFn: async (propertyId: number) => {
+      const response = await axiosInstance.patch(
+        `/properties/${propertyId}/publish`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
         }
       );
-      const propertyId = data.id;
-
-      if (payload.propertyImages.length > 0) {
-        for (let i = 0; i < payload.propertyImages.length; i++) {
-          const formData = new FormData();
-          formData.append("urlImages", payload.propertyImages[i]);
-          formData.append("isCover", i === 0 ? "true" : "false");
-
-          await axiosInstance.post(
-            `/properties/${propertyId}/property-images`,
-            formData,
-            {
-              headers: {
-                Authorization: `Bearer ${session.data?.user.accessToken}`,
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
-        }
-      }
-
-      for (const room of payload.rooms) {
-        const { data: createdRoom } = await axiosInstance.post(
-          `/properties/${propertyId}/rooms`,
-          {
-            name: room.name,
-            description: room.description,
-            basePrice: room.basePrice,
-            totalGuests: room.totalGuests,
-            totalUnits: room.totalUnits,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${session.data?.user.accessToken}`,
-            },
-          }
-        );
-        const roomId = createdRoom.id;
-
-        if (room.roomImages.length > 0) {
-          for (let i = 0; i < room.roomImages.length; i++) {
-            const formData = new FormData();
-            formData.append("urlImages", room.roomImages[i]);
-            formData.append("isCover", i === 0 ? "true" : "false");
-
-            await axiosInstance.post(`/rooms/${roomId}/room-images`, formData, {
-              headers: {
-                Authorization: `Bearer ${session.data?.user.accessToken}`,
-              },
-            });
-          }
-        }
-      }
-      return data;
+      return response.data;
     },
     onSuccess: () => {
-      toast.success("Create property successfully");
+      toast.success("Property published successfully!");
       router.push("/dashboard/tenant/property");
       queryClient.invalidateQueries({ queryKey: ["properties", "tenant"] });
     },
-    onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data.message || "Failed to create property");
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Failed to publish property");
     },
   });
 };
@@ -320,91 +311,6 @@ export const useDeleteProperty = () => {
       toast.error(
         error.response?.data.message ||
           "Failed to delete property. Please check if there are active bookings."
-      );
-    },
-  });
-};
-
-export const useCheckPropertyPublishability = (propertyId: number) => {
-  const session = useSession();
-
-  return useQuery({
-    queryKey: ["property", propertyId, "publishability"],
-    queryFn: async () => {
-      const { data } = await axiosInstance.get<{
-        currentStatus: string;
-        canPublish: boolean;
-        checklist: {
-          propertyImages: boolean;
-          roomCreated: boolean;
-          validRoom: boolean;
-        };
-      }>(`/properties/${propertyId}/publishability`, {
-        headers: {
-          Authorization: `Bearer ${session.data?.user.accessToken}`,
-        },
-      });
-      return data;
-    },
-    enabled: !!propertyId && !!session.data?.user.accessToken,
-  });
-};
-
-export const usePublishProperty = () => {
-  const queryClient = useQueryClient();
-  const session = useSession();
-
-  return useMutation({
-    mutationFn: async (propertyId: number) => {
-      const { data } = await axiosInstance.patch(
-        `/properties/${propertyId}/publish`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${session.data?.user.accessToken}`,
-          },
-        }
-      );
-      return data;
-    },
-    onSuccess: (_, propertyId) => {
-      queryClient.invalidateQueries({ queryKey: ["tenant-properties"] });
-      queryClient.invalidateQueries({ queryKey: ["property", propertyId] });
-      toast.success("Property published successfully!");
-    },
-    onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(
-        error.response?.data.message ||
-          "Failed to publish property. Please ensure all requirements are met."
-      );
-    },
-  });
-};
-
-export const useUnpublishProperty = () => {
-  const queryClient = useQueryClient();
-  const session = useSession();
-
-  return useMutation({
-    mutationFn: async (propertyId: number) => {
-      const { data } = await axiosInstance.patch(
-        `/properties/${propertyId}/unpublish`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${session.data?.user.accessToken}`,
-          },
-        }
-      );
-      return data;
-    },
-    onSuccess: (_, propertyId) => {
-      queryClient.invalidateQueries({ queryKey: ["property", propertyId] });
-      toast.success("Property unpublished successfully!");
-    },
-    onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(
-        error.response?.data.message || "Failed to unpublish property"
       );
     },
   });

@@ -4,11 +4,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { updateRoomSchema } from "@/lib/validator/dashboard.rooms.schema";
-import { useGetTenantRooms, useUpdateRoom } from "@/hooks/useRoom";
+import {
+  useGetTenantRooms,
+  useUpdateRoom,
+  useUploadRoomImages,
+  useDeleteRoomImage,
+} from "@/hooks/useRoom";
 import { useGetTenantProperties } from "@/hooks/useProperty";
-import { useSession } from "next-auth/react";
-import { axiosInstance } from "@/lib/axios";
-import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,23 +30,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import RoomImageUploader from "./RoomImageUploader";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const UpdateRoomForm = () => {
   const router = useRouter();
   const params = useParams();
-  const session = useSession();
   const roomId = Number(params.id);
 
   const { data: tenantRooms, isPending: roomsLoading } = useGetTenantRooms();
   const { data: tenantProperties, isPending: propertiesLoading } =
     useGetTenantProperties();
   const { mutateAsync: updateRoom } = useUpdateRoom();
+  const { mutateAsync: uploadRoomImages } = useUploadRoomImages();
+  const { mutateAsync: deleteRoomImage } = useDeleteRoomImage();
 
   const [newImages, setNewImages] = useState<string[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageToDelete, setImageToDelete] = useState<number | null>(null);
+
   const roomData = tenantRooms?.data?.find((room) => room.id === roomId);
 
   const form = useForm<z.infer<typeof updateRoomSchema>>({
@@ -73,53 +88,48 @@ const UpdateRoomForm = () => {
   }, [roomData, form]);
 
   const handleCancel = () => {
+    // Cleanup preview URLs
     newImages.forEach((url) => URL.revokeObjectURL(url));
     router.push("/dashboard/tenant/room");
   };
 
+  const handleImagesChange = (images: string[], files: File[]) => {
+    setNewImages(images);
+    setNewImageFiles(files);
+  };
+
+  const handleDeleteImage = async (roomImageId: number) => {
+    try {
+      await deleteRoomImage(roomImageId);
+      setImageToDelete(null);
+    } catch (error) {
+      console.error("Delete image failed:", error);
+    }
+  };
+
   const onSubmit = async (values: z.infer<typeof updateRoomSchema>) => {
     setIsSubmitting(true);
-
     try {
-      toast.loading("Updating room...", { id: "update-room" });
-      await updateRoom(values);
-      toast.success("Room updated!", { id: "update-room" });
+      await updateRoom({
+        roomId,
+        data: {
+          name: values.name,
+          description: values.description,
+          basePrice: values.basePrice,
+          totalGuests: values.totalGuests,
+          totalUnits: values.totalUnits,
+        };
+      });
 
-      // Step 2: Upload new images if any (one by one)
       if (newImageFiles.length > 0) {
-        toast.loading(`Uploading ${newImageFiles.length} new image(s)...`, {
-          id: "upload-images",
+        await uploadRoomImages({
+          roomId,
+          images: newImageFiles,
         });
-
-        const existingImagesCount = roomData?.roomImages?.length || 0;
-
-        for (let i = 0; i < newImageFiles.length; i++) {
-          const file = newImageFiles[i];
-          const formData = new FormData();
-          formData.append("urlImage", file); // ✅ Correct field name
-          // Set as cover only if no existing images and this is the first new image
-          formData.append(
-            "isCover",
-            String(existingImagesCount === 0 && i === 0)
-          );
-
-          await axiosInstance.post(`/room-images/room/${roomId}`, formData, {
-            headers: {
-              Authorization: `Bearer ${session.data?.user.accessToken}`,
-            },
-          });
-        }
-
-        toast.success("All images uploaded!", { id: "upload-images" });
-      }
-
-      // Cleanup preview URLs
-      newImages.forEach((url) => URL.revokeObjectURL(url));
-      toast.success("Room updated successfully!");
-      router.push("/dashboard/tenant/room");
+        newImages.forEach((url) => URL.revokeObjectURL(url));
+      };
     } catch (error) {
       console.error("Update room failed:", error);
-      toast.error("Failed to update room");
     } finally {
       setIsSubmitting(false);
     }
@@ -133,6 +143,7 @@ const UpdateRoomForm = () => {
       </div>
     );
   }
+
   if (!roomData) {
     return (
       <div className="text-center py-12">
@@ -146,7 +157,6 @@ const UpdateRoomForm = () => {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -167,7 +177,6 @@ const UpdateRoomForm = () => {
       <div className="bg-card rounded-2xl border border-border p-6 max-w-2xl">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Property Selection */}
             <FormField
               control={form.control}
               name="propertyId"
@@ -195,6 +204,9 @@ const UpdateRoomForm = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Property cannot be changed after room creation
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -214,6 +226,8 @@ const UpdateRoomForm = () => {
                 </FormItem>
               )}
             />
+
+            {/* Description */}
             <FormField
               control={form.control}
               name="description"
@@ -231,6 +245,8 @@ const UpdateRoomForm = () => {
                 </FormItem>
               )}
             />
+
+            {/* Base Price and Total Guests */}
             <div className="grid grid-cols-2 gap-6">
               <FormField
                 control={form.control}
@@ -258,6 +274,7 @@ const UpdateRoomForm = () => {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="totalGuests"
@@ -280,6 +297,7 @@ const UpdateRoomForm = () => {
               />
             </div>
 
+            {/* Total Units */}
             <FormField
               control={form.control}
               name="totalUnits"
@@ -306,7 +324,7 @@ const UpdateRoomForm = () => {
                 <FormLabel>Current Room Images</FormLabel>
                 <div className="grid grid-cols-5 gap-3">
                   {existingImages.map((img, index) => (
-                    <div key={index} className="relative group">
+                    <div key={img.id} className="relative group">
                       <div className="aspect-square rounded-lg overflow-hidden bg-muted border border-border">
                         <img
                           src={img.urlImages}
@@ -314,11 +332,23 @@ const UpdateRoomForm = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
+
+                      {/* Cover Badge */}
                       {img.isCover && (
                         <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-medium">
                           Cover
                         </div>
                       )}
+
+                      {/* Delete Button */}
+                      <button
+                        type="button"
+                        onClick={() => setImageToDelete(img.id)}
+                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        disabled={isSubmitting}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -334,10 +364,9 @@ const UpdateRoomForm = () => {
               </FormLabel>
               <RoomImageUploader
                 images={newImages}
-                setImages={setNewImages}
                 imageFiles={newImageFiles}
-                setImageFiles={setNewImageFiles}
-                maxImages={5}
+                onImagesChange={handleImagesChange}
+                maxImages={10 - existingImages.length}
               />
               {newImageFiles.length > 0 && (
                 <p className="text-xs text-muted-foreground">
@@ -371,7 +400,33 @@ const UpdateRoomForm = () => {
           </form>
         </Form>
       </div>
+
+      {/* Delete Image Confirmation Dialog */}
+      <AlertDialog
+        open={imageToDelete !== null}
+        onOpenChange={(open) => !open && setImageToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Image</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this image? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => imageToDelete && handleDeleteImage(imageToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
+
 export default UpdateRoomForm;

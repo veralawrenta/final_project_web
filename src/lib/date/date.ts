@@ -35,7 +35,7 @@ export function normalizeDateRange(start: Date, end: Date) {
   };
 };
 
-// count number of nights between two dates (check-out exclusive)
+
 export function countNights(
   start?: Date,
   end?: Date
