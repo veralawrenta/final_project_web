@@ -1,16 +1,29 @@
 export interface Room {
     id: number;
-    propertyId: number;
+    propertyId?: number;
     name: string;
     totalGuests: number;
     totalUnits: number;
     basePrice: number;
-    description?: string;
+    description: string;
     roomImages : RoomImage[];
-    createdAt: string;
-    updatedAt: string;
+    seasonalRates?: SeasonalRates[];
+    roomNonAvailability? : RoomNonAvailability[];
+    createdAt?: string;
+    updatedAt?: string;
     deletedAt?: string | null;
 };
+
+export interface RoomPropertyCard {
+    id: number;
+    name: string;
+    basePrice: number;
+    totalGuests: number;
+    totalUnits: number;
+    roomImages: RoomImage[];
+    roomNonAvailability: RoomNonAvailability[];
+    seasonalRates : SeasonalRates[];
+}
 
 export interface RoomImage {
     id: number;

@@ -1,8 +1,15 @@
+import { RoomImage, RoomNonAvailability, SeasonalRates } from "./room";
+
 export enum PropertyType {
   APARTMENT = "APARTMENT",
   HOTEL = "HOTEL",
   VILLA = "VILLA",
   HOUSE = "HOUSE",
+};
+
+export enum PropertyStatus {
+  PUBLISHED = "PUBLISHED",
+  DRAFT = "DRAFT",
 }
 
 export interface Property {
@@ -16,7 +23,7 @@ export interface Property {
   propertyImages: Array<{ id: number; urlImages: string; isCover: boolean }>;
   city: { id: number; name: string };
   category: { id: number; name: string } | null;
-  amenities: Array<{ id: number; name: string }>;
+  amenities: Array<{ id: number; name: string, code: string }>;
   availableRooms?: Array<{
     room: {
       id: number;
@@ -116,21 +123,30 @@ export interface PropertyPayload {
   longitude: number;
   propertyType: "APARTMENT" | "HOUSE" | "VILLA" | "HOTEL";
   propertyImages: File[];
-  amenities: string[];
-  rooms: Array<{
+  amenities: Array<{
+    code: string;
+    name: string;
+  }>;
+  /*rooms: Array<{
     name: string;
     description: string;
     basePrice: number;
     totalGuests: number;
     totalUnits: number;
     roomImages: File[];
-  }>;
+  }>;*/
 }
 
 export interface PropertyRoomImage {
   file: File;
   preview: string;
   isCover: boolean;
+}
+
+export interface PropertyIdImages {
+  id: number;
+  urlImages: string[];
+  isCover: boolean[];
 }
 
 export interface PropertyRoom {
@@ -142,4 +158,36 @@ export interface PropertyRoom {
   totalUnits: number;
   imageFiles: File[];
   imagePreviews: PropertyRoomImage[];
+}
+
+
+//for dashboard property Id tenant
+export interface TenantPropertyId {
+  id: number;
+  name: string;
+  description : string;
+  propertyType: PropertyType;
+  address: string;
+  city: string;
+  category: string;
+  status: PropertyStatus;
+  hasMaintenance: boolean;
+  hasPropertyImages: boolean;
+  hasSeasonalRate : boolean;
+  hasPublishableRoom: boolean;
+  rooms: Array<{
+    id: number;
+    name: string;
+    basePrice: number;
+    totalUnits: number;
+    totalGuests: number;
+    roomImages: RoomImage[];
+    roomNonAvailability : RoomNonAvailability[];
+    seasonalRates: SeasonalRates[]
+  }>
+  images: Array<{
+    id: number;
+    urlImages: string[],
+    isCover: boolean[]
+  }>
 }
