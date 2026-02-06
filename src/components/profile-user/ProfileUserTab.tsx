@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import React, { useEffect, useState } from "react";
 import {
   useMeProfile,
   useUpdateProfileUser,
@@ -49,11 +48,7 @@ const ProfileUserTab = () => {
       avatar: me.avatar,
       provider: "CREDENTIAL",
       isVerified: me.isVerified,
-      tenantName: me.tenant.tenantName,
-      bankName: me.tenant.bankName,
-      bankNumber: me.tenant.bankNumber,
     };
-
     setFormData(mapped);
     setEditData(mapped);
   }, [me]);

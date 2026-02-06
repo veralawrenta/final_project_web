@@ -94,12 +94,8 @@ const PropertyListingComponent= () => {
   const isLoading = isSearchMode ? searchLoading : allPropertiesLoading;
   const error = isSearchMode ? searchError : allPropertiesError;
 
-  // Calculate pagination
   const totalPages = data?.meta ? Math.ceil(data.meta.total / ITEMS_PER_PAGE) : 0;
-  const hasNextPage = currentPage < totalPages;
-  const hasPrevPage = currentPage > 1;
-
-  // Handle filter changes
+  
   const handlePropertyTypeChange = (value: string) => {
     setPropertyType(value as PropertyTypeFilter);
     setCurrentPage(1);
@@ -131,8 +127,8 @@ const PropertyListingComponent= () => {
   ].filter(Boolean).length;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="bg-linear-to-b from-primary/5 to-background border-b">
+    <div className="min-h-screen">
+      <div className="bg-linear-to-b from-accent/5 to-white border-b-slate-400 border-b-2">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-3xl font-bold mb-2">
             {isSearchMode ? (
@@ -141,7 +137,7 @@ const PropertyListingComponent= () => {
                 {data?.data?.[0]?.city?.name || "your destination"}
               </>
             ) : (
-              "All Properties"
+              "Find your perfect place to stay"
             )}
           </h1>
           <p className="text-muted-foreground">

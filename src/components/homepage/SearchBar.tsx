@@ -131,14 +131,14 @@ export function SearchBar() {
 
   return (
     <div className="w-full max-w-4xl mx-auto -mt-8 md:-mt-12 relative z-10 px-4">
-      <div className="glass rounded-2xl p-4 md:p-6 shadow-strong border-2 border-slate-100 bg-slate-700/40">
+      <div className="glass rounded-2xl p-4 md:p-6 shadow-strong border-2 border-slate-100 bg-white">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           <div className="relative" ref={cityDropdownRef}>
-            <label className="block text-xs text-slate-100 font-semibold mb-1.5 px-2">
+            <label className="block text-xs font-semibold mb-1.5 px-2">
               Location
             </label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none z-10" />
               <input
                 type="text"
                 value={localCitySearch}
@@ -194,7 +194,7 @@ export function SearchBar() {
             </div>
           </div>
           <div>
-            <label className="block text-xs text-slate-100 font-semibold mb-1.5 px-2">
+            <label className="block text-xs font-semibold mb-1.5 px-2">
               Check-in
             </label>
             <DatePicker
@@ -208,7 +208,7 @@ export function SearchBar() {
           </div>
 
           <div>
-            <label className="block text-xs text-slate-100 font-semibold mb-1.5 px-2">
+            <label className="block text-xs font-semibold mb-1.5 px-2">
               Check-out
             </label>
             <DatePicker
@@ -224,10 +224,9 @@ export function SearchBar() {
             />
           </div>
 
-          {/* Guests + Search */}
           <div className="flex gap-3 items-end">
             <div className="flex-1">
-              <label className="block text-xs text-slate-100 font-semibold mb-1.5 px-2">
+              <label className="block text-xs font-semibold mb-1.5 px-2">
                 Guests
               </label>
               <select
@@ -253,7 +252,7 @@ export function SearchBar() {
           <div className="mt-4 text-center">
             <button
               onClick={handleClearSearch}
-              className="text-xs text-muted-foreground hover:underline"
+              className="text-xs hover:underline"
             >
               Clear all filters
             </button>

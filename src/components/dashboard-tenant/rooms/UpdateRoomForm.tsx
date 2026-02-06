@@ -1,37 +1,4 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { updateRoomSchema } from "@/lib/validator/dashboard.rooms.schema";
-import {
-  useGetTenantRooms,
-  useUpdateRoom,
-  useUploadRoomImages,
-  useDeleteRoomImage,
-} from "@/hooks/useRoom";
-import { useGetTenantProperties } from "@/hooks/useProperty";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
-import RoomImageUploader from "./RoomImageUploader";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +9,39 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useGetTenantProperties } from "@/hooks/useProperty";
+import {
+  useDeleteRoomImage,
+  useGetTenantRooms,
+  useUpdateRoom,
+  useUploadRoomImages,
+} from "@/hooks/useRoom";
+import { updateRoomSchema } from "@/lib/validator/dashboard.rooms.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import RoomImageUploader from "./RoomImageUploader";
 
 const UpdateRoomForm = () => {
   const router = useRouter();
@@ -118,7 +118,7 @@ const UpdateRoomForm = () => {
           basePrice: values.basePrice,
           totalGuests: values.totalGuests,
           totalUnits: values.totalUnits,
-        };
+        },
       });
 
       if (newImageFiles.length > 0) {
@@ -127,7 +127,7 @@ const UpdateRoomForm = () => {
           images: newImageFiles,
         });
         newImages.forEach((url) => URL.revokeObjectURL(url));
-      };
+      }
     } catch (error) {
       console.error("Update room failed:", error);
     } finally {

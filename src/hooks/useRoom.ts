@@ -1,6 +1,7 @@
 import { axiosInstance } from "@/lib/axios";
 import {
   CreateRoomFormData,
+  UpdateRoomFormData,
   updateRoomSchema,
 } from "@/lib/validator/dashboard.rooms.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
@@ -124,22 +125,9 @@ export const useUpdateRoom = () => {
   const session = useSession();
   const router = useRouter();
 
-  const params = useParams();
-  const id = Number(params.id);
-
   return useMutation({
-    mutationFn: async (body: z.infer<typeof updateRoomSchema>) => {
-      //create form data secara parsial
-      const payload: Record<string, unknown> = {};
-      if (body.name !== undefined) payload.name = body.name;
-      if (body.description !== undefined)
-        payload.description = body.description;
-      if (body.basePrice !== undefined) payload.basePrice = body.basePrice;
-      if (body.totalGuests !== undefined)
-        payload.totalGuests = body.totalGuests;
-      if (body.totalUnits !== undefined) payload.totalUnits = body.totalUnits;
-
-      const response = await axiosInstance.patch(`/rooms/${id}`, payload, {
+    mutationFn: async ({roomId, data} : {roomId: number, data: UpdateRoomFormData}) => {
+      const response = await axiosInstance.patch(`/rooms/${roomId}`, data, {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },

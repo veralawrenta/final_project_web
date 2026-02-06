@@ -1,8 +1,8 @@
 'use client'
 
-import PropertyDetails from '@/components/dashboard-tenant/property/PropertyIdDetails'
-import PropertyGallery from '@/components/dashboard-tenant/property/PropertyIdGallery'
-import RoomCard from '@/components/dashboard-tenant/property/PropertyIdRoomCard'
+import PropertyDetails from '@/components/dashboard-tenant/property/id/PropertyIdDetails'
+import PropertyGallery from '@/components/dashboard-tenant/property/id/PropertyIdGallery'
+import RoomCard from '@/components/dashboard-tenant/property/id/PropertyIdRoomCard'
 import { useGetTenantPropertyId } from '@/hooks/useProperty'
 import { useParams } from 'next/navigation'
 

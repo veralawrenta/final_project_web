@@ -10,7 +10,8 @@ import { redirect } from "next/navigation";
 
 const Homepage = async () => {
   const session = await auth();
-  if (session?.user.role !== "USER") redirect("/dashboard/tenant");
+  if (session?.user?.role === "TENANT") redirect("/dashboard/tenant");
+  
   return (
     <div>
       <Navbar />

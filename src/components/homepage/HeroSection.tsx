@@ -48,7 +48,7 @@ const HeroSection = () => {
   }, [emblaApi]);
 
   return (
-    <section className="relative container mx-auto max-w-full h-[60vh] md:h-[80vh] overflow-hidden mt-13">
+    <section className="relative container mx-auto max-w-full h-[60vh] overflow-hidden mt-13">
       <div className="embla h-full" ref={emblaRef}>
         <div className="embla__container flex h-full">
           {destinations.map((dest) => (

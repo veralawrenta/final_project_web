@@ -5,6 +5,7 @@ import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -19,7 +20,7 @@ export const useGetCategoriesForTenant = (queries?: GetCategoriesQuery) => {
     queryFn: async () => {
       const { data } = await axiosInstance.get<PageableResponse<Category>>(
         `/categories`,
-        { 
+        {
           params: queries,
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
@@ -68,6 +69,7 @@ export const useGetCategory = (categoryId: number) => {
 export const useCreateCategory = () => {
   const session = useSession();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (payload: z.infer<typeof categoryFormSchema>) => {
@@ -82,6 +84,9 @@ export const useCreateCategory = () => {
       toast.success("Category created successfully");
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       queryClient.invalidateQueries({ queryKey: ["categories-tenant"] });
+      setTimeout(() => {
+        router.push("/dashboard/tenant/category");
+      }, 1000);
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data.message || "Failed to create category");
@@ -92,14 +97,19 @@ export const useCreateCategory = () => {
 export const useUpdateCategory = (categoryId: number) => {
   const session = useSession();
   const queryClient = useQueryClient();
+  const router = useRouter()
 
   return useMutation({
     mutationFn: async (payload: z.infer<typeof categoryFormSchema>) => {
-      const { data } = await axiosInstance.patch(`/categories/${categoryId}`, payload, {
-        headers: {
-          Authorization: `Bearer ${session.data?.user.accessToken}`,
-        },
-      });
+      const { data } = await axiosInstance.patch(
+        `/categories/${categoryId}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        }
+      );
       return data;
     },
     onSuccess: () => {
@@ -107,6 +117,7 @@ export const useUpdateCategory = (categoryId: number) => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       queryClient.invalidateQueries({ queryKey: ["categories-tenant"] });
       queryClient.invalidateQueries({ queryKey: ["category", categoryId] });
+      router.push("/dashboard/tenant/category");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data.message || "Failed to update category");

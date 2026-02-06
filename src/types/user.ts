@@ -36,3 +36,17 @@ export interface Tenant {
   bankNumber: string;
   bankName: string;
 }
+
+export type TenantProfileView = {
+  tenantName: string;
+  imageUrl?: string | null;
+  bankNumber: string;
+  bankName: string;
+  address: string;
+  aboutMe: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  isVerified?: boolean;
+};

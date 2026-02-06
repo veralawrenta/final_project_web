@@ -67,6 +67,7 @@ export const useUpdateProfileUser = () => {
 export const useUpdateProfileTenant = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const session = useSession()
 
   return useMutation({
     mutationFn: async (payload: {
@@ -76,7 +77,11 @@ export const useUpdateProfileTenant = () => {
       bankName?: string;
       bankNumber?: string;
     }) => {
-      const { data } = await axiosInstance.patch("/tenant/profile", payload);
+      const { data } = await axiosInstance.patch("/users/data-tenant", payload, {
+        headers: {
+          Authorization: `Bearer ${session.data?.user.accessToken}`,
+        }
+      });
       return data;
     },
     onSuccess: () => {
@@ -117,7 +122,9 @@ export const useUploadAvatar = () => {
     },
     onSuccess: (data) => {
       toast.success("Upload avatar success");
-      router.push("/profile/user");
+      setTimeout(() => {
+          router.refresh()
+      }, 1000)
       queryClient.setQueryData(["me-profile"], (oldData: User | undefined) => {
         if (oldData) {
           return {

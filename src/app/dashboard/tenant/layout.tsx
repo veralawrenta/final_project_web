@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import Dashboard from "@/components/dashboard-tenant/Dashboard";
+import { Role } from "@/types/user";
 import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
@@ -9,7 +10,8 @@ export default async function DashboardLayout({
 }) {
   const session = await auth();
 
-  if (session?.user.role !== "TENANT") redirect("/");
+  if(!session) redirect("/auth/login/tenant")
+  if (session?.user.role !== Role.TENANT) redirect("/");
   
   return <Dashboard>{children}</Dashboard>;
-}
+};

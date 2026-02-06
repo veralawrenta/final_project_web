@@ -6,6 +6,14 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { Menu, X, UserCircle } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 const Navbar = () => {
   const { data: session } = useSession();
@@ -55,25 +63,64 @@ const Navbar = () => {
         <nav className="hidden md:flex items-center gap-8">
           {session?.user ? (
             <div className="flex items-center gap-6">
-              <Link href="/profile/user" className={navItemStyles}>
-                Profile
-              </Link>
+              <div className="flex items-center pl-4 border-l border-slate-200">
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="focus:outline-none">
+                    <div className="flex items-center gap-3 group cursor-pointer">
+                      <div className="text-right leading-tight hidden sm:block">
+                        <p className="text-sm font-bold text-[#334155]">
+                          {session.user.email?.split("@")[0]}
+                        </p>
+                      </div>
+                      <div className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden group-hover:border-[#C7E1FB] transition-all">
+                        <UserCircle
+                          size={26}
+                          className="text-slate-400 group-hover:text-[#334155] transition-colors"
+                        />
+                      </div>
+                    </div>
+                  </DropdownMenuTrigger>
 
-              <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-                <div className="text-right leading-tight">
-                  <p className="text-xs font-bold text-[#334155]">
-                    {session.user.email?.split("@")[0]}
-                  </p>
-                  <button
-                    onClick={() => signOut()}
-                    className="text-[10px] uppercase tracking-widest font-bold text-slate-400 hover:text-red-500 transition-colors"
+                  <DropdownMenuContent
+                    align="end"
+                    className="w-56 mt-2 shadow-xl border-slate-100"
                   >
-                    Logout
-                  </button>
-                </div>
-                <div className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden hover:border-[#C7E1FB] transition-colors">
-                  <UserCircle size={24} className="text-slate-400" />
-                </div>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-bold leading-none text-[#334155]">
+                          {session.user.email?.split("@")[0]}
+                        </p>
+                        <p className="text-xs leading-none text-slate-500">
+                          {session.user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/profile/user"
+                        className="cursor-pointer font-medium"
+                      >
+                        Profile Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/"
+                        className="cursor-pointer font-medium"
+                      >
+                        My Bookings
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => signOut()}
+                      className="text-red-600 font-bold focus:bg-red-50 focus:text-red-600 cursor-pointer"
+                    >
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           ) : (
