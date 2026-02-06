@@ -1,6 +1,4 @@
 "use client";
-
-import { signOut } from "@/auth";
 import { useMeProfile } from "@/hooks/useProfile";
 import {
   BadgeDollarSign,
@@ -30,6 +28,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { signOut } from "next-auth/react";
 
 interface NavItem {
   label: string;
@@ -85,8 +84,16 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: me } = useMeProfile();
 
-  const isActive = (href: string) =>
-    pathname === href || pathname.startsWith(href + "/");
+  const isActive = (href: string) => {
+    if (href === "/dashboard/tenant") {
+      return pathname === href;
+    };
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+  };
 
   return (
     <div className="flex h-screen bg-background">
@@ -107,6 +114,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               height={180}
               alt="Website Logo"
               priority
+              className="h-auto w-auto"
             />
           ) : (
             <DoorOpen className="w-6 h-6 text-slate-600" />
@@ -138,7 +146,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
             variant="outline"
             className="w-full bg-transparent"
             size={sidebarOpen ? "default" : "icon"}
-            onClick={() => signOut}
+            onClick={handleLogout}
           >
             {sidebarOpen ? "Logout" : <span className="text-xs">Logout</span>}
           </Button>
@@ -219,8 +227,8 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive gap-2">
-                <Button onClick={() => signOut}>
-                  <LogOut className="w-4 h-4 text-primary-foreground" /> Logout
+                <Button onClick={handleLogout}>
+                  <LogOut className="w-4 h-4 text-primary-foreground"/> Logout
                 </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>

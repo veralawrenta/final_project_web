@@ -18,7 +18,7 @@ const VerifyChangeEmailForm = () => {
 
     const validateToken = async () => {
       try {
-        const { data } = await axiosInstance.patch(
+        const response = await axiosInstance.patch(
           "/auth/verify-change-email",
           {},
           {
@@ -27,10 +27,12 @@ const VerifyChangeEmailForm = () => {
             },
           }
         );
+        console.log("VERIFY RESPONSE:", response.data);
+        const user = response.data?.user;
 
         toast.success("Account verified successfully");
 
-        if (data.user.role === "TENANT") {
+        if (user && user.role === "TENANT") {
           router.replace("/dashboard/tenant");
         } else {
           router.replace("/profile/user");

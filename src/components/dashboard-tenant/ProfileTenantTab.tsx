@@ -1,62 +1,33 @@
 "use client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle, Pencil, Save, X, XCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Pencil, X, Save, CheckCircle, XCircle } from "lucide-react";
-import {
-  useMeProfile,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Pencil, X, Save, CheckCircle, XCircle } from "lucide-react";
+
 import {
   useMeProfile,
   useUpdateProfileTenant,
   useUploadAvatar,
 } from "@/hooks/useProfile";
-import AvatarUploader from "../profile-user/AvatarUploader";
-import { updateDataTenantSchema } from "@/lib/validator/dashboard.update-data.schema";
-import { Skeleton } from "../ui/skeleton";
 
-type TenantProfileView = {
-  tenantName: string;
-  imageUrl?: string | null;
-  bankNumber: string;
-  bankName: string;
-  address: string;
-  aboutMe: string;
-  address: string;
-  aboutMe: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  isVerified?: boolean;
-};
+import { updateDataTenantSchema } from "@/lib/validator/dashboard.update-data.schema";
+import AvatarUploader from "../profile-user/AvatarUploader";
+import { Skeleton } from "../ui/skeleton";
+import { TenantProfileView } from "@/types/user";
 
 const ProfileTenantTab = () => {
   const { data: me, isPending } = useMeProfile();
-  const { data: me, isPending } = useMeProfile();
   const updateProfile = useUpdateProfileTenant();
-  const uploadImage = useUploadAvatar();
   const uploadImage = useUploadAvatar();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -66,20 +37,8 @@ const ProfileTenantTab = () => {
 
   useEffect(() => {
     if (!me || !me.tenant) return;
-    if (!me || !me.tenant) return;
 
     const mapped: TenantProfileView = {
-      tenantName: me.tenant.tenantName ?? "",
-      bankNumber: me.tenant.bankNumber ?? "",
-      bankName: me.tenant.bankName ?? "",
-      firstName: me.firstName ?? "",
-      lastName: me.lastName ?? "",
-      email: me.email,
-      phone: me.phone ?? "",
-      isVerified: me.isVerified,
-      imageUrl: me.avatar ?? "",
-      address: me.address ?? "",
-      aboutMe: me.aboutMe ?? "",
       tenantName: me.tenant.tenantName ?? "",
       bankNumber: me.tenant.bankNumber ?? "",
       bankName: me.tenant.bankName ?? "",
@@ -96,54 +55,12 @@ const ProfileTenantTab = () => {
     setFormData(mapped);
     setEditData(mapped);
   }, [me]);
-  }, [me]);
 
   if (isPending) {
     return (
       <div className="space-y-6 animate-in fade-in duration-500">
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-4 w-48" />
-        </div>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-4">
-              <Skeleton className="h-20 w-20 rounded-full" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-8 w-24" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between">
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-40" />
-                <Skeleton className="h-4 w-60" />
-              </div>
-              <Skeleton className="h-9 w-20" />
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-8">
-            <div className="grid gap-6 md:grid-cols-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-10 w-full" />
-                </div>
-              ))}
-            </div>
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-24 w-full" />
-            </div>
-          </CardContent>
-        </Card>
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-4 w-48" />
       </div>
     );
   }
@@ -162,7 +79,7 @@ const ProfileTenantTab = () => {
 
   const handleSave = () => {
     const payload = updateDataTenantSchema.parse(editData);
-    const payload = updateDataTenantSchema.parse(editData);
+
     updateProfile.mutate(payload, {
       onSuccess: () => {
         setFormData(editData);
@@ -175,7 +92,7 @@ const ProfileTenantTab = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setEditData((prev) => prev && { ...prev, [name]: value });
+    setEditData((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
 
   const handleImageUpload = (file: File) => {
@@ -187,12 +104,15 @@ const ProfileTenantTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold text-foreground">Tenant Profile</h1>
+      {/* header */}
+      <div>
+        <h1 className="text-3xl font-bold">Tenant Profile</h1>
         <p className="text-muted-foreground">
           Manage your business information
         </p>
       </div>
+
+      {/* avatar */}
       <Card>
         <CardHeader>
           <CardTitle>Business Logo</CardTitle>
@@ -208,45 +128,43 @@ const ProfileTenantTab = () => {
         </CardContent>
       </Card>
 
+      {/* profile */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex justify-between items-center">
             <div>
               <CardTitle>Business Profile</CardTitle>
               <CardDescription>
                 Your complete business information
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+
+            <div className="flex gap-2 items-center">
               <Badge variant={formData.isVerified ? "default" : "secondary"}>
                 {formData.isVerified ? (
                   <>
-                    <CheckCircle className="mr-1 h-3 w-3" />
-                    Verified
+                    <CheckCircle className="h-3 w-3 mr-1" /> Verified
                   </>
                 ) : (
                   <>
-                    <XCircle className="mr-1 h-3 w-3" />
-                    Unverified
+                    <XCircle className="h-3 w-3 mr-1" /> Unverified
                   </>
                 )}
               </Badge>
+
               {!isEditing ? (
-                <Button variant="outline" size="sm" onClick={handleEdit}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
+                <Button size="sm" variant="outline" onClick={handleEdit}>
+                  <Pencil className="h-4 w-4 mr-2" /> Edit
                 </Button>
               ) : (
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleCancel}>
-                    <X className="mr-2 h-4 w-4" />
-                    Cancel
+                <>
+                  <Button size="sm" variant="outline" onClick={handleCancel}>
+                    <X className="h-4 w-4 mr-2" /> Cancel
                   </Button>
                   <Button size="sm" onClick={handleSave}>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save
+                    <Save className="h-4 w-4 mr-2" /> Save
                   </Button>
-                </div>
+                </>
               )}
             </div>
           </div>

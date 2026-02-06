@@ -16,14 +16,14 @@ export interface DashboardData {
   }
 
 export const useDashboardOverview = () => {
-    const session = useSession();
+    const {data : session, status} = useSession();
     return useQuery({
         queryKey: ["dashboard-overview"],
         queryFn: async () => {
           const { data } = await axiosInstance.get<DashboardData>(
             "/tenants/me/statistics", {
                 headers: {
-                  Authorization: `Bearer ${session.data?.user.accessToken}`,
+                  Authorization: `Bearer ${session!.user.accessToken}`,
                 },
             },
           );

@@ -80,15 +80,15 @@ export function DashboardOverview() {
       label: "Total Rooms",
       value: stats.totalRooms,
       icon: BedDouble,
-      color: "text-accent",
-      bgColor: "bg-accent/10",
+      color: "text-primary-foreground",
+      bgColor: "bg-primary",
     },
     {
       label: "Room Non-Availability",
       value: stats.totalRoomNonAvailability,
       icon: Wrench,
-      color: "text-warning",
-      bgColor: "bg-warning/10",
+      color: "text-red-500",
+      bgColor: "bg-destructive/10",
     },
     ...(stats.averageRating !== null
       ? [
@@ -105,7 +105,6 @@ export function DashboardOverview() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-heading font-bold">
           Dashboard
@@ -115,7 +114,6 @@ export function DashboardOverview() {
         </p>
       </div>
 
-      {/* Stats Cards - Adaptive Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsDisplay.map((stat) => (
           <div
@@ -144,7 +142,7 @@ export function DashboardOverview() {
                 src={profile.avatar || undefined}
                 alt={profile.name}
               />
-              <AvatarFallback className="bg-linear-to-br from-primary to-accent text-primary-foreground text-xl">
+              <AvatarFallback className="bg-accent text-slate-600 text-xl">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -222,7 +220,7 @@ export function DashboardOverview() {
           onClick={() => handleNavigate("/dashboard/tenant/room")}
           className="bg-card rounded-2xl border border-border p-6 text-left hover:border-primary/50 transition-colors group"
         >
-          <BedDouble className="h-8 w-8 text-accent mb-3" />
+          <BedDouble className="h-8 w-8 text-primary mb-3" />
           <h3 className="font-heading font-semibold">Room Management</h3>
           <p className="text-sm text-muted-foreground mt-1">
             Manage rooms across properties
