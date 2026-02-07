@@ -1,6 +1,7 @@
 import { axiosInstance } from "@/lib/axios";
 import { formatLocalDate } from "@/lib/date/date";
 import { StepOneFormData } from "@/lib/validator/dashboard.create-property.schema";
+import { UpdatePropertFormValues } from "@/lib/validator/dashboard.update-property.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import {
   CalendarResponse,
@@ -18,6 +19,7 @@ import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import z from "zod";
 
 interface GetPropertiesQuery extends PaginationQueryParams {
   search?: string;
@@ -249,23 +251,12 @@ export const usePublishProperty = () => {
   });
 };
 
-export const useUpdateProperty = () => {
+export const useUpdateProperty = (propertyId: number) => {
   const queryClient = useQueryClient();
   const session = useSession();
-  const params = useParams();
-  const propertyId = Number(params.id);
 
   return useMutation({
-    mutationFn: async (body: {
-      name?: string;
-      description?: string;
-      address?: string;
-      cityId?: number;
-      categoryId?: number;
-      propertyType?: string;
-      latitude?: number;
-      longitude?: number;
-    }) => {
+    mutationFn: async (body: UpdatePropertFormValues) => {
       const { data } = await axiosInstance.patch(
         `/properties/${propertyId}`,
         body,
