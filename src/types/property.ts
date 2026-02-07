@@ -1,11 +1,12 @@
-import { RoomImage, RoomNonAvailability, SeasonalRates } from "./room";
+import { NewImageData } from "./images";
+import { RoomNonAvailability, SeasonalRates } from "./room";
 
 export enum PropertyType {
   APARTMENT = "APARTMENT",
   HOTEL = "HOTEL",
   VILLA = "VILLA",
   HOUSE = "HOUSE",
-};
+}
 
 export enum PropertyStatus {
   PUBLISHED = "PUBLISHED",
@@ -23,7 +24,7 @@ export interface Property {
   propertyImages: Array<{ id: number; urlImages: string; isCover: boolean }>;
   city: { id: number; name: string };
   category: { id: number; name: string } | null;
-  amenities: Array<{ id: number; name: string, code: string }>;
+  amenities: Array<{ id: number; name: string; code: string }>;
   availableRooms?: Array<{
     room: {
       id: number;
@@ -137,12 +138,6 @@ export interface PropertyPayload {
   }>;*/
 }
 
-export interface PropertyRoomImage {
-  file: File;
-  preview: string;
-  isCover: boolean;
-}
-
 export interface PropertyIdImages {
   id: number;
   urlImages: string[];
@@ -157,37 +152,59 @@ export interface PropertyRoom {
   totalGuests: number;
   totalUnits: number;
   imageFiles: File[];
-  imagePreviews: PropertyRoomImage[];
+  imagePreviews: NewImageData[];
 }
-
 
 //for dashboard property Id tenant
 export interface TenantPropertyId {
   id: number;
   name: string;
-  description : string;
+  description: string;
   propertyType: PropertyType;
   address: string;
   city: string;
-  category: string;
+  cityId: number;
+  category: string | null;
+  categoryId: number | null;
+  latitude?: number;
+  longitude?: number;
   status: PropertyStatus;
   hasMaintenance: boolean;
   hasPropertyImages: boolean;
-  hasSeasonalRate : boolean;
+  hasSeasonalRate: boolean;
   hasPublishableRoom: boolean;
+  amenities: string[];
   rooms: Array<{
     id: number;
     name: string;
     basePrice: number;
     totalUnits: number;
     totalGuests: number;
-    roomImages: RoomImage[];
-    roomNonAvailability : RoomNonAvailability[];
-    seasonalRates: SeasonalRates[]
-  }>
+    roomImages: Array<{
+      id: number;
+      urlImages: string;
+    }>;
+    roomNonAvailability: Array<{
+      id: number;
+      reason: string;
+      startDate: Date;
+      endDate: Date;
+    }>;
+    seasonalRates:Array<{
+      id: number;
+      name: string;
+      startDate: Date;
+      endDate: Date;
+      fixedPrice: number;
+    }>;
+  }>;
   images: Array<{
     id: number;
-    urlImages: string[],
-    isCover: boolean[]
-  }>
+    urlImages: string;
+    isCover: boolean;
+  }>;
+}
+
+export type EditPropertyTypes ={
+  name : string
 }
