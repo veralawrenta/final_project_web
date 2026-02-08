@@ -1,17 +1,7 @@
 "use client";
 
-import L from "leaflet";
-import { useEffect, useRef, useState } from "react";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
-
-if (typeof window !== "undefined") {
-  delete (L.Icon.Default.prototype as any)._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-    iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-  });
-}
+import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
 
 interface InteractiveMapProps {
   latitude: number;
@@ -21,42 +11,23 @@ interface InteractiveMapProps {
   className?: string;
 }
 
-function MapController({
-  position,
-  onLocationChange,
-}: {
-  position: [number, number];
-  onLocationChange: (lat: number, lng: number) => void;
-}) {
-  const map = useMap();
-  const markerRef = useRef<L.Marker>(null);
-
-  useEffect(() => {
-    map.setView(position, map.getZoom());
-  }, [position, map]);
-
-  useMapEvents({
-    click: (e) => {
-      const { lat, lng } = e.latlng;
-      onLocationChange(lat, lng);
-    },
-  });
-
+// Simple loading component
+function MapLoading({ height }: { height: string }) {
   return (
-    <Marker
-      position={position}
-      draggable={true}
-      eventHandlers={{
-        dragend: (e) => {
-          const marker = e.target;
-          const pos = marker.getLatLng();
-          onLocationChange(pos.lat, pos.lng);
-        },
-      }}
-      ref={markerRef}
-    />
+    <div
+      style={{ height }}
+      className="flex items-center justify-center bg-muted rounded-lg"
+    >
+      <p className="text-muted-foreground">Loading map...</p>
+    </div>
   );
 }
+
+// The actual map - loaded only on client
+const MapContent = dynamic(() => import("./MapContent"), {
+  ssr: false,
+  loading: () => <MapLoading height="350px" />,
+});
 
 export function InteractiveMap({
   latitude,
@@ -66,46 +37,26 @@ export function InteractiveMap({
   className = "",
 }: InteractiveMapProps) {
   const [mounted, setMounted] = useState(false);
-  const position: [number, number] = [latitude || -6.2088, longitude || 106.8456];
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) {
-    return (
-      <div
-        className={`w-full ${className} bg-muted rounded-lg flex items-center justify-center`}
-        style={{ height }}
-      >
-        <p className="text-sm text-muted-foreground">Loading map...</p>
-      </div>
-    );
+    return <MapLoading height={height} />;
   }
 
   return (
-    <div className={`w-full ${className}`} style={{ height }}>
-      <div className="relative w-full h-full rounded-lg overflow-hidden border border-border">
-        <MapContainer
-          center={position}
-          zoom={13}
-          scrollWheelZoom={true}
-          className="w-full h-full z-0"
-          style={{ height: "100%", width: "100%" }}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <MapController position={position} onLocationChange={onLocationChange} />
-        </MapContainer>
-        
-        <div className="absolute top-2 left-2 z-1000 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded-md border border-border shadow-sm">
-          <p className="text-xs text-muted-foreground">
-            Click or drag marker to set location
-          </p>
-        </div>
-      </div>
+    <div className={className}>
+      <MapContent
+        latitude={latitude}
+        longitude={longitude}
+        onLocationChange={onLocationChange}
+        height={height}
+      />
+      <p className="text-xs text-muted-foreground mt-2">
+        💡 Click or drag marker to set location
+      </p>
     </div>
   );
 }

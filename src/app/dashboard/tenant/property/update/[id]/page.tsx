@@ -8,29 +8,29 @@ import {
 import { useGetTenantPropertyId, useUpdateProperty } from "@/hooks/useProperty";
 import { UpdatePropertFormValues } from "@/lib/validator/dashboard.update-property.schema";
 import { AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
-const EditPropertyPage = ({ params }: { params: { id: string } }) => {
+const EditPropertyPage = () => {
   const router = useRouter();
+  const params = useParams();
   const propertyId = Number(params.id);
 
   const updatePropertyMutation = useUpdateProperty(propertyId);
   const uploadImageMutation = useUploadPropertyImage();
   const deleteImageMutation = useDeletePropertyImage();
 
-  // Fetch property data here with useQuery...
   const { data: property, isLoading } = useGetTenantPropertyId(propertyId);
 
   const handleSave = async (
     propertyData: UpdatePropertFormValues,
     imagesToAdd: File[],
-    imagesToRemove: number[],
-    coverImageId?: number
+    imagesToRemove: number[]
   ) => {
     try {
       await updatePropertyMutation.mutateAsync({
         ...propertyData,
       });
+      
       if (imagesToRemove.length > 0) {
         await Promise.all(
           imagesToRemove.map((propertyImageId: number) =>
@@ -38,13 +38,14 @@ const EditPropertyPage = ({ params }: { params: { id: string } }) => {
           )
         );
       }
+      
       if (imagesToAdd.length > 0) {
         await Promise.all(
           imagesToAdd.map((file, index) => {
             uploadImageMutation.mutateAsync({
               propertyId,
               file,
-              isCover: index === 0 && !coverImageId,
+              isCover: index === 0,
             });
           })
         );
@@ -64,6 +65,7 @@ const EditPropertyPage = ({ params }: { params: { id: string } }) => {
       </div>
     );
   }
+
   if (!property) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center px-6">
@@ -93,4 +95,5 @@ const EditPropertyPage = ({ params }: { params: { id: string } }) => {
     />
   );
 };
+
 export default EditPropertyPage;

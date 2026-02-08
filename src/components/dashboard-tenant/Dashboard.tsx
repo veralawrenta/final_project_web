@@ -211,7 +211,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link
-                  href="/dashboard/profile"
+                  href="/dashboard/tenant/profile"
                   className="flex items-center gap-2"
                 >
                   <User className="w-4 h-4" /> View Profile
@@ -219,7 +219,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
-                  href="/dashboard/profile/update"
+                  href="/dashboard/tenant/profile/update"
                   className="flex items-center gap-2"
                 >
                   <Settings className="w-4 h-4" /> Edit Profile

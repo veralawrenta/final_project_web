@@ -114,34 +114,33 @@ export interface CalendarResponse {
   calendar: CalendarDay[];
 }
 
-export interface PropertyPayload {
-  name: string;
-  description: string;
-  categoryId: number;
-  cityId: number;
-  address: string;
-  latitude: number;
-  longitude: number;
-  propertyType: "APARTMENT" | "HOUSE" | "VILLA" | "HOTEL";
-  propertyImages: File[];
-  amenities: Array<{
-    code: string;
-    name: string;
-  }>;
-  /*rooms: Array<{
-    name: string;
-    description: string;
-    basePrice: number;
-    totalGuests: number;
-    totalUnits: number;
-    roomImages: File[];
-  }>;*/
+export interface PropertyImage {
+  id: number;
+  propertyId: number;
+  urlImages: string;
+  isCover: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 }
 
+export interface TenantProperty {
+  id: number;
+  name: string;
+  city: string;
+  category?: string;
+  propertyType: 'HOTEL' | 'HOUSE' | 'APARTMENT' | 'VILLA';
+  lowestPrice: number | null;
+  totalRooms: number;
+  status: 'PUBLISHED' | 'DRAFT';
+  propertyImages: PropertyImage[]
+}
+
+//for property id dashboard
 export interface PropertyIdImages {
   id: number;
-  urlImages: string[];
-  isCover: boolean[];
+  urlImages: string;
+  isCover: boolean;
 }
 
 export interface PropertyRoom {
@@ -177,6 +176,7 @@ export interface TenantPropertyId {
   rooms: Array<{
     id: number;
     name: string;
+    description: string;
     basePrice: number;
     totalUnits: number;
     totalGuests: number;

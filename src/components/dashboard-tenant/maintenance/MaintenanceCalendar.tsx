@@ -4,6 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Loader2 } from "lucide-react";
 import { RoomNonAvailability } from "@/types/room";
 import { fromDateString } from "@/lib/date/date";
+import { DateRange } from "react-day-picker";
 
 interface MaintenanceCalendarProps {
   records: RoomNonAvailability[] | undefined;

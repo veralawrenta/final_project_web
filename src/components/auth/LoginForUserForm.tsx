@@ -1,15 +1,21 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import z from "zod";
+import { axiosInstance } from "../../lib/axios";
 import { cn } from "../../lib/utils";
+import { loginSchema } from "../../lib/validator/auth.login.schema";
+import ButtonGoogle from "../google/ButtonGoogle";
 import { Button } from "../ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import {
   Field,
   FieldDescription,
@@ -18,19 +24,7 @@ import {
   FieldSeparator,
 } from "../ui/field";
 import { Input } from "../ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "../../lib/validator/auth.login.schema";
-import { useMutation } from "@tanstack/react-query";
-import { axiosInstance } from "../../lib/axios";
-import { signIn } from "next-auth/react";
-import { AxiosError } from "axios";
-import ButtonGoogle from "../google/ButtonGoogle";
-import z from "zod";
-import Link from "next/link";
-import Image from "next/image";
-import { toast, Toaster } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Role } from "@/types/user";
 
 export function LoginForUserForm({
   className,
@@ -49,6 +43,16 @@ export function LoginForUserForm({
       return data;
     },
     onSuccess: async (data) => {
+      if (data.role === Role.TENANT || data.user?.role === Role.TENANT) {
+        toast.error(
+          "This account is registered as a Tenant. Please use the Tenant login page."
+        );
+        return;
+      }
+      if (data.role !== Role.USER && data.user?.role !== Role.USER) {
+        toast.error("Invalid account type for this login page.");
+        return;
+      }
       await signIn("credentials", { redirect: false, ...data });
       toast.success("Welcome back to Staynuit!");
       setTimeout(() => {

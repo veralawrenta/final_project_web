@@ -3,6 +3,8 @@
 @import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
+@plugin "@tailwindcss/typography";
+
 
 :root {
   --background: oklch(1.0000 0 0);
@@ -204,4 +206,57 @@ body {
     letter-spacing: var(--tracking-normal);
     scroll-behavior: smooth;
   }
+/*.ProseMirror {
+  outline: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror blockquote {
+  padding-left: 1em;
+  border-left: 3px solid hsl(var(--primary));
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror strong {
+  font-weight: 600;
+}
+
+.ProseMirror em {
+  font-style: italic;
+}
+
+.ProseMirror p {
+  margin-bottom: 0.5em;
+}
+
+.ProseMirror p:last-child {
+  margin-bottom: 0;
+}*/
 }

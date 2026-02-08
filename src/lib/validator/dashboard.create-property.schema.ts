@@ -1,21 +1,13 @@
 import z from "zod";
-import { createPropertyRoomSchema, createRoomSchema } from "./dashboard.rooms.schema";
+import { imageFileSchema } from "./dashboard.images.schema";
+import { roomsWithImageSchema } from "./dashboard.rooms.schema";
 
-const MAX_FILE_SIZE = 1 * 1024 * 1024;
-const ACCEPTED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/jpeg",
-  "image/gif",
-];
-export const PropertyTypeEnum = z.enum(["APARTMENT", "HOUSE", "VILLA", "HOTEL"]);
-export const imageFileSchema = z
-  .instanceof(File)
-  .refine((file) => file.size <= MAX_FILE_SIZE, "Max image size is 1 MB")
-  .refine(
-    (file) => ACCEPTED_IMAGE_TYPES.includes(file.type),
-    "Only JPG, PNG, JPEG, GIF are allowed"
-  );
+export const PropertyTypeEnum = z.enum([
+  "APARTMENT",
+  "HOUSE",
+  "VILLA",
+  "HOTEL",
+]);
 
 export const createPropertyOneSchema = z.object({
   name: z.string().min(1, "Property name is required").max(150),
@@ -27,22 +19,17 @@ export const createPropertyOneSchema = z.object({
   longitude: z.number().min(-180).max(180),
   propertyType: PropertyTypeEnum,
   amenities: z.array(z.string()).min(1, "Select at least one amenity"),
-  urlImages: z
+  propertyImages: z
     .array(imageFileSchema)
     .min(1, "At least one property image required")
-    .max(10, "Maximum 10 images allowed"),
-});
-
-export const createPropertyRoom = z.object({
-  rooms: z.array(createRoomSchema).min(1, "At least one room is required"),
+    .max(10, "Only accepted maximum of 10 images"),
 });
 
 export const createPropertyTwoSchema = z.object({
   rooms: z
-    .array(createPropertyRoomSchema)
+    .array(roomsWithImageSchema)
     .min(1, "At least one room with room image is required"),
 });
 
 export type StepOneFormData = z.infer<typeof createPropertyOneSchema>;
-export type RoomFormData = z.infer<typeof createPropertyRoomSchema>;
 export type StepTwoFormData = z.infer<typeof createPropertyTwoSchema>;

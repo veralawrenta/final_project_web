@@ -1,23 +1,13 @@
-'use client';
-
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { ArrowRight, Loader2, MapPin, Home } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
+"use client";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -25,94 +15,140 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { createPropertyOneSchema, StepOneFormData } from '@/lib/validator/dashboard.create-property.schema';
-import { useGetCities } from '@/hooks/useGetCities';
-import { useGetMasterAmenities } from '@/hooks/useAmenities';
-import { InteractiveMap } from '../MapComponent';
-import { getAmenityIcon } from '@/lib/amenitiesIcon';
-import CreateImageUploader from '../CreateImageUploader';
-import { useGetCategories } from '@/hooks/useCategory';
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetMasterAmenities } from "@/hooks/useAmenities";
+import { useGetCategories } from "@/hooks/useCategory";
+import { useGetCities } from "@/hooks/useGetCities";
+import { getAmenityIcon } from "@/lib/amenitiesIcon";
+import { cn } from "@/lib/utils";
+import { StepOneFormData } from "@/lib/validator/dashboard.create-property.schema";
+import { NewImageData } from "@/types/images";
+import { ArrowRight, Home, Loader2, MapPin } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import CreateImageUploader from "../CreateImageUploader";
+import { InteractiveMap } from "../MapComponent";
+import { RichTextEditor } from "@/components/RichTextEditor";
 
 const KOTA_TUA_LAT = -6.1352;
 const KOTA_TUA_LNG = 106.8133;
 
 interface CreatePropertyStep1Props {
-  onSaveDraft: (data: StepOneFormData, images: ImageData[]) => void;
-  onContinue: (data: StepOneFormData, images: ImageData[]) => void;
-  onCancel: () => void; 
+  onContinue: (data: StepOneFormData, images: NewImageData[]) => void;
+  onCancel: () => void;
   isLoading?: boolean;
 }
 
-export function CreatePropertyStep1({
-  onSaveDraft,
+type FormValues = Omit<StepOneFormData, "cityId" | "categoryId"> & {
+  cityId: string;
+  categoryId: string;
+};
+
+export function CreatePropertyStep1Form({
   onContinue,
   onCancel,
   isLoading,
 }: CreatePropertyStep1Props) {
-  const [images, setImages] = useState<ImageData[]>([]);
+  const [propertyImages, setPropertyImages] = useState<NewImageData[]>([]);
 
   const { data: cities = [], isLoading: loadingCities } = useGetCities();
-  const { data: categories = [], isLoading: loadingCategories } = useGetCategories();
-  const { data: amenities = [], isLoading: loadingAmenities } = useGetMasterAmenities();
-  
-  const form = useForm<StepOneFormData>({
-    resolver: zodResolver(createPropertyOneSchema),
+  const { data: categories = [], isLoading: loadingCategories } =
+    useGetCategories();
+  const { data: amenities = [], isLoading: loadingAmenities } =
+    useGetMasterAmenities();
+
+  const form = useForm<FormValues>({
     defaultValues: {
-      name: '',
-      description: '',
-      address: '',
-      cityId: 0,
-      categoryId: 0,
+      name: "",
+      description: "",
+      address: "",
+      cityId: "",
+      categoryId: "",
       latitude: KOTA_TUA_LAT,
       longitude: KOTA_TUA_LNG,
-      propertyType: 'VILLA',
+      propertyType: "VILLA",
       amenities: [],
     },
   });
 
-  const selectedAmenities = form.watch('amenities');
-  const toggleAmenity = (code: string) => {
-    const current = form.getValues('amenities');
-    
-    if (current.includes(code)) {
-      form.setValue('amenities', current.filter((c) => c !== code));
-    } else {
-      form.setValue('amenities', [...current, code]);
+  // Convert form values to the expected type
+  const convertFormData = (data: FormValues): StepOneFormData => {
+    return {
+      ...data,
+      cityId: Number(data.cityId),
+      categoryId: Number(data.categoryId),
+    };
+  };
+
+  // Validate all required fields
+  const validateAllFields = (): boolean => {
+    const formData = form.getValues();
+
+    if (!formData.name.trim()) {
+      toast.error("Property name is required");
+      return false;
     }
+
+    if (!formData.description.trim() || formData.description === "<p></p>") {
+      toast.error("Description is required");
+      return false;
+    }
+
+    if (!formData.address.trim()) {
+      toast.error("Address is required");
+      return false;
+    }
+
+    if (!formData.cityId) {
+      toast.error("City is required");
+      return false;
+    }
+
+    if (!formData.categoryId) {
+      toast.error("Category is required");
+      return false;
+    }
+
+    if (formData.amenities.length === 0) {
+      toast.error("Please select at least one amenity");
+      return false;
+    }
+
+    if (propertyImages.length === 0) {
+      toast.error("Please upload at least one property image");
+      return false;
+    }
+
+    return true;
   };
 
-  // Handle "Save as Draft" button
-  const handleSaveDraft = (data: StepOneFormData) => {
-    // Validate images
-    if (images.length === 0) {
-      alert('Please upload at least one property image');
+  const handleContinue = (data: FormValues) => {
+    if (!validateAllFields()) {
       return;
-    };
-    
-    onSaveDraft(data, images);
+    }
+
+    onContinue(convertFormData(data), propertyImages);
   };
 
-  const handleContinue = (data: StepOneFormData) => {
-    if (images.length === 0) {
-      alert('Please upload at least one property image');
-      return;
-    };
-    onContinue(data, images);
-  };
+  const canSubmit = propertyImages.length > 0;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Create Property</h1>
-        <p className="text-muted-foreground">Step 1 of 2: Property Details & Images</p>
+        <p className="text-muted-foreground">
+          Step 1 of 2: Property Details & Images
+        </p>
       </div>
 
       <div className="flex gap-2">
@@ -131,7 +167,6 @@ export function CreatePropertyStep1({
               <CardDescription>Tell us about your property</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              
               <FormField
                 control={form.control}
                 name="name"
@@ -148,6 +183,8 @@ export function CreatePropertyStep1({
                   </FormItem>
                 )}
               />
+
+              {/* Rich Text Description */}
               <FormField
                 control={form.control}
                 name="description"
@@ -155,19 +192,17 @@ export function CreatePropertyStep1({
                   <FormItem>
                     <FormLabel>Description *</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Describe what makes your property special..."
-                        className="min-h-[120px] resize-none"
-                        {...field}
+                      <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Write your description..."
                       />
                     </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      {field.value.length} characters
-                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <div className="grid md:grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
@@ -175,7 +210,10 @@ export function CreatePropertyStep1({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Property Type *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select type" />
@@ -184,7 +222,9 @@ export function CreatePropertyStep1({
                         <SelectContent>
                           <SelectItem value="VILLA">🏖️ Villa</SelectItem>
                           <SelectItem value="HOUSE">🏠 House</SelectItem>
-                          <SelectItem value="APARTMENT">🏢 Apartment</SelectItem>
+                          <SelectItem value="APARTMENT">
+                            🏢 Apartment
+                          </SelectItem>
                           <SelectItem value="HOTEL">🏨 Hotel</SelectItem>
                         </SelectContent>
                       </Select>
@@ -203,8 +243,8 @@ export function CreatePropertyStep1({
                         <Skeleton className="h-10 w-full" />
                       ) : (
                         <Select
-                          onValueChange={(val) => field.onChange(Number(val))}
-                          value={field.value?.toString()}
+                          value={field.value || ""}
+                          onValueChange={field.onChange}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -213,7 +253,10 @@ export function CreatePropertyStep1({
                           </FormControl>
                           <SelectContent>
                             {cities.map((city: any) => (
-                              <SelectItem key={city.id} value={city.id.toString()}>
+                              <SelectItem
+                                key={city.id}
+                                value={city.id.toString()}
+                              >
                                 {city.name}
                               </SelectItem>
                             ))}
@@ -234,8 +277,8 @@ export function CreatePropertyStep1({
                         <Skeleton className="h-10 w-full" />
                       ) : (
                         <Select
-                          onValueChange={(val) => field.onChange(Number(val))}
-                          value={field.value?.toString()}
+                          value={field.value || ""}
+                          onValueChange={field.onChange}
                         >
                           <FormControl>
                             <SelectTrigger>
@@ -244,7 +287,10 @@ export function CreatePropertyStep1({
                           </FormControl>
                           <SelectContent>
                             {categories.map((cat: any) => (
-                              <SelectItem key={cat.id} value={cat.id.toString()}>
+                              <SelectItem
+                                key={cat.id}
+                                value={cat.id.toString()}
+                              >
                                 {cat.name}
                               </SelectItem>
                             ))}
@@ -275,6 +321,7 @@ export function CreatePropertyStep1({
               />
             </CardContent>
           </Card>
+
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -286,7 +333,6 @@ export function CreatePropertyStep1({
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -301,7 +347,9 @@ export function CreatePropertyStep1({
                           type="number"
                           step="any"
                           {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value))
+                          }
                           className="font-mono text-sm"
                         />
                       </FormControl>
@@ -323,7 +371,9 @@ export function CreatePropertyStep1({
                           type="number"
                           step="any"
                           {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value))
+                          }
                           className="font-mono text-sm"
                         />
                       </FormControl>
@@ -336,145 +386,170 @@ export function CreatePropertyStep1({
               {/* Interactive Map */}
               <div className="rounded-lg overflow-hidden border border-border">
                 <InteractiveMap
-                  latitude={form.watch('latitude')}
-                  longitude={form.watch('longitude')}
+                  latitude={form.getValues("latitude")}
+                  longitude={form.getValues("longitude")}
                   onLocationChange={(lat, lng) => {
-                    form.setValue('latitude', parseFloat(lat.toFixed(6)));
-                    form.setValue('longitude', parseFloat(lng.toFixed(6)));
+                    form.setValue("latitude", parseFloat(lat.toFixed(6)), {
+                      shouldValidate: false,
+                    });
+                    form.setValue("longitude", parseFloat(lng.toFixed(6)), {
+                      shouldValidate: false,
+                    });
                   }}
                   height="350px"
                 />
-              </div>
-
-              {/* Location Info */}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>Default: Kota Tua Jakarta</span>
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Amenities</CardTitle>
+              <CardTitle>Amenities *</CardTitle>
               <CardDescription>
                 Select all amenities available at your property
               </CardDescription>
             </CardHeader>
             <CardContent>
               {loadingAmenities ? (
-                // Loading Skeleton
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {[...Array(8)].map((_, i) => (
                     <Skeleton key={i} className="h-14 w-full" />
                   ))}
                 </div>
               ) : (
-                <>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {amenities.map((amenity: any) => {
-                      const Icon = getAmenityIcon(amenity.code);
-                      const isSelected = selectedAmenities.includes(amenity.code);
-                      
-                      return (
-                        <div
-                          key={amenity.code}
-                          onClick={() => toggleAmenity(amenity.code)}
-                          className={`
-                            relative flex items-center gap-3 p-3 rounded-lg border-2 
-                            cursor-pointer transition-all
-                            ${
-                              isSelected
-                                ? 'border-primary bg-primary/5 shadow-sm'
-                                : 'border-border hover:border-primary/50 hover:bg-accent/50'
-                            }
-                          `}
+                <FormField
+                  control={form.control}
+                  name="amenities"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {amenities.map((amenity: any) => {
+                          const Icon = getAmenityIcon(amenity.code);
+                          const isSelected = field.value.includes(amenity.code);
+
+                          return (
+                            <button
+                              key={amenity.code}
+                              type="button"
+                              onClick={() => {
+                                const newValue = isSelected
+                                  ? field.value.filter(
+                                      (c: string) => c !== amenity.code
+                                    )
+                                  : [...field.value, amenity.code];
+                                field.onChange(newValue);
+                              }}
+                              className={cn(
+                                "relative flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all text-left",
+                                isSelected
+                                  ? "border-primary bg-primary/5 shadow-sm"
+                                  : "border-border hover:border-primary/50 hover:bg-accent/50"
+                              )}
+                            >
+                              <div
+                                className={cn(
+                                  "h-4 w-4 rounded border-2 flex items-center justify-center shrink-0",
+                                  isSelected
+                                    ? "bg-primary border-primary"
+                                    : "border-input"
+                                )}
+                              >
+                                {isSelected && (
+                                  <svg
+                                    className="w-3 h-3 text-primary-foreground"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path d="M5 13l4 4L19 7"></path>
+                                  </svg>
+                                )}
+                              </div>
+
+                              <Icon
+                                className={cn(
+                                  "h-4 w-4 shrink-0",
+                                  isSelected
+                                    ? "text-primary"
+                                    : "text-muted-foreground"
+                                )}
+                              />
+
+                              <span className="text-sm flex-1">
+                                {amenity.name}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="flex items-center justify-between mt-4 pt-4 border-t">
+                        <p className="text-sm text-muted-foreground">
+                          Select at least one amenity
+                        </p>
+                        <Badge
+                          variant={
+                            field.value.length > 0 ? "default" : "secondary"
+                          }
                         >
-                          <Checkbox
-                            id={amenity.code}
-                            checked={isSelected}
-                            onCheckedChange={() => toggleAmenity(amenity.code)}
-                          />
-                          <Icon className={`h-4 w-4 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
-                          <label
-                            htmlFor={amenity.code}
-                            className="text-sm cursor-pointer flex-1 select-none"
-                          >
-                            {amenity.name}
-                          </label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                    <p className="text-sm text-muted-foreground">
-                      Select at least one amenity
-                    </p>
-                    <Badge variant={selectedAmenities.length > 0 ? "default" : "secondary"}>
-                      {selectedAmenities.length} selected
-                    </Badge>
-                  </div>
-                  <FormMessage>{form.formState.errors.amenities?.message}</FormMessage>
-                </>
+                          {field.value.length} selected
+                        </Badge>
+                      </div>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
             </CardContent>
           </Card>
-        
+
           <Card>
-            <CardHeader>
-              <CardTitle>Property Images</CardTitle>
-              <CardDescription>
-                Upload 1-10 high-quality photos showcasing your property
-              </CardDescription>
-            </CardHeader>
             <CardContent>
-              {/* Reusable Image Uploader */}
               <CreateImageUploader
-                images={images}
-                onImagesChange={setImages}
+                images={propertyImages}
+                onImagesChange={setPropertyImages}
                 maxImages={10}
                 label="Property Images"
                 showCoverBadge={true}
               />
-              
-              {/* Image Tips */}
+
               <div className="mt-4 p-3 bg-muted/50 rounded-lg">
                 <p className="text-xs text-muted-foreground">
-                  📸 <strong>Tips:</strong> Use high-resolution photos. 
-                  The first image will be your cover photo. You can change it by clicking the star.
+                  📸 <strong>Tips:</strong> Use high-resolution photos. The
+                  first image will be your cover photo. You can change it by
+                  clicking the star.
                 </p>
               </div>
+
+              {propertyImages.length === 0 && (
+                <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <p className="text-xs text-amber-800 dark:text-amber-200">
+                    ⚠️ <strong>Required:</strong> At least one property image is
+                    required to continue.
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
-          
+
           <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t">
-            
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
 
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={form.handleSubmit(handleSaveDraft)}
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save as Draft
-              </Button>
-
-              {/* Continue Button */}
-              <Button
-                type="button"
-                onClick={form.handleSubmit(handleContinue)}
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Continue to Rooms
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              type="button"
+              onClick={form.handleSubmit(handleContinue)}
+              disabled={isLoading || !canSubmit}
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Continue to Rooms
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </div>
         </form>
       </Form>

@@ -16,6 +16,7 @@ import SelectedDatePanel from "./maintenance/SelectedDatePanel";
 import MaintenanceList from "./maintenance/MaintenanceList";
 import MaintenanceDeleteDialog from "./maintenance/MaintenanceDeleteDialog";
 import MaintenanceCalendar from "./maintenance/MaintenanceCalendar";
+import { DateRange } from "react-day-picker";
 
 const MaintenanceManagementTab = () => {
   const router = useRouter();

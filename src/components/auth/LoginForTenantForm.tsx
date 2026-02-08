@@ -23,6 +23,7 @@ import { toast, Toaster } from "sonner";
 import { Card, CardContent } from "../ui/card";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
+import { Role } from "@/types/user";
 
 export function LoginForTenantForm({
   className,
@@ -41,6 +42,16 @@ export function LoginForTenantForm({
       return data;
     },
     onSuccess: async (data) => {
+      if (data.role === Role.USER || data.user?.role === Role.USER) {
+        toast.error(
+          "This account is registered as User. Please use the Tenant login page."
+        );
+        return;
+      }
+      if (data.role !== Role.TENANT && data.user?.role !== Role.TENANT) {
+        toast.error("Invalid account type for this login page.");
+        return;
+      }
       await signIn("credentials", {
         redirect: false,
         ...data,

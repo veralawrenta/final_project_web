@@ -1,12 +1,10 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
@@ -16,25 +14,26 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 
 import {
-  updatePropertySchema,
   UpdatePropertFormValues,
+  updatePropertySchema,
 } from "@/lib/validator/dashboard.update-property.schema";
 
-import { PropertyType, type TenantPropertyId } from "@/types/property";
+import { RichTextEditor } from "@/components/RichTextEditor";
+import { useGetMasterAmenities } from "@/hooks/useAmenities";
 import { useGetCategories } from "@/hooks/useCategory";
 import { useGetCities } from "@/hooks/useGetCities";
-import { useGetMasterAmenities } from "@/hooks/useAmenities";
 import { ExistingImageData, NewImageData } from "@/types/images";
-import { RichTextEditor } from "@/components/RichTextEditor";
+import { PropertyType, type TenantPropertyId } from "@/types/property";
 import EditImageUploader from "../EditImageUploader";
 import { InteractiveMap } from "../MapComponent";
 
@@ -96,8 +95,7 @@ export function EditPropertyForm({
     );
   }, [property.images]);
 
-  const locationLocked =
-    property.hasMaintenance || property.hasSeasonalRate;
+  const locationLocked = property.hasMaintenance || property.hasSeasonalRate;
 
   const propertyTypeLocked = property.status === "PUBLISHED";
   const selectedAmenities = form.watch("amenities") ?? [];
@@ -134,16 +132,13 @@ export function EditPropertyForm({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={onCancel}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
 
         <div className="flex-1">
-          <h1 className="text-2xl md:text-3xl font-bold">
-            Edit Property
-          </h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Edit Property</h1>
           <p className="text-muted-foreground">{property.name}</p>
         </div>
 
@@ -157,15 +152,9 @@ export function EditPropertyForm({
           {property.status}
         </span>
       </div>
-
-      {/* Form */}
       <div className="bg-card rounded-2xl border p-6">
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8"
-          >
-            {/* Basic Info */}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <section className="space-y-6">
               <FormField
                 control={form.control}
@@ -189,7 +178,7 @@ export function EditPropertyForm({
                     <FormLabel>Description</FormLabel>
                     <FormControl>
                       <RichTextEditor
-                        content={field.value ?? ""}
+                        value={field.value ?? ""}
                         onChange={field.onChange}
                       />
                     </FormControl>
@@ -211,7 +200,9 @@ export function EditPropertyForm({
                         onValueChange={field.onChange}
                       >
                         <FormControl>
-                          <SelectTrigger />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select property type" />
+                          </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {PROPERTY_TYPES.map((type) => (
@@ -235,12 +226,12 @@ export function EditPropertyForm({
                       <Select
                         disabled={locationLocked}
                         value={field.value?.toString()}
-                        onValueChange={(v) =>
-                          field.onChange(Number(v))
-                        }
+                        onValueChange={(v) => field.onChange(Number(v))}
                       >
                         <FormControl>
-                          <SelectTrigger />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select city" />
+                          </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {cities?.map((city) => (
@@ -266,19 +257,16 @@ export function EditPropertyForm({
                       <FormLabel>Category</FormLabel>
                       <Select
                         value={field.value?.toString()}
-                        onValueChange={(v) =>
-                          field.onChange(Number(v))
-                        }
+                        onValueChange={(v) => field.onChange(Number(v))}
                       >
                         <FormControl>
-                          <SelectTrigger />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {categories?.map((cat) => (
-                            <SelectItem
-                              key={cat.id}
-                              value={cat.id.toString()}
-                            >
+                          {categories?.map((cat: any) => (
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
                               {cat.name}
                             </SelectItem>
                           ))}
@@ -291,7 +279,6 @@ export function EditPropertyForm({
               </div>
             </section>
 
-            {/* Location */}
             <section className="space-y-4 border-t pt-6">
               <div className="grid grid-cols-2 gap-4">
                 <FormField
@@ -342,21 +329,13 @@ export function EditPropertyForm({
               />
             </section>
 
-            {/* Amenities */}
             <section className="space-y-4 border-t pt-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {masterAmenities?.map((amenity) => (
-                  <label
-                    key={amenity.code}
-                    className="flex items-center gap-2"
-                  >
+                  <label key={amenity.code} className="flex items-center gap-2">
                     <Checkbox
-                      checked={selectedAmenities.includes(
-                        amenity.code
-                      )}
-                      onCheckedChange={() =>
-                        toggleAmenity(amenity.code)
-                      }
+                      checked={selectedAmenities.includes(amenity.code)}
+                      onCheckedChange={() => toggleAmenity(amenity.code)}
                     />
                     {amenity.name}
                   </label>
@@ -368,7 +347,6 @@ export function EditPropertyForm({
               </p>
             </section>
 
-            {/* Images */}
             <section className="space-y-4 border-t pt-6">
               <EditImageUploader
                 existingImages={existingImages}
@@ -382,11 +360,7 @@ export function EditPropertyForm({
               />
             </section>
             <div className="flex justify-end gap-3 border-t pt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-              >
+              <Button type="button" variant="outline" onClick={onCancel}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
