@@ -1,12 +1,13 @@
 "use client";
-import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatLocalDate } from "@/lib/date/date";
+import { formatCurrency } from "@/lib/price/currency";
 import { RoomPropertyCard } from "@/types/room";
 import { AlertCircle, Home, TrendingUp, Users } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 
 interface RoomCardProps {
   room: RoomPropertyCard;
@@ -40,7 +41,9 @@ export default function RoomCard({ room }: RoomCardProps) {
             src={roomImage}
             alt={room.name}
             fill
-            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover "
+            loading="eager"
           />
         </div>
 
@@ -51,7 +54,7 @@ export default function RoomCard({ room }: RoomCardProps) {
               <div>
                 <h3 className="text-xl font-bold">{room.name}</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  ${room.basePrice} per night
+                  {formatCurrency(room.basePrice)} per night
                 </p>
               </div>
 
@@ -117,7 +120,7 @@ export default function RoomCard({ room }: RoomCardProps) {
                           <span className="font-medium text-foreground">
                             {rate.name}:
                           </span>{" "}
-                          ${rate.fixedPrice}
+                          {formatCurrency(rate.fixedPrice)}
                           {" ("}
                           {formatDate(rate.startDate)} to{" "}
                           {formatDate(rate.endDate)}

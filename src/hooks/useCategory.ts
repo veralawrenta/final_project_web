@@ -38,12 +38,12 @@ export const useGetCategories = () => {
   return useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<Category[]>("/categories", {
+      const response = await axiosInstance.get("/categories", {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
       });
-      return data; // Returns array directly
+      return response.data.data; // Returns array directly
     },
     enabled: !!session.data?.user.accessToken,
     staleTime: 10 * 60 * 1000,

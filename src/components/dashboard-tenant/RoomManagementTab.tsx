@@ -11,6 +11,7 @@ import {
   Search,
   Filter,
   LayoutGrid,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,6 +38,7 @@ import { useDeleteRoom, useGetTenantRooms } from "@/hooks/useRoom";
 import PaginationSection from "@/components/PaginationSection";
 import { useGetTenantProperties } from "@/hooks/useProperty";
 import { useRouter } from "next/navigation";
+import { formatCurrency } from "@/lib/price/currency";
 
 const RoomManagementTab = () => {
   const router = useRouter();
@@ -125,30 +127,49 @@ const RoomManagementTab = () => {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Loading State: Skeleton Cards */}
+      <div className="space-y-4">
         {isPending &&
           Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="border rounded-2xl p-5 space-y-4">
-              <div className="flex justify-between">
-                <Skeleton className="h-5 w-16" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-8 w-8 rounded-md" />
-                  <Skeleton className="h-8 w-8 rounded-md" />
+            <div key={i} className="border rounded-2xl p-5">
+              <div className="hidden md:flex items-center gap-6">
+                <Skeleton className="h-24 w-32 rounded-xl shrink-0" />
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-6 w-48" />
+                  </div>
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-40" />
+                </div>
+                <div className="flex items-center gap-6">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-5 w-28" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                  </div>
                 </div>
               </div>
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <div className="pt-4 border-t flex justify-between">
-                <Skeleton className="h-5 w-20" />
-                <Skeleton className="h-5 w-24" />
+              <div className="md:hidden space-y-4">
+                <div className="flex gap-4">
+                  <Skeleton className="h-20 w-24 rounded-xl shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-4 w-24" />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-3 border-t">
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
               </div>
             </div>
           ))}
 
         {/* Empty State */}
         {!isPending && filteredRooms.length === 0 && (
-          <div className="col-span-full flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed rounded-3xl bg-muted/30">
+          <div className="flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed rounded-3xl bg-muted/30">
             <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
               <LayoutGrid className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -175,56 +196,146 @@ const RoomManagementTab = () => {
           </div>
         )}
 
-        {/* Room Grid */}
-        {!isPending && filteredRooms.map((room) => (
-          <div
-            key={room.id}
-            className="group bg-card rounded-2xl border border-border p-5 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <span className="px-2.5 py-1 bg-secondary text-secondary-foreground rounded-lg text-[10px] font-bold tracking-wider uppercase">
-                ID: {room.id}
-              </span>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 rounded-full"
-                  onClick={() => handleEditRoom(room)}
-                >
-                  <Edit className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
-                  onClick={() => setDeleteRoom(room)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+        {!isPending && filteredRooms.map((room) => {
+          const coverImage = room.roomImages?.find((img: any) => img.isCover)?.urlImages;
+          const firstImage = room.roomImages?.[0]?.urlImages;
+          const displayImage = coverImage || firstImage;
+
+          return (
+            <div
+              key={room.id}
+              className="group bg-card rounded-2xl border border-border p-5 hover:shadow-md transition-all duration-200"
+            >
+              <div className="hidden md:flex items-center gap-6">
+                {/* Room Image */}
+                <div className="h-24 w-32 rounded-xl overflow-hidden bg-muted shrink-0">
+                  {displayImage ? (
+                    <img
+                      src={displayImage}
+                      alt={room.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-heading font-bold text-xl leading-tight">{room.name}</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Property: {room.property?.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {room.property?.city?.name} • {room.property?.category?.name}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-1.5 text-sm font-medium">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span>{room.totalGuests} Guests</span>
+                  </div>
+                  
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-xl font-bold tracking-tight text-foreground">
+                      {formatCurrency(room.basePrice)}
+                    </span>
+                    <span className="text-[12px] text-muted-foreground font-medium">/night</span>
+                  </div>
+
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-full"
+                      onClick={() => handleEditRoom(room)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 rounded-full text-destructive hover:bg-destructive/10"
+                      onClick={() => setDeleteRoom(room)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile Layout */}
+              <div className="md:hidden space-y-4">
+                <div className="flex gap-4">
+                  {/* Room Image */}
+                  <div className="h-20 w-24 rounded-xl overflow-hidden bg-muted shrink-0">
+                    {displayImage ? (
+                      <img
+                        src={displayImage}
+                        alt={room.name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center">
+                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <span className="inline-block px-2 py-0.5 bg-secondary text-secondary-foreground rounded text-[9px] font-bold tracking-wider uppercase mb-2">
+                      ID: {room.id}
+                    </span>
+                    <h3 className="font-heading font-bold text-lg leading-tight mb-1 truncate">{room.name}</h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {room.property?.name}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {room.property?.city?.name} • {room.property?.category?.name}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5 text-sm font-medium">
+                      <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span>{room.totalGuests}</span>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-lg font-bold tracking-tight text-foreground">
+                        {formatCurrency(room.basePrice)}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground font-medium">/night</span>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full"
+                      onClick={() => handleEditRoom(room)}
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
+                      onClick={() => setDeleteRoom(room)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <h3 className="font-heading font-bold text-xl leading-tight mb-1">{room.name}</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Property Ref: #{room.propertyId}
-            </p>
-
-            <div className="flex items-center gap-3 py-3 border-t border-border mt-auto">
-              <div className="flex items-center gap-1.5 text-sm font-medium">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span>{room.totalGuests} Guests</span>
-              </div>
-              <div className="ml-auto flex items-baseline gap-1">
-                <span className="text-sm font-medium text-primary">$</span>
-                <span className="text-xl font-bold tracking-tight text-foreground">
-                  {room.basePrice.toLocaleString()}
-                </span>
-                <span className="text-[12px] text-muted-foreground font-medium">/night</span>
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       
       {!!tenantRooms?.meta && !isPending && filteredRooms.length > 0 && (

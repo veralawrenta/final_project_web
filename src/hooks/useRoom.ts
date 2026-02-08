@@ -1,9 +1,5 @@
 import { axiosInstance } from "@/lib/axios";
-import {
-  CreateRoomFormData,
-  UpdateRoomFormData,
-  updateRoomSchema,
-} from "@/lib/validator/dashboard.rooms.schema";
+import { UpdateRoomFormData } from "@/lib/validator/dashboard.rooms.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import { Room } from "@/types/room";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,7 +7,6 @@ import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import z from "zod";
 
 interface GetTenantRoomsQuery extends PaginationQueryParams {
   search?: string;
@@ -24,7 +19,12 @@ export const useGetTenantRooms = (queries?: GetTenantRoomsQuery) => {
     queryFn: async () => {
       const { data } = await axiosInstance.get<PageableResponse<Room>>(
         "/rooms/",
-        { params: queries }
+        {
+          params: queries,
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        }
       );
       return data;
     },
@@ -77,25 +77,12 @@ export const useCreateRoom = () => {
   return useMutation({
     mutationFn: async ({
       propertyId,
-      room,
+      formData,
     }: {
       propertyId: number;
-      room: CreateRoomFormData;
+      formData: FormData;
     }) => {
-      toast.loading("Creating room with images...", { id: "create-room" });
-
-      const formData = new FormData();
-
-      formData.append("name", room.name);
-      formData.append("description", room.description);
-      formData.append("basePrice", room.basePrice.toString());
-      formData.append("totalGuests", room.totalGuests.toString());
-      formData.append("totalUnits", room.totalUnits.toString());
-      room.urlImages.forEach((file) => {
-        formData.append("urlImages", file);
-      });
-
-      const response = await axiosInstance.post(
+      const { data } = await axiosInstance.post(
         `/rooms/property/${propertyId}`,
         formData,
         {
@@ -105,11 +92,11 @@ export const useCreateRoom = () => {
           },
         }
       );
-      return response.data;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-rooms"] });
-      toast.success("Room created successfully", { id: "create-room" });
+      toast.success("Room created successfully");
       router.push("/dashboard/tenant/room");
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -126,7 +113,13 @@ export const useUpdateRoom = () => {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async ({roomId, data} : {roomId: number, data: UpdateRoomFormData}) => {
+    mutationFn: async ({
+      roomId,
+      data,
+    }: {
+      roomId: number;
+      data: UpdateRoomFormData;
+    }) => {
       const response = await axiosInstance.patch(`/rooms/${roomId}`, data, {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
@@ -135,7 +128,7 @@ export const useUpdateRoom = () => {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tenantRooms"] });
+      queryClient.invalidateQueries({ queryKey: ["tenant-rooms"] });
       queryClient.invalidateQueries({ queryKey: ["getproperties"] });
       router.push("/dashboard/tenant/room");
     },
@@ -164,12 +157,14 @@ export const useDeleteRoom = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-rooms"] });
       toast.success("Room deleted successfully!", { id: "delete-room" });
-      setTimeout(()=> {
+      setTimeout(() => {
         router.push("/dashboard/tenant");
-      }, 1000)
+      }, 1000);
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      toast.error(error.response?.data.message || "Failed to delete room", {id: "delete-room"});
+      toast.error(error.response?.data.message || "Failed to delete room", {
+        id: "delete-room",
+      });
     },
   });
 };
@@ -187,7 +182,9 @@ export const useUploadRoomImages = () => {
       roomId: number;
       images: File[];
     }) => {
-      if (images.length === 0) { throw new Error("No images to upload")};
+      if (images.length === 0) {
+        throw new Error("No images to upload");
+      }
       const roomResponse = await axiosInstance.get(`/rooms/${roomId}`, {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
@@ -198,7 +195,10 @@ export const useUploadRoomImages = () => {
       const uploadPromises = images.map(async (file, index) => {
         const formData = new FormData();
         formData.append("urlImage", file);
-        formData.append("isCover", String(existingImagesCount === 0 && index === 0));
+        formData.append(
+          "isCover",
+          String(existingImagesCount === 0 && index === 0)
+        );
 
         return axiosInstance.post(`/room-images/room/${roomId}`, formData, {
           headers: {
@@ -207,16 +207,18 @@ export const useUploadRoomImages = () => {
           },
         });
       });
-      await  Promise.all(uploadPromises); //wait for all to upload completely
+      await Promise.all(uploadPromises); //wait for all to upload completely
       return { roomId, uploadedCount: images.length };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["tenant-rooms"] });
       queryClient.invalidateQueries({ queryKey: ["room", data.roomId] });
-      toast.success(`${data.uploadedCount} image(s) uploaded successfully!`)
+      toast.success(`${data.uploadedCount} image(s) uploaded successfully!`);
     },
-    onError: (error: AxiosError<{ message: string }>) => { toast.error(error.response?.data.message || "Failed to upload images" )},
-    });
+    onError: (error: AxiosError<{ message: string }>) => {
+      toast.error(error.response?.data.message || "Failed to upload images");
+    },
+  });
 };
 
 export const useDeleteRoomImage = () => {
@@ -240,7 +242,7 @@ export const useDeleteRoomImage = () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-rooms"] });
       toast.success("Room image deleted successfully");
       setTimeout(() => {
-        router.push("/dashboard/tenant/room")
+        router.push("/dashboard/tenant/room");
       }, 1000);
     },
     onError: (error: AxiosError<{ message: string }>) => {

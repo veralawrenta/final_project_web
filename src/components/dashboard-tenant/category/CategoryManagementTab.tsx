@@ -126,7 +126,7 @@ const CategoryManagementTab = ({
               className="border rounded-xl p-6 hover:shadow-md transition"
             >
               <div className="flex justify-between mb-4">
-                <span className="text-xs font-bold">ID: {category.id}</span>
+              <h3 className="text-xl font-bold">{category.name}</h3>
                 <div className="flex gap-2">
                   <Button
                     size="icon"
@@ -146,8 +146,6 @@ const CategoryManagementTab = ({
                   </Button>
                 </div>
               </div>
-
-              <h3 className="text-xl font-bold">{category.name}</h3>
               <div className="flex items-center gap-2 text-muted-foreground mt-2">
                 <LayoutGrid className="h-4 w-4" />
                 <span>
@@ -162,7 +160,6 @@ const CategoryManagementTab = ({
         </div>
       )}
 
-      {/* Delete Dialog */}
       <AlertDialog
         open={!!isDeletingCategory}
         onOpenChange={() => setIsDeletingCategory(null)}

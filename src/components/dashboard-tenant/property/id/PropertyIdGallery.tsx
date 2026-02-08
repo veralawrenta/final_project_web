@@ -1,33 +1,37 @@
-'use client'
-
-import { useState } from 'react'
-import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { PropertyIdImages } from '@/types/property'
-
+"use client";
+import { useState } from "react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PropertyIdImages } from "@/types/property";
 
 interface PropertyGalleryProps {
   images: PropertyIdImages[];
   propertyName: string;
 }
 
-export default function PropertyGallery({ images, propertyName }: PropertyGalleryProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+export default function PropertyGallery({
+  images,
+  propertyName,
+}: PropertyGalleryProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const fallbackImage = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&h=600&fit=crop'
-  const allImageUrls: string[] = []
-  
-  if (images && images.length > 0) {
-    images.forEach(imageObj => {
-      if (imageObj.urlImages && imageObj.urlImages.length > 0) {
-        allImageUrls.push(...imageObj.urlImages)
-      };
-    });
-  };
-  
-  const hasImages = allImageUrls.length > 0
-  
+  const fallbackImage =
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&h=600&fit=crop";
+
+  const validImageUrls = images
+    .sort((a, b) => Number(b.isCover) - Number(a.isCover))
+    .map((img) => img.urlImages)
+    .filter(
+      (url) =>
+        url &&
+        (url.startsWith("http://") ||
+          url.startsWith("https://") ||
+          url.startsWith("/"))
+    );
+
+  const hasImages = validImageUrls.length > 0;
+
   if (!hasImages) {
     return (
       <div className="space-y-4">
@@ -44,30 +48,31 @@ export default function PropertyGallery({ images, propertyName }: PropertyGaller
           </div>
         </div>
       </div>
-    )
+    );
   }
 
-  const currentImage = allImageUrls[currentImageIndex]
-  const totalImages = allImageUrls.length
+  const currentImage = validImageUrls[currentImageIndex];
+  const totalImages = validImageUrls.length;
 
   const goToPrevious = () => {
     if (currentImageIndex === 0) {
-      setCurrentImageIndex(totalImages - 1) 
+      setCurrentImageIndex(totalImages - 1);
     } else {
-      setCurrentImageIndex(currentImageIndex - 1)
-    };
+      setCurrentImageIndex(currentImageIndex - 1);
+    }
   };
+
   const goToNext = () => {
     if (currentImageIndex === totalImages - 1) {
-      setCurrentImageIndex(0)
+      setCurrentImageIndex(0);
     } else {
-      setCurrentImageIndex(currentImageIndex + 1)
-    };
+      setCurrentImageIndex(currentImageIndex + 1);
+    }
   };
 
   const selectImage = (index: number) => {
-    setCurrentImageIndex(index)
-  }
+    setCurrentImageIndex(index);
+  };
 
   return (
     <div className="space-y-4">
@@ -76,9 +81,12 @@ export default function PropertyGallery({ images, propertyName }: PropertyGaller
           src={currentImage}
           alt={`${propertyName} - Image ${currentImageIndex + 1}`}
           fill
-          className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="object-cover "
           priority
+          loading="eager"
         />
+
         {totalImages > 1 && (
           <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button
@@ -98,7 +106,7 @@ export default function PropertyGallery({ images, propertyName }: PropertyGaller
               <ChevronRight className="w-6 h-6" />
             </Button>
           </div>
-        )};
+        )}
 
         <div className="absolute bottom-4 right-4 bg-background/80 px-3 py-1 rounded-full text-sm font-medium">
           {currentImageIndex + 1} / {totalImages}
@@ -107,30 +115,31 @@ export default function PropertyGallery({ images, propertyName }: PropertyGaller
 
       {totalImages > 1 && (
         <div className="grid grid-cols-4 gap-3">
-          {allImageUrls.map((url, index) => {
-            const isSelected = index === currentImageIndex
-            
+          {validImageUrls.map((url, index) => {
+            const isSelected = index === currentImageIndex;
             return (
               <button
                 key={index}
                 onClick={() => selectImage(index)}
                 className={`relative w-full h-24 rounded-lg overflow-hidden border-2 transition-all ${
                   isSelected
-                    ? 'border-primary'
-                    : 'border-border hover:border-primary/50'
+                    ? "border-primary"
+                    : "border-border hover:border-primary/50"
                 }`}
               >
                 <Image
                   src={url}
                   alt={`${propertyName} - Thumbnail ${index + 1}`}
                   fill
-                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover "
+                  loading="eager"
                 />
               </button>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }
