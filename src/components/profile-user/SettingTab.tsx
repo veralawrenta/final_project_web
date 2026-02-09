@@ -16,16 +16,17 @@ import {
 import { Label } from "@radix-ui/react-label";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Toaster } from "sonner";
 
 const SettingTabComponent = () => {
   const { data: profile, isPending } = useMeProfile();
   const { data: session } = useSession();
-  const changeEmail = useChangeEmail();
-  const changePassword = useChangePassword();
+  const { mutateAsync: changeEmail, isPending: changeEmailPending } =
+    useChangeEmail();
+  const { mutateAsync: changePassword, isPending: changePasswordPending } =
+    useChangePassword();
 
-  //kamu mau buka tab yg mana defaultnya
   const [activeTab, setActiveTab] = useState<"password" | "email">("password");
 
   const [emailForm, setEmailForm] = useState({
@@ -55,7 +56,7 @@ const SettingTabComponent = () => {
 
   const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    changePassword.mutate({
+    changePassword({
       currentPassword: passwordForm.currentPassword,
       newPassword: passwordForm.newPassword,
     });
@@ -63,7 +64,7 @@ const SettingTabComponent = () => {
 
   const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    changeEmail.mutate({
+    changeEmail({
       newEmail: emailForm.newEmail,
     });
   };
@@ -207,10 +208,17 @@ const SettingTabComponent = () => {
                 </div>
                 <Button
                   type="submit"
-                  disabled={isPending}
+                  disabled={changePasswordPending}
                   className="bg-slate-600 hover:bg-primary"
                 >
-                  {isPending ? "Updating..." : "Update Password"}
+                  {changePasswordPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Password"
+                  )}
                 </Button>
               </form>
             )}
@@ -262,10 +270,17 @@ const SettingTabComponent = () => {
                 </div>
                 <Button
                   type="submit"
-                  disabled={isPending}
+                  disabled={changeEmailPending}
                   className="bg-slate-600 hover:bg-primary"
                 >
-                  {isPending ? "Processing..." : "Update Email"}
+                  {changeEmailPending ? (
+                    <>
+                      <Loader2 className=" mr-2 h-4 w-4 animate-spin" />{" "}
+                      Processing...{" "}
+                    </>
+                  ) : (
+                    "Update Email"
+                  )}
                 </Button>
               </form>
             )}

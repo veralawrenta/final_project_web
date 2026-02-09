@@ -184,6 +184,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                       alt="Avatar"
                       width={36}
                       height={36}
+                      className="h-auto w-auto"
                     />
                   ) : (
                     <span className="text-primary-foreground font-semibold text-sm">

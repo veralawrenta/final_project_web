@@ -11,13 +11,17 @@ interface InteractiveMapProps {
   className?: string;
 }
 
+// Minimal loading component
 function MapLoading({ height }: { height: string }) {
   return (
     <div
       style={{ height }}
-      className="flex items-center justify-center bg-muted rounded-lg"
+      className="flex items-center justify-center bg-gray-50 dark:bg-gray-900 rounded-md border"
     >
-      <p className="text-muted-foreground">Loading map...</p>
+      <div className="text-center">
+        <div className="w-8 h-8 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto mb-2" />
+        <p className="text-sm text-gray-500">Loading map...</p>
+      </div>
     </div>
   );
 }
@@ -53,9 +57,6 @@ export function InteractiveMap({
         onLocationChange={onLocationChange}
         height={height}
       />
-      <p className="text-xs text-muted-foreground mt-2">
-        💡 Click or drag marker to set location
-      </p>
     </div>
   );
 }

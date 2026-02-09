@@ -7,11 +7,11 @@ import {
   Edit,
   Trash2,
   Users,
-  DollarSign,
   Search,
   Filter,
   LayoutGrid,
   ImageIcon,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,28 +32,33 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Room } from "@/types/room";
 import { useDeleteRoom, useGetTenantRooms } from "@/hooks/useRoom";
 import PaginationSection from "@/components/PaginationSection";
 import { useGetTenantProperties } from "@/hooks/useProperty";
 import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/price/currency";
+import Image from "next/image";
 
 const RoomManagementTab = () => {
   const router = useRouter();
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [sortBy, setSortBy] = useQueryState("sortBy", { defaultValue: "name" });
+  const [sortOrder, setSortOrder] = useQueryState("sortOrder", { defaultValue: "asc" });
+  const [propertyType, setPropertyType] = useQueryState("propertyType", { defaultValue: "all" });
+  
   const [debounceSearch] = useDebounceValue(search, 500);
-
-  const [selectedProperty, setSelectedProperty] = useState<string>("all");
   const [deleteRoom, setDeleteRoom] = useState<Room | null>(null);
 
   const { data: tenantProperties } = useGetTenantProperties();
   const { data: tenantRooms, isPending } = useGetTenantRooms({
     page,
-    take: 3,
+    take: 6,
     search: debounceSearch,
+    sortBy,
+    sortOrder,
+    propertyType: propertyType !== "all" ? propertyType : undefined,
   });
   const deleteRoomMutation = useDeleteRoom();
 
@@ -76,11 +81,22 @@ const RoomManagementTab = () => {
     }
   };
 
-  const filteredRooms =
-    tenantRooms?.data?.filter((room) => {
-      if (selectedProperty === "all") return true;
-      return room.propertyId === Number(selectedProperty);
-    }) || [];
+  const handleClearAll = () => {
+    setSearch("");
+    setPropertyType("all");
+    setSortBy("name");
+    setSortOrder("asc");
+    setPage(1);
+  };
+
+  const filteredRooms = tenantRooms?.data || [];
+
+  const hasActiveFilters = 
+    search !== "" || 
+    propertyType !== "all" ||
+    sortBy !== "name" ||
+    sortOrder !== "asc";
+  const hasApiResults = tenantRooms?.data && tenantRooms.data.length > 0;
 
   return (
     <div className="space-y-6">
@@ -99,75 +115,95 @@ const RoomManagementTab = () => {
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1 max-w-md">
+      {/* Filter Section */}
+      <div className="flex flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by room name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 focus-visible:ring-primary"
+            className="pl-10"
           />
         </div>
-        <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-          <SelectTrigger className="w-full sm:w-[240px] bg-background">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="Filter by property" />
-            </div>
+
+        {/* Property Type Filter */}
+        <Select value={propertyType} onValueChange={setPropertyType}>
+          <SelectTrigger className="w-[180px]">
+            <Filter className="h-4 w-4 mr-2" />
+            <SelectValue placeholder="Property Type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Properties</SelectItem>
-            {tenantProperties?.data?.map((property: any) => (
-              <SelectItem key={property.id} value={property.id.toString()}>
-                {property.title}
-              </SelectItem>
-            ))}
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="HOTEL">Hotel</SelectItem>
+            <SelectItem value="APARTMENT">Apartment</SelectItem>
+            <SelectItem value="VILLA">Villa</SelectItem>
+            <SelectItem value="HOUSE">House</SelectItem>
           </SelectContent>
         </Select>
+
+        {/* Sort By */}
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="name">Name</SelectItem>
+            <SelectItem value="basePrice">Price</SelectItem>
+            <SelectItem value="createdAt">Date Created</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Sort Order */}
+        <Select value={sortOrder} onValueChange={setSortOrder}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="Order" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">Ascending</SelectItem>
+            <SelectItem value="desc">Descending</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {hasActiveFilters && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleClearAll}
+            title="Clear all filters"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
-      <div className="space-y-4">
-        {isPending &&
-          Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="border rounded-2xl p-5">
-              <div className="hidden md:flex items-center gap-6">
-                <Skeleton className="h-24 w-32 rounded-xl shrink-0" />
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center gap-4">
-                    <Skeleton className="h-5 w-16" />
-                    <Skeleton className="h-6 w-48" />
-                  </div>
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-4 w-40" />
-                </div>
-                <div className="flex items-center gap-6">
-                  <Skeleton className="h-5 w-24" />
-                  <Skeleton className="h-5 w-28" />
-                  <div className="flex gap-2">
-                    <Skeleton className="h-9 w-9 rounded-full" />
-                    <Skeleton className="h-9 w-9 rounded-full" />
-                  </div>
-                </div>
-              </div>
-              <div className="md:hidden space-y-4">
-                <div className="flex gap-4">
-                  <Skeleton className="h-20 w-24 rounded-xl shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-5 w-16" />
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                </div>
-                <div className="flex items-center justify-between pt-3 border-t">
-                  <Skeleton className="h-5 w-20" />
-                  <Skeleton className="h-5 w-24" />
-                </div>
-              </div>
-            </div>
-          ))}
+      {!isPending && tenantRooms?.data && (
+        <div className="text-sm text-muted-foreground">
+          {filteredRooms.length}{" "}
+          {filteredRooms.length === 1 ? "room" : "rooms"}
+          {hasActiveFilters && " found"}
+        </div>
+      )}
 
-        {/* Empty State */}
+      <div className="space-y-4">
+        {isPending && (
+          <div className="flex flex-col items-center justify-center py-32 space-y-4 w-full border-2 border-dashed rounded-3xl bg-muted/5">
+            <div className="relative h-16 w-16 animate-pulse">
+               <Image
+                src="/images/nuit-logo.png"
+                width={300}
+                height={300}
+                alt="Loading..."
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div className="flex flex-col items-center space-y-2">
+               <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+               <p className="text-xs font-medium text-muted-foreground">Fetching your rooms...</p>
+            </div>
+          </div>
+        )}
         {!isPending && filteredRooms.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed rounded-3xl bg-muted/30">
             <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
@@ -175,17 +211,20 @@ const RoomManagementTab = () => {
             </div>
             <h3 className="text-xl font-semibold">No rooms found</h3>
             <p className="text-muted-foreground text-center max-w-xs mt-2">
-              {search || selectedProperty !== "all" 
-                ? "Try adjusting your filters or search terms to find what you're looking for." 
+              {!hasApiResults && search
+                ? `No rooms match "${search}". Try a different search term.`
+                : hasActiveFilters
+                ? "No rooms match your current filters."
                 : "You haven't added any rooms yet. Start by creating your first listing."}
             </p>
-            {search || selectedProperty !== "all" ? (
+            {hasActiveFilters ? (
               <Button 
                 variant="outline" 
-                className="mt-6" 
-                onClick={() => {setSearch(""); setSelectedProperty("all");}}
+                className="mt-6 gap-2" 
+                onClick={handleClearAll}
               >
-                Clear all filters
+                <X className="h-4 w-4" />
+                Clear Filters
               </Button>
             ) : (
               <Button className="mt-6" onClick={handleAddRoom}>
@@ -207,7 +246,6 @@ const RoomManagementTab = () => {
               className="group bg-card rounded-2xl border border-border p-5 hover:shadow-md transition-all duration-200"
             >
               <div className="hidden md:flex items-center gap-6">
-                {/* Room Image */}
                 <div className="h-24 w-32 rounded-xl overflow-hidden bg-muted shrink-0">
                   {displayImage ? (
                     <img
@@ -246,7 +284,7 @@ const RoomManagementTab = () => {
                     <span className="text-[12px] text-muted-foreground font-medium">/night</span>
                   </div>
 
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-1 group-hover:text-primary transition-opacity">
                     <Button
                       variant="outline"
                       size="icon"
@@ -266,11 +304,8 @@ const RoomManagementTab = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Mobile Layout */}
               <div className="md:hidden space-y-4">
                 <div className="flex gap-4">
-                  {/* Room Image */}
                   <div className="h-20 w-24 rounded-xl overflow-hidden bg-muted shrink-0">
                     {displayImage ? (
                       <img
@@ -286,9 +321,6 @@ const RoomManagementTab = () => {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <span className="inline-block px-2 py-0.5 bg-secondary text-secondary-foreground rounded text-[9px] font-bold tracking-wider uppercase mb-2">
-                      ID: {room.id}
-                    </span>
                     <h3 className="font-heading font-bold text-lg leading-tight mb-1 truncate">{room.name}</h3>
                     <p className="text-xs text-muted-foreground truncate">
                       {room.property?.name}
@@ -347,26 +379,22 @@ const RoomManagementTab = () => {
         </div>
       )}
 
-      {/* Keep existing AlertDialog logic */}
       <AlertDialog open={!!deleteRoom} onOpenChange={() => setDeleteRoom(null)}>
         <AlertDialogContent className="max-w-[400px]">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl">Delete Room</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4 pt-2">
-              <p>
                 Are you sure you want to delete <span className="font-semibold text-foreground">"{deleteRoom?.name}"</span>? 
-                This will remove the room from Property ID: {deleteRoom?.propertyId}.
-              </p>
-              <div className="bg-destructive/5 border border-destructive/20 p-3 rounded-lg">
+                This will remove the room from <span className="font-semibold text-foreground">{deleteRoom?.property?.name}.</span>
+            </AlertDialogDescription>
+            <div className="bg-destructive/5 border border-destructive/20 p-3 rounded-lg">
                 <p className="text-destructive text-xs font-bold uppercase tracking-wider mb-2">
                   Permanent Action
                 </p>
                 <ul className="space-y-1 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2">• All images will be removed</li>
-                  <li className="flex items-center gap-2">• Maintenance logs will be cleared</li>
                 </ul>
               </div>
-            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>

@@ -7,13 +7,10 @@ import {
   Property,
   PropertyDetail,
   PropertyType,
+  TenantProperty,
   TenantPropertyId,
 } from "@/types/property";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -21,10 +18,10 @@ import { toast } from "sonner";
 
 interface PropertiesQueryParams extends PaginationQueryParams {
   search?: string;
-  propertyType?: PropertyType | "all";
+  propertyType?: PropertyType;
 }
 
-interface SearchPropertiesParams extends PropertiesQueryParams{
+interface SearchPropertiesParams extends PropertiesQueryParams {
   cityId: number;
   checkIn: Date;
   checkOut: Date;
@@ -36,19 +33,20 @@ export const useSearchProperties = (
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
-    queryKey: ["properties", "search", queries],
+    queryKey: ["properties", queries?.search ?? "",
+      queries.cityId,
+      formatLocalDate(queries.checkIn),
+      formatLocalDate(queries.checkOut),
+      queries.take ?? 3,
+      queries.page ?? 1,
+      queries.sortBy ?? "name",
+      queries.sortOrder ?? "asc",
+      queries.propertyType ?? "",
+    ],
     queryFn: async () => {
-      const { checkIn, checkOut, propertyType, ...rest } = queries;
       const { data } = await axiosInstance.get<PageableResponse<Property>>(
         "/properties/search",
-        {
-          params: {
-            ...rest,
-            checkIn: formatLocalDate(checkIn),
-            checkOut: formatLocalDate(checkOut),
-            propertyType: propertyType === "all" ? undefined : queries.propertyType,
-          },
-        }
+        {params: queries}
       );
       return data;
     },
@@ -61,19 +59,16 @@ export const useGetAllProperties = (
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
-    queryKey: ["properties", "public", queries],
+    queryKey: ["properties", "public", queries?.search ?? "",
+      queries?.page ?? 1,
+      queries?.sortBy ?? "name",
+      queries?.sortOrder ?? "asc",
+      queries?.propertyType ?? "",
+    ],
     queryFn: async () => {
       const { data } = await axiosInstance.get<PageableResponse<Property>>(
         "/properties/public",
-        {
-          params: {
-            ...queries,
-            propertyType:
-              queries?.propertyType === "all"
-                ? undefined
-                : queries?.propertyType,
-          },
-        }
+        {params: queries}
       );
       return data;
     },
@@ -146,14 +141,24 @@ export const useGetMonthCalendarSearch = (
 
 export const useGetTenantProperties = (queries?: PropertiesQueryParams) => {
   const session = useSession();
-  
+
   return useQuery({
-    queryKey: ["tenant-properties", queries],
+    queryKey: [
+      "tenant-properties",
+      queries?.search ?? "",
+      queries?.page ?? 1,
+      queries?.take ?? 3,
+      queries?.sortBy ?? "name",
+      queries?.sortOrder ?? "asc",
+      queries?.propertyType ?? "",
+    ],
     queryFn: async () => {
-      const { data } = await axiosInstance.get("/properties", {
+      const { data } = await axiosInstance.get<
+        PageableResponse<TenantProperty>
+      >("/properties", {
         params: queries,
         headers: {
-          Authorization: `Bearer ${session.data?.user.accessToken}`
+          Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
       });
       return data;
@@ -169,17 +174,20 @@ export const useGetTenantPropertyId = (propertyId: number) => {
   return useQuery({
     queryKey: ["tenant-property-id", propertyId],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<TenantPropertyId>(`/properties/${propertyId}`, {
-        headers: {
-          Authorization: `Bearer ${session.data?.user.accessToken}`
-        },
-      });
+      const { data } = await axiosInstance.get<TenantPropertyId>(
+        `/properties/${propertyId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        }
+      );
       return data;
     },
     enabled: !!session.data?.user.accessToken,
     staleTime: 5 * 60 * 1000,
   });
-}
+};
 
 export const useCreateProperty = () => {
   const session = useSession();
@@ -187,7 +195,7 @@ export const useCreateProperty = () => {
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
-      const {data} = await axiosInstance.post("/properties", formData, {
+      const { data } = await axiosInstance.post("/properties", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${session.data?.user.accessToken}`,
@@ -198,7 +206,9 @@ export const useCreateProperty = () => {
     onSuccess: () => {
       toast.success("Property created successfully");
     },
-    onError: (error: AxiosError<{ message: string }>) => {toast.error(error.response?.data.message || "Failed to create property")},
+    onError: (error: AxiosError<{ message: string }>) => {
+      toast.error(error.response?.data.message || "Failed to create property");
+    },
   });
 };
 
@@ -226,7 +236,9 @@ export const usePublishProperty = () => {
       queryClient.invalidateQueries({ queryKey: ["properties", "tenant"] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to publish property");
+      toast.error(
+        error.response?.data?.message || "Failed to publish property"
+      );
     },
   });
 };
@@ -251,7 +263,9 @@ export const useUpdateProperty = (propertyId: number) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-properties"] });
-      queryClient.invalidateQueries({ queryKey: ["tenant-property-id", propertyId] });
+      queryClient.invalidateQueries({
+        queryKey: ["tenant-property-id", propertyId],
+      });
       toast.success("Property updated successfully!");
       setTimeout(() => {
         router.push("/dashboard/tenant/property");

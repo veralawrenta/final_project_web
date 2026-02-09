@@ -2,6 +2,13 @@
 import PaginationSection from "@/components/PaginationSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatLocalDate, fromDateString } from "@/lib/date/date";
 import { PageableResponse } from "@/types/pagination";
 import { Room, RoomNonAvailability } from "@/types/room";
@@ -12,7 +19,11 @@ interface MaintenanceListProps {
   rooms: Room[];
   isLoading: boolean;
   search: string;
+  sortBy: string;
+  sortOrder: string;
   onSearchChange: (value: string) => void;
+  onSortByChange: (value: string) => void;
+  onSortOrderChange: (value: string) => void;
   onPageChange: (page: number) => void;
   onEditBlock: (record: RoomNonAvailability) => void;
   onDeleteBlock: (record: RoomNonAvailability) => void;
@@ -23,31 +34,56 @@ const MaintenanceList = ({
   rooms,
   isLoading,
   search,
+  sortBy,
+  sortOrder,
   onSearchChange,
+  onSortByChange,
+  onSortOrderChange,
   onPageChange,
   onEditBlock,
   onDeleteBlock,
 }: MaintenanceListProps) => {
-  const getRoomName = (record: RoomNonAvailability) => {
-    if (record.room?.name) return record.room.name;
-    const match = rooms.find((r) => r.id === record.id);
-    return match?.name || `Room #${record.id}`;
+  const getRoomName = (values: RoomNonAvailability) => {
+    if (values.room?.name) return values.room.name;
+    const match = rooms.find((r) => r.id === values.id);
+    return match?.name || `Room #${values.id}`;
   };
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search maintenance..."
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10"
-        />
+      <div className="flex flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search maintenance..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+
+        <Select value={sortBy} onValueChange={onSortByChange}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="createdAt">Date Created</SelectItem>
+            <SelectItem value="reason">Reason</SelectItem>
+            <SelectItem value="roomName">Room Name</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select value={sortOrder} onValueChange={onSortOrderChange}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="Order" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">A to Z</SelectItem>
+            <SelectItem value="desc">Z to A</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* List */}
       <div className="space-y-3">
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-12">
@@ -62,10 +98,7 @@ const MaintenanceList = ({
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-2">
-                    <span className="px-2 py-0.5 bg-primary/10 text-primary rounded text-xs font-bold font-mono">
-                      ID: {record.id}
-                    </span>
-                    <span className="px-2 py-0.5 bg-warning/10 text-warning rounded text-xs font-medium">
+                    <span className="px-2 py-0.5 bg-warning/10 text-warning rounded text-xs font-semibold">
                       Blocked
                     </span>
                     <span className="px-2 py-0.5 bg-secondary rounded text-xs font-medium">
@@ -79,7 +112,8 @@ const MaintenanceList = ({
                   )}
 
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                   {formatLocalDate(fromDateString(record.startDate.split("T")[0]))} to {formatLocalDate(fromDateString(record.endDate.split("T")[0]))}
+                    {formatLocalDate(fromDateString(record.startDate.split("T")[0]))} to{" "}
+                    {formatLocalDate(fromDateString(record.endDate.split("T")[0]))}
                   </div>
                 </div>
 
@@ -113,8 +147,6 @@ const MaintenanceList = ({
           </div>
         )}
       </div>
-
-      {/* Pagination */}
       {!!data?.meta && (
         <PaginationSection meta={data.meta} onChangePage={onPageChange} />
       )}

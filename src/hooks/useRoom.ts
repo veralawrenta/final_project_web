@@ -1,6 +1,7 @@
 import { axiosInstance } from "@/lib/axios";
 import { UpdateRoomFormData } from "@/lib/validator/dashboard.rooms.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
+import { PropertyType } from "@/types/property";
 import { Room } from "@/types/room";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 
 interface GetTenantRoomsQuery extends PaginationQueryParams {
   search?: string;
+  propertyType?: string;
 }
 
 export const useGetTenantRooms = (queries?: GetTenantRoomsQuery) => {

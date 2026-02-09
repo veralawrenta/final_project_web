@@ -8,9 +8,9 @@ import { NewImageData } from "@/types/images";
 import {
   CreatePropertyStep2Form,
   SavedRoom,
-} from "./property-form/CreatePropertyStepTwoForm";
+} from "./samplex-forms/CreatePropertyStepTwoForm";
 import { StepOneFormData } from "@/lib/validator/dashboard.create-property.schema";
-import { CreatePropertyStep1Form } from "./property-form/CreatePropertyStepOneForm";
+import { CreatePropertyStep1Form } from "./samplex-forms/CreatePropertyStepOneForm";
 
 interface CreatePropertyFormsProps {
   onCancel: () => void;
@@ -56,18 +56,14 @@ const CreatePropertyForms = ({ onCancel }: CreatePropertyFormsProps) => {
     try {
       const formData = buildPropertyFormData(data, images);
       const property = await createProperty.mutateAsync(formData);
-
-      // Save propertyId to use in Step 2
       setPropertyId(property.id);
       setCurrentStep(2);
       toast.success("Property created as draft. Now add rooms.");
     } catch (error: any) {
       console.error("Failed to create property:", error);
-      // Error toast handled by mutation
     }
   };
 
-  // Step 2: Create rooms then publish property
   const handleStep2Complete = async (rooms: SavedRoom[]) => {
     if (!propertyId) {
       toast.error("Property ID not found. Please go back to Step 1.");
@@ -75,7 +71,6 @@ const CreatePropertyForms = ({ onCancel }: CreatePropertyFormsProps) => {
     }
 
     try {
-      // Create all rooms for the property
       const roomPromises = rooms.map(async (room) => {
         const roomFormData = new FormData();
         roomFormData.append("name", room.name);
@@ -91,14 +86,9 @@ const CreatePropertyForms = ({ onCancel }: CreatePropertyFormsProps) => {
       });
 
       await Promise.all(roomPromises);
-
-      // After all rooms are created, publish the property
       await publishProperty.mutateAsync(propertyId);
-
-      // Success handled by publishProperty mutation (redirects to property list)
     } catch (error: any) {
       console.error("Failed to complete property:", error);
-      // Error toast handled by mutations
     }
   };
 
@@ -108,7 +98,6 @@ const CreatePropertyForms = ({ onCancel }: CreatePropertyFormsProps) => {
 
   const handleCancel = () => {
     if (propertyId) {
-      // Property already created, redirect to property list
       router.push("/dashboard/tenant/property");
     } else {
       onCancel();

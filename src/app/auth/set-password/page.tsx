@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import VerifyAndSetPasswordForm from "../../../components/auth/VerifySetPassword";
 
 export default function VerifyandSetPasswordPage() {

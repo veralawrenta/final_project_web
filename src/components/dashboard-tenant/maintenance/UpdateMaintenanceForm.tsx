@@ -1,13 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
-import { CalendarIcon, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
@@ -17,6 +9,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -24,24 +22,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 import { useGetTenantProperties } from "@/hooks/useProperty";
 import { useGetTenantRooms } from "@/hooks/useRoom";
 import {
   useGetRoomNonAvailability,
   useUpdateRoomNonAvailability,
 } from "@/hooks/useRoomNonAvailability";
+import { formatLocalDate, parseISODate } from "@/lib/date/date";
+import { cn } from "@/lib/utils";
 import {
   updateMaintenanceBlockSchema,
   UpdateMaintenanceBlockValues,
 } from "@/lib/validator/dashboard.maintenance.schema";
-import { formatLocalDate, fromDateString, parseISODate } from "@/lib/date/date";
-import { Property } from "@/types/property";
+import { TenantProperty } from "@/types/property";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { ArrowLeft, CalendarIcon, Loader2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
 export default function UpdateMaintenanceBlockPage() {
   const router = useRouter();
@@ -52,7 +52,7 @@ export default function UpdateMaintenanceBlockPage() {
   const [selectedRoomId, setSelectedRoomId] = useState<string>("");
 
   const { data: tenantProperties } = useGetTenantProperties();
-  const properties: Property[] = tenantProperties?.data || [];
+  const properties: TenantProperty[] = tenantProperties?.data || [];
 
   const { data: tenantRooms } = useGetTenantRooms();
   const allRooms = tenantRooms?.data || [];
@@ -307,7 +307,7 @@ export default function UpdateMaintenanceBlockPage() {
                     Units to Block
                     {selectedRoom && (
                       <span className="text-muted-foreground font-normal ml-1">
-                        (max {selectedRoom.totalUnits})
+                        (max {1})
                       </span>
                     )}
                   </FormLabel>
@@ -330,7 +330,7 @@ export default function UpdateMaintenanceBlockPage() {
               name="reason"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Reason / Description (Optional)</FormLabel>
+                  <FormLabel>Reason / Description</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Describe what needs to be fixed or maintained..."

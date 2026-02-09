@@ -39,9 +39,7 @@ interface SeasonalRateFormProps<TFieldValues extends FieldValues> {
   isSubmitting?: boolean;
   submitLabel: string;
   onCancel: () => void;
-  /** List of properties available */
   properties?: PropertyOption[];
-  /** List of rooms available (with property info) */
   rooms?: RoomOption[];
 
   fields: {
@@ -70,10 +68,9 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
     startDate && endDate
       ? { from: startDate, to: endDate }
       : startDate
-        ? { from: startDate, to: undefined }
-        : undefined;
+      ? { from: startDate, to: undefined }
+      : undefined;
 
-  // Group rooms by property for better organization
   const roomsByProperty = rooms.reduce((acc, room) => {
     if (!acc[room.propertyName]) {
       acc[room.propertyName] = [];
@@ -85,7 +82,6 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Property or Room Selector */}
         {(properties.length > 0 || rooms.length > 0) && (
           <FormField
             control={form.control}
@@ -97,7 +93,7 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
                   onValueChange={(value) => {
                     // Parse the value: "property-{id}" or "room-{id}"
                     const [type, id] = value.split("-");
-                    
+
                     if (type === "property") {
                       // Clear roomId and set propertyId
                       if (fields.roomId) {
@@ -118,10 +114,14 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
                   }}
                   value={
                     form.watch(fields.propertyId as Path<TFieldValues>)
-                      ? `property-${form.watch(fields.propertyId as Path<TFieldValues>)}`
+                      ? `property-${form.watch(
+                          fields.propertyId as Path<TFieldValues>
+                        )}`
                       : form.watch(fields.roomId as Path<TFieldValues>)
-                        ? `room-${form.watch(fields.roomId as Path<TFieldValues>)}`
-                        : ""
+                      ? `room-${form.watch(
+                          fields.roomId as Path<TFieldValues>
+                        )}`
+                      : ""
                   }
                 >
                   <FormControl>
@@ -130,7 +130,6 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {/* Property options - applies to all rooms */}
                     {properties.length > 0 && (
                       <>
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
@@ -142,7 +141,9 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
                             value={`property-${property.id}`}
                           >
                             <div className="flex items-center gap-2">
-                              <span className="font-medium">{property.name}</span>
+                              <span className="font-medium">
+                                {property.name}
+                              </span>
                               <span className="text-xs text-muted-foreground">
                                 (All rooms)
                               </span>
@@ -152,34 +153,36 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
                       </>
                     )}
 
-                    {/* Room options - grouped by property */}
                     {rooms.length > 0 && (
                       <>
                         <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2 border-t">
                           Individual Rooms
                         </div>
-                        {Object.entries(roomsByProperty).map(([propertyName, propertyRooms]) => (
-                          <div key={propertyName}>
-                            <div className="px-2 py-1 text-xs text-muted-foreground italic">
-                              {propertyName}
+                        {Object.entries(roomsByProperty).map(
+                          ([propertyName, propertyRooms]) => (
+                            <div key={propertyName}>
+                              <div className="px-2 py-1 text-xs text-muted-foreground italic">
+                                {propertyName}
+                              </div>
+                              {propertyRooms.map((room) => (
+                                <SelectItem
+                                  key={`room-${room.id}`}
+                                  value={`room-${room.id}`}
+                                  className="pl-6"
+                                >
+                                  {room.name}
+                                </SelectItem>
+                              ))}
                             </div>
-                            {propertyRooms.map((room) => (
-                              <SelectItem
-                                key={`room-${room.id}`}
-                                value={`room-${room.id}`}
-                                className="pl-6"
-                              >
-                                {room.name}
-                              </SelectItem>
-                            ))}
-                          </div>
-                        ))}
+                          )
+                        )}
                       </>
                     )}
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Select an entire property to apply rates to all rooms, or choose a specific room
+                  Select an entire property to apply rates to all rooms, or
+                  choose a specific room
                 </p>
                 <FormMessage />
               </FormItem>
@@ -187,7 +190,6 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
           />
         )}
 
-        {/* Name */}
         <FormField
           control={form.control}
           name={fields.name}
@@ -211,11 +213,15 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
                 <Input
                   type="number"
                   {...field}
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value === "" ? 0 : Number(e.target.value)
-                    )
-                  }
+                  onFocus={(e) => {
+                    if (e.target.value === "0") {
+                      e.target.value = "";
+                    }
+                  }}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    field.onChange(value === "" ? undefined : Number(value));
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -223,7 +229,6 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
           )}
         />
 
-        {/* Date range: one picker for both start and end */}
         <FormField
           control={form.control}
           name={fields.startDate}
@@ -250,8 +255,15 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {submitLabel}
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="relative flex items-center justify-center gap-2"
+          >
+            {isSubmitting && (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            )}
+            <span>{isSubmitting ? "Processing..." : submitLabel}</span>
           </Button>
         </div>
       </form>
