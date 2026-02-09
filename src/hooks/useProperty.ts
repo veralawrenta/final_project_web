@@ -19,37 +19,26 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-interface GetPropertiesQuery extends PaginationQueryParams {
+interface PropertiesQueryParams extends PaginationQueryParams {
   search?: string;
-}
-
-interface GetAllPropertiesQuery {
-  page?: number;
-  take?: number;
-  sortBy?: "name" | "price";
-  sortOrder?: "asc" | "desc";
   propertyType?: PropertyType | "all";
 }
 
-interface GetPropertySearchParams extends PaginationQueryParams {
+interface SearchPropertiesParams extends PropertiesQueryParams{
   cityId: number;
   checkIn: Date;
   checkOut: Date;
   totalGuests: number;
-  sortBy?: "name" | "price";
-  sortOrder?: "asc" | "desc";
-  propertyType?: string;
-  search?: string;
 }
 
 export const useSearchProperties = (
-  queries: GetPropertySearchParams,
+  queries: SearchPropertiesParams,
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
     queryKey: ["properties", "search", queries],
     queryFn: async () => {
-      const { checkIn, checkOut, ...rest } = queries;
+      const { checkIn, checkOut, propertyType, ...rest } = queries;
       const { data } = await axiosInstance.get<PageableResponse<Property>>(
         "/properties/search",
         {
@@ -57,17 +46,18 @@ export const useSearchProperties = (
             ...rest,
             checkIn: formatLocalDate(checkIn),
             checkOut: formatLocalDate(checkOut),
+            propertyType: propertyType === "all" ? undefined : queries.propertyType,
           },
         }
       );
       return data;
     },
-    enabled: options?.enabled !== false,
+    enabled: options?.enabled,
   });
 };
 
 export const useGetAllProperties = (
-  queries?: GetAllPropertiesQuery,
+  queries?: PropertiesQueryParams,
   options?: { enabled?: boolean }
 ) => {
   return useQuery({
@@ -142,7 +132,7 @@ export const useGetMonthCalendarSearch = (
     ],
     queryFn: async () => {
       const { data } = await axiosInstance.get<CalendarResponse>(
-        `/properties/${propertyId}/availability-preview`,
+        `/properties/${propertyId}/calendar-prices`,
         {
           params: startDate ? { startDate: formatLocalDate(startDate) } : {},
         }
@@ -154,7 +144,7 @@ export const useGetMonthCalendarSearch = (
   });
 };
 
-export const useGetTenantProperties = (queries?: GetPropertiesQuery) => {
+export const useGetTenantProperties = (queries?: PropertiesQueryParams) => {
   const session = useSession();
   
   return useQuery({

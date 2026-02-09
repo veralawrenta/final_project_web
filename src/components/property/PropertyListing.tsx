@@ -69,7 +69,7 @@ export default function PropertyListingPage() {
       propertyType: propertyType === "all" ? undefined : propertyType,
     },
     {
-      enabled: isSearchMode, // Only fetch when in search mode
+      enabled: isSearchMode, 
     }
   );
 

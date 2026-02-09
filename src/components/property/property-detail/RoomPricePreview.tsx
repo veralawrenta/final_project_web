@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/price/currency";
-import { RoomPropertyCard } from "@/types/room";
+import { RoomIdPublic } from "@/types/room";
 import { format } from "date-fns";
 
 interface Props {
-  room: RoomPropertyCard | null;
+  room: RoomIdPublic | null;
   nights: number;
   checkIn: Date;
   checkOut: Date;

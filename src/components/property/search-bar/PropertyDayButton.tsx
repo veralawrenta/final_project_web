@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { formatLocalDate } from "@/lib/date/date";
+import { formatCurrency } from "@/lib/price/currency";
 import { cn } from "@/lib/utils";
 import type { DayButton } from "react-day-picker";
 
@@ -33,7 +34,7 @@ export function PropertyDayButton({
       size="icon"
       className={cn(
         "flex flex-col h-12 w-full rounded-md",
-        modifiers.selected && "bg-primary text-primary-foreground",
+        modifiers.selected && "bg-slate-300 text-black",
         className
       )}
       {...props}
@@ -43,13 +44,13 @@ export function PropertyDayButton({
       {dayData?.lowestPrice && (
         <span
           className={cn(
-            "text-[10px]",
+            "text-[10px] px-2",
             isSeasonal
               ? "text-orange-500 font-semibold"
-              : "text-muted-foreground"
+              : "text-black"
           )}
         >
-          ${dayData.lowestPrice}
+          {formatCurrency(dayData.lowestPrice)}
         </span>
       )}
     </Button>

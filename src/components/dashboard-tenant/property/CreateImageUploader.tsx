@@ -12,10 +12,6 @@ interface CreateImageUploaderProps {
   showCoverBadge?: boolean;
 }
 
-// ============================================
-// COMPONENT
-// ============================================
-
 const CreateImageUploader = ({
   images,
   onImagesChange,
@@ -50,7 +46,6 @@ const CreateImageUploader = ({
         return;
       }
 
-      // VALIDATION 2: File type
       const allowedTypes = [
         "image/jpg",
         "image/jpeg",

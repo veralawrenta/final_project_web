@@ -1,4 +1,4 @@
-
+import { DateRange } from "react-day-picker";
 //convert all dates into pure calendar date string to strip down the time and timezone
 export function formatLocalDate(date: Date): string {
   const year = date.getFullYear();
@@ -14,16 +14,25 @@ export function fromDateString(dateStr: string): Date {
   return new Date(y, m - 1, d);
 };
 
+//parse ISO string date to Date object
+export function parseISODate(isoString: string): Date {
+  const dateOnly = isoString.split("T")[0];
+  return fromDateString(dateOnly);
+};
+
 //removing time to date
 export function normalizeLocalDate(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 };
 
 //this for inclusive range to check if a date is inside the range 
-export function isWithinRange(date: Date, start: Date, end: Date): boolean {
-  const d = normalizeLocalDate(date);
-  const s = normalizeLocalDate(start);
-  const e = normalizeLocalDate(end);
+export function isWithinRange(date: DateRange, start: string, end: string): boolean {
+  if (!date || !date.from) return false;
+  
+  const d = normalizeLocalDate(date.from);
+  const s = normalizeLocalDate(parseISODate(start));
+  const e = normalizeLocalDate(parseISODate(end));
+  
   return d >= s && d <= e;
 };
 

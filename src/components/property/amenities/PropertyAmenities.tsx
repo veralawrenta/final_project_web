@@ -7,6 +7,7 @@ interface PropertyAmenitiesProps {
 
 export function PropertyAmenities({ amenities }: PropertyAmenitiesProps) {
   if (!amenities || amenities.length === 0) return null;
+
   return (
     <div>
       <h2 className="text-xl font-semibold mb-4">Amenities</h2>
@@ -19,7 +20,10 @@ export function PropertyAmenities({ amenities }: PropertyAmenitiesProps) {
               className="flex items-center gap-2 p-3 bg-secondary rounded-lg"
             >
               <Icon className="h-5 w-5 text-primary" />
-              <span className="text-sm">{amenity.name}</span>
+
+              <span className="text-sm font-medium">
+                {amenity.name || amenity.code }
+              </span>
             </div>
           );
         })}

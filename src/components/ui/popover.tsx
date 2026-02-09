@@ -56,27 +56,18 @@ function PopoverFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function PopoverTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Title>) {
+function PopoverTitle({ className, ...props }: React.ComponentProps<"h3">) {
   return (
-    <PopoverPrimitive.Title
+    <h3
       className={cn("text-sm font-semibold leading-none tracking-tight", className)}
       {...props}
     />
   )
 }
 
-function PopoverDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Description>) {
+function PopoverDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <PopoverPrimitive.Description
-      className={cn("text-muted-foreground text-sm", className)}
-      {...props}
-    />
+    <div className={cn("text-muted-foreground text-sm", className)} {...props} />
   )
 }
 

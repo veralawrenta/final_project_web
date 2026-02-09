@@ -69,7 +69,7 @@ const PropertyListingComponent= () => {
       propertyType: propertyType === "all" ? undefined : propertyType,
     },
     {
-      enabled: isSearchMode, // Only fetch when in search mode
+      enabled: isSearchMode,
     }
   );
 
@@ -145,16 +145,9 @@ const PropertyListingComponent= () => {
               <>
                 {checkIn && checkOut && (
                   <>
-                    {fromDateString(checkIn).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })}
+                    {fromDateString(checkIn)}
                     {" - "}
-                    {fromDateString(checkOut).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {fromDateString(checkOut)}
                   </>
                 )}
                 {" • "}

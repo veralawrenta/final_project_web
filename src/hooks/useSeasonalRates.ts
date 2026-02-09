@@ -5,7 +5,8 @@ import {
   updateSeasonalRatesSchema,
 } from "@/lib/validator/dashboard.seasonalrates.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
-import { SeasonalRates } from "@/types/room";
+import { SeasonalRates } from "@/types/seasonal-rates";
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
@@ -18,30 +19,45 @@ interface GetSeasonalRatesQuery extends PaginationQueryParams {
 }
 
 export const useGetSeasonalRateById = (seasonalRateId: number) => {
+  const session = useSession();
+
   return useQuery({
     queryKey: ["seasonalRates", seasonalRateId],
     queryFn: async () => {
       const { data } = await axiosInstance.get<SeasonalRates>(
-        `/seasonalRates/${seasonalRateId}`
+        `/seasonal-rates/${seasonalRateId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        }
       );
       return data;
     },
-    enabled: Boolean(seasonalRateId) && !Number.isNaN(seasonalRateId),
+    enabled: !!session.data?.user.accessToken,
   });
 };
 
 export const useGetSeasonalRatesbyTenant = (
   queries?: GetSeasonalRatesQuery
 ) => {
+  const session = useSession();
+
   return useQuery({
     queryKey: ["seasonalRates", queries],
     queryFn: async () => {
       const { data } = await axiosInstance.get<PageableResponse<SeasonalRates>>(
-        `/seasonalRates`,
-        { params: queries }
+        `/seasonal-rates`,
+        {
+          params: queries,
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        }
       );
       return data;
     },
+    enabled: !!session.data?.user.accessToken,
   });
 };
 
@@ -52,12 +68,19 @@ export const useCreateSeasonalRates = () => {
 
   return useMutation({
     mutationFn: async (
-      payload: z.infer<typeof createSeasonalRatesSchema> & { roomId: number }
+      payload: z.infer<typeof createSeasonalRatesSchema> //& { roomId: number }
     ) => {
-      const { roomId, ...body } = payload;
+      const formattedBody = {
+        name: payload.name,
+        startDate: formatLocalDate(payload.startDate),
+        endDate: formatLocalDate(payload.endDate),
+        fixedPrice: payload.fixedPrice,
+        roomId: payload.roomId,
+        propertyId: payload.propertyId,
+      };
       const { data } = await axiosInstance.post(
-        `/seasonalRates/rooms/${roomId}`,
-        body,
+        `/seasonal-rates`,
+        formattedBody,
         {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
@@ -85,19 +108,20 @@ export const useUpdateSeasonalRates = (seasonalRateId: number) => {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async (body: z.infer<typeof updateSeasonalRatesSchema>) => {
-      //partial edit
+    mutationFn: async (body: {
+      name?: string;
+      startDate?: string;
+      endDate?: string;
+      fixedPrice?: number;
+    } ) => {
       const payload: Record<string, unknown> = {};
       if (body.name !== undefined) payload.name = body.name;
       if (body.fixedPrice !== undefined) payload.fixedPrice = body.fixedPrice;
-      if (body.startDate)
-        payload.startDate = formatLocalDate(body.startDate);
-
-      if (body.endDate)
-        payload.endDate = formatLocalDate(body.endDate);
+      if (body.startDate) payload.startDate = body.startDate;
+      if (body.endDate) payload.endDate = body.endDate;
 
       const { data } = await axiosInstance.patch(
-        `/seasonalRates/${seasonalRateId}`,
+        `/seasonal-rates/${seasonalRateId}`,
         payload,
         {
           headers: {
@@ -128,7 +152,7 @@ export const useDeleteSeasonalRates = () => {
   return useMutation({
     mutationFn: async (seasonalRateId: number) => {
       const { data } = await axiosInstance.delete(
-        `/seasonalRates/${seasonalRateId}`,
+        `/seasonal-rates/${seasonalRateId}`,
         {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,

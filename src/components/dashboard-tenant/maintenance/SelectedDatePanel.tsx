@@ -1,13 +1,14 @@
 "use client";
-import { useState, useMemo } from "react";
-import { format } from "date-fns";
-import { Plus, Trash2, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Room, RoomNonAvailability } from "@/types/room";
 import { fromDateString, isWithinRange } from "@/lib/date/date";
+import { Room, RoomNonAvailability } from "@/types/room";
+import { format } from "date-fns";
+import { Edit, Plus, Trash2 } from "lucide-react";
+import { useMemo } from "react";
+import { DateRange } from "react-day-picker";
 
 interface SelectedDatePanelProps {
-  selectedDate: Date | undefined;
+  selectedDate: DateRange | undefined;
   allRecords: RoomNonAvailability[] | undefined;
   rooms: Room[];
   onNavigateToCreate: () => void;
@@ -29,8 +30,8 @@ const SelectedDatePanel = ({
     return allRecords.filter((record) =>
       isWithinRange(
         selectedDate,
-        fromDateString(record.startDate),
-        fromDateString(record.endDate)
+        record.startDate,
+        record.endDate
       )
     );
   }, [selectedDate, allRecords]);
@@ -38,16 +39,18 @@ const SelectedDatePanel = ({
   // Prefer nested room name from paginated include, fall back to room list lookup
   const getRoomName = (record: RoomNonAvailability) => {
     if (record.room?.name) return record.room.name;
-    const match = rooms.find((r) => r.id === record.roomId);
-    return match?.name || `Room #${record.roomId}`;
+    const match = rooms.find((r) => r.id === record.id);
+    return match?.name || `Room #${record.id}`;
   };
+  const formattedSelectedDateFrom = selectedDate?.from ? format(selectedDate.from, "MMMM d, yyyy") : "";
+  const formattedSelectedDateTo = selectedDate?.to ? format(selectedDate.to, "MMMM d, yyyy") : "";
+  const showedSelectedDate = `${formattedSelectedDateFrom}${formattedSelectedDateTo ? ` - ${formattedSelectedDateTo}` : ""}`;
 
   return (
     <div className="space-y-4">
       {/* Header row */}
       <div className="flex items-center justify-between">
-        <h3 className="font-heading font-semibold">
-          {selectedDate ? format(selectedDate, "MMMM d, yyyy") : "Select a date"}
+        <h3 className="font-heading font-semibold">{selectedDate ? showedSelectedDate : "Select a date"}
         </h3>
         {selectedDate && (
           <Button size="sm" className="gap-1" onClick={onNavigateToCreate}>

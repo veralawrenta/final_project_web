@@ -1,5 +1,5 @@
+import { MasterAmenity } from "./amenity";
 import { NewImageData } from "./images";
-import { RoomNonAvailability, SeasonalRates } from "./room";
 
 export enum PropertyType {
   APARTMENT = "APARTMENT",
@@ -24,7 +24,7 @@ export interface Property {
   propertyImages: Array<{ id: number; urlImages: string; isCover: boolean }>;
   city: { id: number; name: string };
   category: { id: number; name: string } | null;
-  amenities: Array<{ id: number; name: string; code: string }>;
+  amenities: MasterAmenity[];
   availableRooms?: Array<{
     room: {
       id: number;

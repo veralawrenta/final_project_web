@@ -20,14 +20,9 @@ import { DateRange } from "react-day-picker";
 
 const MaintenanceManagementTab = () => {
   const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<DateRange | undefined>({from: new Date(), to: undefined});
   const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<RoomNonAvailability | null>(null);
-
-  const { data: allRecords, isLoading: allLoading } = useGetRoomNonAvailability({ 
-    page: 1, 
-    take: 100 
-  });
 
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [debounceSearch] = useDebounceValue(search, 500);
@@ -42,7 +37,7 @@ const MaintenanceManagementTab = () => {
   const rooms = tenantRooms?.data || [];
   const deleteBlock = useDeleteRoomNonAvailability();
 
-  const handleDateSelect = (date: Date | undefined) => setSelectedDate(date);
+  const handleDateSelect = (date: DateRange | undefined) => setSelectedDate(date);
   const handleEdit = (record: RoomNonAvailability) => {
     router.push(`/dashboard/tenant/maintenance/update/${record.id}`);
   };
@@ -74,53 +69,7 @@ const MaintenanceManagementTab = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        {/* Calendar Card */}
-        <div className="bg-card rounded-4xl border border-border p-6 flex flex-col h-auto min-h-fit shadow-sm overflow-visible">
-          <div className="flex items-center gap-3 mb-8 border-b border-border/50 pb-5">
-            <div className="p-2.5 bg-primary/10 rounded-xl">
-              <CalendarIcon className="h-5 w-5 text-primary" />
-            </div>
-            <h3 className="font-heading font-bold text-lg">Availability Calendar</h3>
-          </div>
 
-          <div className="w-full flex justify-center px-2">
-            <div className="w-full max-w-[440px]">
-              <MaintenanceCalendar
-                records={allRecords?.data}
-                isLoading={allLoading}
-                selectedDate={selectedDate}
-                onSelectDate={handleDateSelect}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Selected Date Detail Panel */}
-        <div className="h-full min-h-[400px]">
-          {allLoading ? (
-            <div className="bg-card rounded-4xl border border-border p-8 space-y-6 shadow-sm h-full">
-              <Skeleton className="h-8 w-1/3 rounded-lg" />
-              <Skeleton className="h-56 w-full rounded-3xl" />
-              <div className="space-y-3">
-                <Skeleton className="h-4 w-full rounded-full" />
-                <Skeleton className="h-4 w-3/4 rounded-full" />
-              </div>
-            </div>
-          ) : (
-            <SelectedDatePanel
-              selectedDate={selectedDate}
-              allRecords={allRecords?.data}
-              rooms={rooms}
-              onNavigateToCreate={() => router.push("/dashboard/tenant/maintenance/create")}
-              onEditBlock={handleEdit}
-              onDeleteBlock={setDeleteTarget}
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Maintenance List / Empty State */}
       <div className="pt-6">
         {listLoading && !paginatedRecords ? (
           <div className="space-y-4">
@@ -132,9 +81,8 @@ const MaintenanceManagementTab = () => {
             </div>
           </div>
         ) : paginatedRecords?.data?.length === 0 && !search ? (
-          /* MODERN PROFESSIONAL EMPTY STATE */
           <div className="relative overflow-hidden flex flex-col items-center justify-center py-24 px-8 border-2 border-dashed border-border/60 rounded-[3rem] bg-linear-to-b from-muted/20 to-transparent">
-            {/* Background Accent */}
+
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/5 blur-[100px] -z-10" />
             
             <div className="h-24 w-24 bg-background rounded-[2.5rem] shadow-2xl shadow-primary/10 border border-border flex items-center justify-center mb-8 rotate-3 transition-transform hover:rotate-0 duration-500">

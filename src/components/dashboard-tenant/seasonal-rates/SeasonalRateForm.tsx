@@ -21,9 +21,16 @@ import {
 import { FieldValues, Path, UseFormReturn } from "react-hook-form";
 import type { DateRange } from "react-day-picker";
 
+interface PropertyOption {
+  id: number;
+  name: string;
+}
+
 interface RoomOption {
   id: number;
   name: string;
+  propertyId: number;
+  propertyName: string;
 }
 
 interface SeasonalRateFormProps<TFieldValues extends FieldValues> {
@@ -32,7 +39,9 @@ interface SeasonalRateFormProps<TFieldValues extends FieldValues> {
   isSubmitting?: boolean;
   submitLabel: string;
   onCancel: () => void;
-  /** When provided, shows a room selector (for create flow). */
+  /** List of properties available */
+  properties?: PropertyOption[];
+  /** List of rooms available (with property info) */
   rooms?: RoomOption[];
 
   fields: {
@@ -41,6 +50,7 @@ interface SeasonalRateFormProps<TFieldValues extends FieldValues> {
     endDate: Path<TFieldValues>;
     fixedPrice: Path<TFieldValues>;
     roomId?: Path<TFieldValues>;
+    propertyId?: Path<TFieldValues>;
   };
 }
 
@@ -51,7 +61,8 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
   submitLabel,
   onCancel,
   fields,
-  rooms,
+  properties = [],
+  rooms = [],
 }: SeasonalRateFormProps<TFieldValues>) {
   const startDate = form.watch(fields.startDate) as Date | undefined;
   const endDate = form.watch(fields.endDate) as Date | undefined;
@@ -62,33 +73,114 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
         ? { from: startDate, to: undefined }
         : undefined;
 
+  // Group rooms by property for better organization
+  const roomsByProperty = rooms.reduce((acc, room) => {
+    if (!acc[room.propertyName]) {
+      acc[room.propertyName] = [];
+    }
+    acc[room.propertyName].push(room);
+    return acc;
+  }, {} as Record<string, RoomOption[]>);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {fields.roomId && rooms && rooms.length > 0 && (
+        {/* Property or Room Selector */}
+        {(properties.length > 0 || rooms.length > 0) && (
           <FormField
             control={form.control}
-            name={fields.roomId}
+            name={fields.propertyId || fields.roomId!}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Room</FormLabel>
+                <FormLabel>Apply to</FormLabel>
                 <Select
-                  onValueChange={(value) => field.onChange(Number(value))}
-                  value={field.value != null ? String(field.value) : ""}
+                  onValueChange={(value) => {
+                    // Parse the value: "property-{id}" or "room-{id}"
+                    const [type, id] = value.split("-");
+                    
+                    if (type === "property") {
+                      // Clear roomId and set propertyId
+                      if (fields.roomId) {
+                        form.setValue(fields.roomId, null as never);
+                      }
+                      if (fields.propertyId) {
+                        form.setValue(fields.propertyId, Number(id) as never);
+                      }
+                    } else if (type === "room") {
+                      // Clear propertyId and set roomId
+                      if (fields.propertyId) {
+                        form.setValue(fields.propertyId, null as never);
+                      }
+                      if (fields.roomId) {
+                        form.setValue(fields.roomId, Number(id) as never);
+                      }
+                    }
+                  }}
+                  value={
+                    form.watch(fields.propertyId as Path<TFieldValues>)
+                      ? `property-${form.watch(fields.propertyId as Path<TFieldValues>)}`
+                      : form.watch(fields.roomId as Path<TFieldValues>)
+                        ? `room-${form.watch(fields.roomId as Path<TFieldValues>)}`
+                        : ""
+                  }
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a room" />
+                      <SelectValue placeholder="Select property or specific room" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {rooms.map((room) => (
-                      <SelectItem key={room.id} value={String(room.id)}>
-                        {room.name}
-                      </SelectItem>
-                    ))}
+                    {/* Property options - applies to all rooms */}
+                    {properties.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                          Entire Property (All Rooms)
+                        </div>
+                        {properties.map((property) => (
+                          <SelectItem
+                            key={`property-${property.id}`}
+                            value={`property-${property.id}`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{property.name}</span>
+                              <span className="text-xs text-muted-foreground">
+                                (All rooms)
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
+
+                    {/* Room options - grouped by property */}
+                    {rooms.length > 0 && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2 border-t">
+                          Individual Rooms
+                        </div>
+                        {Object.entries(roomsByProperty).map(([propertyName, propertyRooms]) => (
+                          <div key={propertyName}>
+                            <div className="px-2 py-1 text-xs text-muted-foreground italic">
+                              {propertyName}
+                            </div>
+                            {propertyRooms.map((room) => (
+                              <SelectItem
+                                key={`room-${room.id}`}
+                                value={`room-${room.id}`}
+                                className="pl-6"
+                              >
+                                {room.name}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select an entire property to apply rates to all rooms, or choose a specific room
+                </p>
                 <FormMessage />
               </FormItem>
             )}

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createSeasonalRatesSchema } from "@/lib/validator/dashboard.seasonalrates.schema";
 import { useCreateSeasonalRates } from "@/hooks/useSeasonalRates";
 import { useGetTenantRooms } from "@/hooks/useRoom";
+import { useGetTenantProperties } from "@/hooks/useProperty";
 import z from "zod";
 import { SeasonalRateForm } from "@/components/dashboard-tenant/seasonal-rates/SeasonalRateForm";
 import { useMemo } from "react";
@@ -13,17 +14,38 @@ import { useMemo } from "react";
 export default function CreateSeasonalRatePage() {
   const router = useRouter();
   const { mutateAsync, isPending } = useCreateSeasonalRates();
+  const { data: propertiesData } = useGetTenantProperties({ take: 500 });
   const { data: roomsData } = useGetTenantRooms({ take: 500 });
+  
+  // Transform properties data
+  const properties = useMemo(
+    () =>
+      (propertiesData?.data ?? []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+      })),
+    [propertiesData?.data]
+  );
+
+  // Transform rooms data to include property information
   const rooms = useMemo(
     () =>
-      (roomsData?.data ?? []).map((r) => ({ id: r.id, name: r.name })),
+      (roomsData?.data ?? [])
+        .filter((r) => r.property) // Filter out rooms without property
+        .map((r) => ({
+          id: r.id,
+          name: r.name,
+          propertyId: r.propertyId!,
+          propertyName: r.property!.name,
+        })),
     [roomsData?.data]
   );
 
   const form = useForm<z.infer<typeof createSeasonalRatesSchema>>({
     resolver: zodResolver(createSeasonalRatesSchema),
     defaultValues: {
-      roomId: 0,
+      roomId: null,
+      propertyId: null,
       name: "",
       startDate: undefined,
       endDate: undefined,
@@ -44,6 +66,7 @@ export default function CreateSeasonalRatePage() {
       isSubmitting={isPending}
       onCancel={() => router.back()}
       onSubmit={handleSubmit}
+      properties={properties}
       rooms={rooms}
       fields={{
         name: "name",
@@ -51,6 +74,7 @@ export default function CreateSeasonalRatePage() {
         endDate: "endDate",
         fixedPrice: "fixedPrice",
         roomId: "roomId",
+        propertyId: "propertyId",
       }}
     />
   );

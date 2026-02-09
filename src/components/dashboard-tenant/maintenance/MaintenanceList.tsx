@@ -1,12 +1,11 @@
 "use client";
-import { format } from "date-fns";
-import { Search, Trash2, Loader2, Edit } from "lucide-react";
+import PaginationSection from "@/components/PaginationSection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Room, RoomNonAvailability } from "@/types/room";
-import PaginationSection from "@/components/PaginationSection";
+import { formatLocalDate, fromDateString } from "@/lib/date/date";
 import { PageableResponse } from "@/types/pagination";
-import { fromDateString } from "@/lib/date/date";
+import { Room, RoomNonAvailability } from "@/types/room";
+import { Edit, Loader2, Search, Trash2 } from "lucide-react";
 
 interface MaintenanceListProps {
   data: PageableResponse<RoomNonAvailability> | undefined;
@@ -31,8 +30,8 @@ const MaintenanceList = ({
 }: MaintenanceListProps) => {
   const getRoomName = (record: RoomNonAvailability) => {
     if (record.room?.name) return record.room.name;
-    const match = rooms.find((r) => r.id === record.roomId);
-    return match?.name || `Room #${record.roomId}`;
+    const match = rooms.find((r) => r.id === record.id);
+    return match?.name || `Room #${record.id}`;
   };
 
   return (
@@ -80,9 +79,7 @@ const MaintenanceList = ({
                   )}
 
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                    {format(fromDateString(record.startDate), "MMM d, yyyy")}
-                    {" "}&ndash;{" "}
-                    {format(fromDateString(record.endDate), "MMM d, yyyy")}
+                   {formatLocalDate(fromDateString(record.startDate.split("T")[0]))} to {formatLocalDate(fromDateString(record.endDate.split("T")[0]))}
                   </div>
                 </div>
 
