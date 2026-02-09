@@ -19,23 +19,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useDeleteSeasonalRates, useGetSeasonalRatesbyTenant } from "@/hooks/useSeasonalRates";
+import {
+  useDeleteSeasonalRates,
+  useGetSeasonalRatesbyTenant,
+} from "@/hooks/useSeasonalRates";
 import { formatLocalDate, fromDateString } from "@/lib/date/date";
 import { formatCurrency } from "@/lib/price/currency";
 import { SeasonalRates } from "@/types/seasonal-rates";
 import {
   CalendarIcon,
   Edit,
-  Filter,
   Plus,
   Search,
   Trash2,
-  TrendingUp
+  TrendingUp,
+  X,
 } from "lucide-react";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
+import Image from "next/image";
 
 interface SeasonalRateManagementTabProps {
   onAddRate: () => void;
@@ -48,15 +51,21 @@ const SeasonalRateManagementTab = ({
 }: SeasonalRateManagementTabProps) => {
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [sortBy, setSortBy] = useQueryState("sortBy", {
+    defaultValue: "createdAt",
+  });
+  const [sortOrder, setSortOrder] = useQueryState("sortOrder", {
+    defaultValue: "desc",
+  });
   const [debounceSearch] = useDebounceValue(search, 500);
-
-  const [selectedProperty, setSelectedProperty] = useState<string>("all");
   const [deleteRate, setDeleteRate] = useState<SeasonalRates | null>(null);
 
   const { data: seasonalRates, isPending } = useGetSeasonalRatesbyTenant({
     page,
     take: 6,
     search: debounceSearch || undefined,
+    sortBy,
+    sortOrder: sortOrder as "asc" | "desc",
   });
 
   const deleteRateMutation = useDeleteSeasonalRates();
@@ -72,16 +81,16 @@ const SeasonalRateManagementTab = ({
     }
   };
 
-  // Get unique property names for the filter dropdown
-  const allRates: SeasonalRates[] = seasonalRates?.data ?? [];
-  const propertyOptions = Array.from(
-    new Set(allRates.map((rate) => rate.property?.name).filter(Boolean))
-  ) as string[];
+  const handleClearAll = () => {
+    setSearch("");
+    setSortBy("createdAt");
+    setSortOrder("desc");
+    setPage(1);
+  };
 
-  const filteredRates = allRates.filter((rate) => {
-    if (selectedProperty === "all") return true;
-    return rate.property?.name === selectedProperty;
-  });
+  const allRates: SeasonalRates[] = seasonalRates?.data ?? [];
+  const hasActiveFilters =
+    search !== "" || sortBy !== "createdAt" || sortOrder !== "desc";
 
   return (
     <div className="space-y-6">
@@ -91,7 +100,8 @@ const SeasonalRateManagementTab = ({
             Seasonal Rates
           </h1>
           <p className="text-muted-foreground mt-1">
-            Manage and monitor seasonal pricing rules across your property portfolio.
+            Manage and monitor seasonal pricing rules across your property
+            portfolio.
           </p>
         </div>
         <Button className="gap-2 shadow-sm" onClick={onAddRate}>
@@ -100,74 +110,97 @@ const SeasonalRateManagementTab = ({
         </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by rate name..."
+            placeholder="Search by rate name, property, or room..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10 focus-visible:ring-primary"
+            className="pl-10"
           />
         </div>
-        <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-          <SelectTrigger className="w-full sm:w-[240px] bg-background">
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <SelectValue placeholder="Filter by property" />
-            </div>
+
+        {/* Sort By */}
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Properties</SelectItem>
-            {propertyOptions.map((propertyName) => (
-              <SelectItem key={propertyName} value={propertyName}>
-                {propertyName}
-              </SelectItem>
-            ))}
+            <SelectItem value="createdAt">Date Created</SelectItem>
+            <SelectItem value="name">Seasonal Name</SelectItem>
+            <SelectItem value="fixedPrice">Price</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={sortOrder} onValueChange={setSortOrder}>
+          <SelectTrigger className="w-[130px]">
+            <SelectValue placeholder="Order" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="asc">Ascending</SelectItem>
+            <SelectItem value="desc">Descending</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {hasActiveFilters && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleClearAll}
+            title="Clear all filters"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
 
-      <div className="space-y-4">
-        {/* Loading State: Skeleton Cards */}
-        {isPending &&
-          Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="border rounded-2xl p-5 space-y-4">
-              <div className="flex justify-between">
-                <Skeleton className="h-5 w-16" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-8 w-8 rounded-md" />
-                  <Skeleton className="h-8 w-8 rounded-md" />
-                </div>
-              </div>
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <div className="pt-4 border-t flex justify-between">
-                <Skeleton className="h-5 w-20" />
-                <Skeleton className="h-5 w-24" />
-              </div>
-            </div>
-          ))}
+      {!isPending && seasonalRates?.data && (
+        <div className="text-sm text-muted-foreground">
+          {allRates.length} {allRates.length === 1 ? "rate" : "rates"}
+          {hasActiveFilters && " found"}
+        </div>
+      )}
 
-        {/* Empty State */}
-        {!isPending && filteredRates.length === 0 && (
+      <div className="space-y-4">
+        {isPending && (
+          <div className="flex flex-col items-center justify-center py-32 space-y-4 w-full border-2 border-dashed rounded-3xl bg-muted/5">
+            <div className="relative h-16 w-16 animate-pulse">
+              <Image
+                src="/images/nuit-logo.png"
+                fill
+                alt="Loading..."
+                className="object-contain"
+                priority
+              />
+            </div>
+            <div className="flex flex-col items-center space-y-2">
+              <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <p className="text-xs font-medium text-muted-foreground">
+                Updating rates...
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!isPending && allRates.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed rounded-3xl bg-muted/30">
             <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
               <TrendingUp className="h-8 w-8 text-muted-foreground" />
             </div>
             <h3 className="text-xl font-semibold">No seasonal rates found</h3>
             <p className="text-muted-foreground text-center max-w-xs mt-2">
-              {search || selectedProperty !== "all" 
-                ? "Try adjusting your filters or search terms to find what you're looking for." 
+              {hasActiveFilters
+                ? "No rates match your filters. Try adjusting your criteria."
                 : "You haven't added any seasonal rates yet. Start by creating your first price adjustment."}
             </p>
-            {search || selectedProperty !== "all" ? (
-              <Button 
-                variant="outline" 
-                className="mt-6" 
-                onClick={() => {setSearch(""); setSelectedProperty("all");}}
+            {hasActiveFilters ? (
+              <Button
+                variant="outline"
+                className="mt-6 gap-2"
+                onClick={handleClearAll}
               >
-                Clear all filters
+                <X className="h-4 w-4" />
+                Clear Filters
               </Button>
             ) : (
               <Button className="mt-6" onClick={onAddRate}>
@@ -177,56 +210,72 @@ const SeasonalRateManagementTab = ({
             )}
           </div>
         )}
-        {!isPending && filteredRates.map((rate) => (
-          <div
-            key={rate.id}
-            className="bg-card rounded-2xl border border-border p-5 hover:shadow-md transition-all duration-200"
-          >
-            <div className="flex items-start justify-end mb-4">
-              <div className="flex gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 rounded-full"
-                  onClick={() => onEditRate(rate)}
-                >
-                  <Edit className="h-3.5 w-3.5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
-                  onClick={() => setDeleteRate(rate)}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+
+        {!isPending &&
+          allRates.map((rate) => (
+            <div
+              key={rate.id}
+              className="bg-card rounded-2xl border border-border p-5 hover:shadow-md transition-all duration-200"
+            >
+              <div className="flex items-start justify-end mb-4">
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-full"
+                    onClick={() => onEditRate(rate)}
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
+                    onClick={() => setDeleteRate(rate)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+
+              <h3 className="font-heading font-bold text-xl leading-tight mb-1 line-clamp-1">
+                {rate.name}
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {rate.property?.name ??
+                  rate.room?.property?.name ??
+                  "Unknown Hotel"}
+                {" – "}
+                {rate.room ? rate.room.name : "All Rooms"}
+              </p>
+
+              <div className="flex items-center gap-3 py-3 border-t border-border mt-auto">
+                <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                  <CalendarIcon className="h-4 w-4" />
+                  <span>
+                    {formatLocalDate(
+                      fromDateString(rate.startDate.split("T")[0])
+                    )}{" "}
+                    to{" "}
+                    {formatLocalDate(
+                      fromDateString(rate.endDate.split("T")[0])
+                    )}
+                  </span>
+                </div>
+                <div className="ml-auto flex items-baseline gap-1">
+                  <span className="text-xl font-bold tracking-tight text-foreground">
+                    {formatCurrency(rate.fixedPrice)}
+                  </span>
+                  <span className="text-[12px] text-muted-foreground font-medium">
+                    /night
+                  </span>
+                </div>
               </div>
             </div>
-
-            <h3 className="font-heading font-bold text-xl leading-tight mb-1 line-clamp-1">
-              {rate.name}
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              {rate.property?.name}
-            </p>
-
-            <div className="flex items-center gap-3 py-3 border-t border-border mt-auto">
-              <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-                <CalendarIcon className="h-4 w-4" />
-                <span> {formatLocalDate(fromDateString(rate.startDate.split("T")[0]))} to {formatLocalDate(fromDateString(rate.endDate.split("T")[0]))}</span>
-              </div>
-              <div className="ml-auto flex items-baseline gap-1">
-                <span className="text-xl font-bold tracking-tight text-foreground">
-                 {formatCurrency(rate.fixedPrice)}
-                </span>
-                <span className="text-[12px] text-muted-foreground font-medium">/night</span>
-              </div>
-            </div>
-          </div>
-        ))}
+          ))}
       </div>
 
-      {!!seasonalRates?.meta && !isPending && filteredRates.length > 0 && (
+      {!!seasonalRates?.meta && !isPending && allRates.length > 0 && (
         <div className="pt-4">
           <PaginationSection
             meta={seasonalRates.meta}
@@ -235,23 +284,28 @@ const SeasonalRateManagementTab = ({
         </div>
       )}
 
-      {/* AlertDialog Logic */}
       <AlertDialog open={!!deleteRate} onOpenChange={() => setDeleteRate(null)}>
         <AlertDialogContent className="max-w-[400px]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl">Delete Seasonal Rate</AlertDialogTitle>
+            <AlertDialogTitle className="text-xl">
+              Delete Seasonal Rate
+            </AlertDialogTitle>
             <AlertDialogDescription className="space-y-4 pt-2">
               <p>
-                Are you sure you want to delete <span className="font-semibold text-foreground">"{deleteRate?.name}"</span>? 
-                Pricing will revert to the standard base rate for this period.
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-foreground">
+                  "{deleteRate?.name}"
+                </span>
+                ? Pricing will revert to the standard base rate for this period.
               </p>
               <div className="bg-destructive/5 border border-destructive/20 p-3 rounded-lg">
                 <p className="text-destructive text-xs font-bold uppercase tracking-wider mb-2">
                   Permanent Action
                 </p>
                 <ul className="space-y-1 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">• Pricing rules will be removed</li>
-                  <li className="flex items-center gap-2">• This cannot be undone</li>
+                  <li className="flex items-center gap-2">
+                    • Pricing rules will be removed
+                  </li>
                 </ul>
               </div>
             </AlertDialogDescription>

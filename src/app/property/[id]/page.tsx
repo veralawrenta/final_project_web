@@ -1,10 +1,11 @@
 import PropertyDetail from '@/components/property/PropertyDetail'
+import { Suspense } from 'react'
 
 const PropertyIdPage = () => {
   return (
-    <div>
+    <Suspense fallback={<div />}>
         <PropertyDetail />
-    </div>
+    </Suspense>
   )
 }
 

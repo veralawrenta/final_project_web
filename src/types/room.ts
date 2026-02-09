@@ -1,8 +1,12 @@
+import { PropertyStatus, PropertyType } from "./property";
+
 export interface Room {
   id: number;
   propertyId: number;
   property?: {
     name: string;
+    propertyStatus?: PropertyStatus;
+    propertyType?: PropertyType
     category: {
       id: number;
       name: string;

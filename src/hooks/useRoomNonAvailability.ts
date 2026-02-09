@@ -8,6 +8,8 @@ import { toast } from "sonner";
 
 interface GetRoomNonAvailabilityQuery extends PaginationQueryParams {
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const useGetRoomNonAvailability = (

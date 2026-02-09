@@ -16,6 +16,8 @@ import z from "zod";
 
 interface GetSeasonalRatesQuery extends PaginationQueryParams {
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export const useGetSeasonalRateById = (seasonalRateId: number) => {

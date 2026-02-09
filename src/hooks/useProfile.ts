@@ -8,7 +8,7 @@ import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import z, { set } from "zod";
+import z from "zod";
 
 interface Payload {
   avatar: File;
@@ -211,7 +211,7 @@ export const useChangePassword = () => {
       return data;
     },
     onSuccess: () => {
-      toast.success("Upload avatar success");
+      toast.success("Change password success");
       setTimeout(() => {
         router.push("/profile/user");
       }, 1000);

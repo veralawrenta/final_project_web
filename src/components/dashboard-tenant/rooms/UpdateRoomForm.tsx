@@ -88,7 +88,7 @@ const UpdateRoomForm = () => {
   }, [roomData, form]);
 
   const handleCancel = () => {
-    // Cleanup preview URLs
+
     newImages.forEach((url) => URL.revokeObjectURL(url));
     router.push("/dashboard/tenant/room");
   };
@@ -185,7 +185,7 @@ const UpdateRoomForm = () => {
                   <FormLabel>Property</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
-                    value={field.value?.toString()}
+                    value={roomData.property?.name}
                     disabled
                   >
                     <FormControl>
@@ -199,7 +199,7 @@ const UpdateRoomForm = () => {
                           key={property.id}
                           value={property.id.toString()}
                         >
-                          {property.title}
+                          {property.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -226,8 +226,6 @@ const UpdateRoomForm = () => {
                 </FormItem>
               )}
             />
-
-            {/* Description */}
             <FormField
               control={form.control}
               name="description"

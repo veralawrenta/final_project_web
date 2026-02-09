@@ -1,19 +1,19 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
-import { z } from "zod";
-import { axiosInstance } from "@/lib/axios";
-import { verifyAndSetPasswordSchema } from "../../lib/validator/auth.set-password.schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { axiosInstance } from "@/lib/axios";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Label } from "@radix-ui/react-label";
-import Link from "next/link";
+import { AxiosError } from "axios";
 import Image from "next/image";
-import { toast, Toaster } from "sonner";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { verifyAndSetPasswordSchema } from "../../lib/validator/auth.set-password.schema";
+import { Role } from "@/types/user";
 
 type FormData = z.infer<typeof verifyAndSetPasswordSchema>;
 
@@ -44,14 +44,11 @@ const VerifyAndSetPasswordForm = () => {
 
     const validateToken = async () => {
       try {
-        await axiosInstance.post(
-          "/auth/validate",
-         null, {
+        await axiosInstance.post("/auth/validate", null, {
           headers: {
-            Authorization: `Bearer ${verificationToken}`
-          }
-         }
-        );
+            Authorization: `Bearer ${verificationToken}`,
+          },
+        });
 
         setIsValid(true);
       } catch {
@@ -73,29 +70,33 @@ const VerifyAndSetPasswordForm = () => {
 
     try {
       const response = await axiosInstance.patch(
-        "/auth/set-password", {
-        password: data.password},
+        "/auth/set-password",
+        {
+          password: data.password,
+        },
         {
           headers: {
-            Authorization: `Bearer ${verificationToken}`
+            Authorization: `Bearer ${verificationToken}`,
+          },
         }
-      }
       );
 
       toast.success("Your account has been verified successfully");
 
       const role = response.data.user.role;
 
-      if (role === "USER") {
-        router.replace("/auth/login/user");
-      } else if (role === "TENANT") {
-        router.replace("/auth/login/tenant");
+      if (role === Role.USER) {
+        router.push("/auth/login/user");
+      } else if (role === Role.TENANT) {
+        router.push("/auth/login/tenant");
       } else {
         router.replace("/");
       }
     } catch (error) {
       if (error instanceof AxiosError) {
-        setError(error.response?.data?.message ??"Failed to verify account. Please try again."
+        setError(
+          error.response?.data?.message ??
+            "Failed to verify account. Please try again."
         );
         toast.error("Verification failed");
       } else {
@@ -108,8 +109,24 @@ const VerifyAndSetPasswordForm = () => {
 
   if (isVerifying) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        Validating your account. Please wait...
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+        <div className="relative flex flex-col items-center space-y-4">
+          <div className="relative h-24 w-24 animate-pulse">
+            <Image
+              src="/images/nuit-logo.png"
+              fill
+              alt="Loading..."
+              className="object-contain"
+              priority
+            />
+          </div>
+          <div className="flex flex-col items-center space-y-2">
+            <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm font-medium text-slate-500 animate-in fade-in duration-700">
+              Validating your account...
+            </p>
+          </div>
+        </div>
       </div>
     );
   }

@@ -4,25 +4,23 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { NewImageData } from "@/types/images";
 import {
-  ArrowLeft,
-  Bed,
   Check,
-  DollarSign,
   Edit2,
   Loader2,
   Plus,
   Trash2,
   Users,
+  Bed,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { RoomData, RoomFormCard } from "../RoomFormCard";
+import { formatCurrency } from "@/lib/price/currency";
 
 export interface SavedRoom {
   id: number;
@@ -36,19 +34,15 @@ export interface SavedRoom {
 
 interface CreatePropertyStep2Props {
   onComplete: (rooms: SavedRoom[]) => void;
-  onBack: () => void;
-  onCancel: () => void;
   isLoading?: boolean;
 }
 
 export function CreatePropertyStep2Form({
   onComplete,
-  onBack,
-  onCancel,
   isLoading,
 }: CreatePropertyStep2Props) {
   const [savedRooms, setSavedRooms] = useState<SavedRoom[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(true); // Start with form open
   const [editingRoomId, setEditingRoomId] = useState<number | null>(null);
 
   const handleAddNewRoom = () => {
@@ -63,31 +57,24 @@ export function CreatePropertyStep2Form({
 
   const handleDeleteRoom = (roomId: number) => {
     setSavedRooms(savedRooms.filter((r) => r.id !== roomId));
-    toast.success("Room removed from list");
+    toast.success("Room removed");
   };
 
   const handleSaveRoom = (data: RoomData) => {
     if (editingRoomId) {
-      // Update existing room
       setSavedRooms(
         savedRooms.map((room) =>
-          room.id === editingRoomId
-            ? {
-                ...room,
-                ...data,
-              }
-            : room
+          room.id === editingRoomId ? { ...room, ...data } : room
         )
       );
-      toast.success("Room updated in list");
+      toast.success("Room updated");
     } else {
-      // Add new room
       const newRoom: SavedRoom = {
         id: Date.now(),
         ...data,
       };
       setSavedRooms([...savedRooms, newRoom]);
-      toast.success("Room added to list");
+      toast.success("Room added");
     }
 
     setShowForm(false);
@@ -100,9 +87,8 @@ export function CreatePropertyStep2Form({
       ...data,
     };
     setSavedRooms([...savedRooms, newRoom]);
-    toast.success("Room added. You can add another.");
+    toast.success("Room added. Add another?");
 
-    // Reset form by toggling
     setShowForm(false);
     setTimeout(() => {
       setEditingRoomId(null);
@@ -111,25 +97,20 @@ export function CreatePropertyStep2Form({
   };
 
   const handleCancelForm = () => {
-    setShowForm(false);
-    setEditingRoomId(null);
+    // Only allow cancel if there are already saved rooms
+    if (savedRooms.length > 0) {
+      setShowForm(false);
+      setEditingRoomId(null);
+    }
   };
 
   const handleComplete = () => {
     if (savedRooms.length === 0) {
-      toast.error("Please add at least one room before completing");
+      toast.error("Add at least one room");
       return;
     }
 
     onComplete(savedRooms);
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
   };
 
   const editingRoom = editingRoomId
@@ -137,28 +118,29 @@ export function CreatePropertyStep2Form({
     : undefined;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Create Property</h1>
-        <p className="text-muted-foreground">Step 2 of 2: Add Rooms</p>
+    <div className="max-w-4xl mx-auto space-y-6 pb-8">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold">Add Rooms</h1>
+        <p className="text-sm text-muted-foreground">
+          Your property has been created. Now add rooms to publish it.
+        </p>
       </div>
 
-      <div className="flex gap-2">
-        <div className="h-2 flex-1 rounded-full bg-primary" />
-        <div className="h-2 flex-1 rounded-full bg-primary" />
+      {/* Info Banner */}
+      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          <strong>Required:</strong> Add at least one room to publish your property. You can add more rooms later from the property dashboard.
+        </p>
       </div>
 
       {/* Saved Rooms List */}
       {savedRooms.length > 0 && !showForm && (
         <Card>
-          <CardHeader>
+          <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Added Rooms ({savedRooms.length})</CardTitle>
-                <CardDescription>
-                  Your rooms are ready to publish
-                </CardDescription>
-              </div>
+              <CardTitle className="text-lg">
+                Rooms ({savedRooms.length})
+              </CardTitle>
               <Button onClick={handleAddNewRoom} variant="outline" size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Room
@@ -169,9 +151,9 @@ export function CreatePropertyStep2Form({
             {savedRooms.map((room) => (
               <div
                 key={room.id}
-                className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors"
+                className="flex items-start gap-4 p-3 rounded-md border hover:border-primary/50 transition-colors"
               >
-                <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted shrink-0">
+                <div className="w-20 h-20 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-900 shrink-0">
                   {room.images[0] && (
                     <img
                       src={room.images[0].preview}
@@ -182,39 +164,31 @@ export function CreatePropertyStep2Form({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg truncate">
-                    {room.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                    {room.description}
+                  <h3 className="font-medium truncate">{room.name}</h3>
+                  <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
+                    {room.description.replace(/<[^>]*>/g, '')}
                   </p>
 
-                  <div className="flex flex-wrap items-center gap-3 mt-3">
-                    <Badge variant="secondary" className="gap-1">
-                      <DollarSign className="h-3 w-3" />
-                      {formatCurrency(room.basePrice)}/night
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      {formatCurrency(room.basePrice)}
                     </Badge>
-                    <Badge variant="secondary" className="gap-1">
+                    <Badge variant="secondary" className="text-xs gap-1">
                       <Users className="h-3 w-3" />
-                      {room.totalGuests} guests
+                      {room.totalGuests}
                     </Badge>
-                    <Badge variant="secondary" className="gap-1">
+                    <Badge variant="secondary" className="text-xs gap-1">
                       <Bed className="h-3 w-3" />
-                      {room.totalUnits} units
-                    </Badge>
-                    <Badge variant="outline">
-                      {room.images.length} image
-                      {room.images.length !== 1 ? "s" : ""}
+                      {room.totalUnits}
                     </Badge>
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => handleEditRoom(room)}
-                    title="Edit room"
                   >
                     <Edit2 className="h-4 w-4" />
                   </Button>
@@ -223,7 +197,6 @@ export function CreatePropertyStep2Form({
                     size="icon"
                     onClick={() => handleDeleteRoom(room.id)}
                     className="text-destructive hover:text-destructive"
-                    title="Delete room"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -235,7 +208,7 @@ export function CreatePropertyStep2Form({
       )}
 
       {/* Room Form */}
-      {showForm ? (
+      {showForm && (
         <RoomFormCard
           onSubmit={handleSaveRoom}
           onCancel={savedRooms.length > 0 ? handleCancelForm : undefined}
@@ -244,53 +217,23 @@ export function CreatePropertyStep2Form({
           showSecondaryAction={!editingRoomId}
           secondaryActionLabel="Save & Add Another"
           onSecondaryAction={handleSaveAndAddAnother}
-          title={editingRoomId ? "Edit Room" : "Add New Room"}
-          description={
-            editingRoomId
-              ? "Update room details and images"
-              : "Fill in room details and upload images"
-          }
+          title={editingRoomId ? "Edit Room" : "Add Room"}
+          description={editingRoomId ? "Update room details" : "Fill in room details"}
           initialData={editingRoom}
         />
-      ) : (
-        savedRooms.length === 0 && (
-          <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <Bed className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="font-semibold text-lg mb-2">
-                No rooms added yet
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4 text-center">
-                Add at least one room to continue
-              </p>
-              <Button onClick={handleAddNewRoom}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Your First Room
-              </Button>
-            </CardContent>
-          </Card>
-        )
       )}
 
-      {/* Footer Actions */}
-      <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t">
-        <Button type="button" variant="outline" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
+      {/* Footer Actions - Only Publish button */}
+      <div className="flex justify-end gap-3 pt-4 border-t">
+        <Button
+          onClick={handleComplete}
+          disabled={savedRooms.length === 0 || isLoading}
+          size="lg"
+        >
+          {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+          <Check className="h-4 w-4 mr-2" />
+          Publish Property
         </Button>
-        <div className="flex gap-3">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleComplete}
-            disabled={savedRooms.length === 0 || isLoading}
-          >
-            {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            <Check className="h-4 w-4 mr-2" />
-            Complete & Publish
-          </Button>
-        </div>
       </div>
     </div>
   );
