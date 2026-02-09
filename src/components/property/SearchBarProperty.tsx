@@ -14,6 +14,7 @@ import { Search } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useState } from "react";
 import { DatePicker } from "../DatePicker";
+import { formatCurrency } from "@/lib/price/currency";
 
 interface Props {
   propertyId: number;
@@ -139,7 +140,7 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 6 }: Props) {
             <div className="text-xs text-center text-muted-foreground">
               {nights} night{nights > 1 ? "s" : ""} •{" "}
               <strong className="text-foreground">
-                ${totalPrice.toLocaleString()}
+                {formatCurrency(totalPrice)}
               </strong>
             </div>
           )}

@@ -36,14 +36,17 @@ import {
   useGetRoomNonAvailability,
   useUpdateRoomNonAvailability,
 } from "@/hooks/useRoomNonAvailability";
-import { updateMaintenanceBlockSchema, UpdateMaintenanceBlockValues } from "@/lib/validator/dashboard.maintenance.schema";
-import { formatLocalDate, fromDateString } from "@/lib/date/date";
+import {
+  updateMaintenanceBlockSchema,
+  UpdateMaintenanceBlockValues,
+} from "@/lib/validator/dashboard.maintenance.schema";
+import { formatLocalDate, fromDateString, parseISODate } from "@/lib/date/date";
 import { Property } from "@/types/property";
 
 export default function UpdateMaintenanceBlockPage() {
   const router = useRouter();
   const params = useParams();
-  const blockId = Number(params.id);
+  const roomNonAvailabilityId = Number(params.id);
 
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
   const [selectedRoomId, setSelectedRoomId] = useState<string>("");
@@ -54,11 +57,14 @@ export default function UpdateMaintenanceBlockPage() {
   const { data: tenantRooms } = useGetTenantRooms();
   const allRooms = tenantRooms?.data || [];
 
-  const { data: allBlocks, isLoading: blocksLoading } = useGetRoomNonAvailability({
-    page: 1,
-    take: 100,
-  });
-  const blockData = allBlocks?.data?.find((b) => b.id === blockId);
+  const { data: allBlocks, isLoading: blocksLoading } =
+    useGetRoomNonAvailability({
+      page: 1,
+      take: 100,
+    });
+  const blockData = allBlocks?.data?.find(
+    (b) => b.id === roomNonAvailabilityId
+  );
 
   const updateBlock = useUpdateRoomNonAvailability();
 
@@ -74,15 +80,25 @@ export default function UpdateMaintenanceBlockPage() {
 
   useEffect(() => {
     if (blockData) {
-      const room = allRooms.find((r) => r.id === blockData.roomId);
-      if (room) {
-        setSelectedPropertyId(room.propertyId.toString());
-        setSelectedRoomId(blockData.roomId.toString());
+      const room = allRooms.find((r) => r.id === blockData.room?.id);
+      if (!room) return;
+
+      if (room.propertyId !== undefined) {
+        setSelectedPropertyId(String(room.propertyId));
+      }
+      setSelectedRoomId(String(blockData.room?.id));
+
+      const startDate = parseISODate(blockData.startDate);
+      const endDate = parseISODate(blockData.endDate);
+
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error("❌ Invalid dates after parsing!");
+        return;
       }
 
       form.reset({
-        startDate: fromDateString(blockData.startDate),
-        endDate: fromDateString(blockData.endDate),
+        startDate,
+        endDate,
         reason: blockData.reason || "",
         roomInventory: blockData.roomInventory,
       });
@@ -102,9 +118,11 @@ export default function UpdateMaintenanceBlockPage() {
   const onSubmit = async (values: UpdateMaintenanceBlockValues) => {
     try {
       await updateBlock.mutateAsync({
-        id: blockId,
+        id: roomNonAvailabilityId,
         body: {
-          startDate: values.startDate ? formatLocalDate(values.startDate) : undefined,
+          startDate: values.startDate
+            ? formatLocalDate(values.startDate)
+            : undefined,
           endDate: values.endDate ? formatLocalDate(values.endDate) : undefined,
           reason: values.reason,
           roomInventory: values.roomInventory,
@@ -122,16 +140,18 @@ export default function UpdateMaintenanceBlockPage() {
         <p className="text-muted-foreground">Loading maintenance block...</p>
       </div>
     );
-  };
+  }
 
   if (!blockData) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground mb-4">Maintenance block not found</p>
+        <p className="text-muted-foreground mb-4">
+          Maintenance block not found
+        </p>
         <Button onClick={handleCancel}>Back to Maintenance</Button>
       </div>
     );
-  };
+  }
 
   return (
     <div className="space-y-6">
@@ -168,7 +188,10 @@ export default function UpdateMaintenanceBlockPage() {
                   </FormControl>
                   <SelectContent>
                     {properties.map((property) => (
-                      <SelectItem key={property.id} value={property.id.toString()}>
+                      <SelectItem
+                        key={property.id}
+                        value={property.id.toString()}
+                      >
                         {property.name}
                       </SelectItem>
                     ))}
@@ -199,78 +222,78 @@ export default function UpdateMaintenanceBlockPage() {
                 control={form.control}
                 name="startDate"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Start Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Start Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value && !isNaN(field.value.getTime()) ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
               />
 
               <FormField
                 control={form.control}
                 name="endDate"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>End Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                    <FormItem className="flex flex-col">
+                      <FormLabel>End Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value && !isNaN(field.value.getTime()) ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
               />
             </div>
 

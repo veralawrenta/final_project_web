@@ -13,14 +13,19 @@ interface GetRoomNonAvailabilityQuery extends PaginationQueryParams {
 export const useGetRoomNonAvailability = (
   queries: GetRoomNonAvailabilityQuery
 ) => {
+  const session = useSession ();
+
   return useQuery({
     queryKey: ["roomNonAvailability", queries],
     queryFn: async () => {
       const { data } = await axiosInstance.get<
         PageableResponse<RoomNonAvailability>
-      >("/rooms-non-availability", { params: queries },);
+      >("/rooms-non-availability", { params: queries,  headers: {
+        Authorization: `Bearer ${session.data?.user.accessToken}`
+      },},);
       return data;
     },
+    enabled: !!session.data?.user.accessToken,
   });
 };
 
@@ -54,7 +59,7 @@ export const useCreateRoomNonAvailability = () => {
         roomInventory: number;
       };
     }) => {
-      const { data } = await axiosInstance.post(
+      const response = await axiosInstance.post(
         `/rooms-non-availability/room/${roomId}`,
         body,
         {
@@ -63,7 +68,7 @@ export const useCreateRoomNonAvailability = () => {
           },
         }
       );
-      return data;
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["roomNonAvailability"] });

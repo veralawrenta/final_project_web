@@ -4,11 +4,9 @@
 import { ArrowLeft, MapPin } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-
 import { PropertyDetailSearchBar } from "@/components/property/SearchBarProperty";
 import { PropertyAmenities } from "./amenities/PropertyAmenities";
 import RoomCard from "./property-detail/RoomCard";
@@ -19,10 +17,10 @@ import {
   fromDateString,
   normalizeLocalDate,
 } from "@/lib/date/date";
-import { RoomPropertyCard } from "@/types/room";
+import { RoomIdPublic } from "@/types/room";
 import { RoomPricePreview } from "./property-detail/RoomPricePreview";
 
-const mapRoomToCard = (room: any): RoomPropertyCard => ({
+const mapRoomToCard = (room: any): RoomIdPublic => ({
   id: room.id,
   name: room.name,
   basePrice: room.basePrice,
@@ -30,7 +28,7 @@ const mapRoomToCard = (room: any): RoomPropertyCard => ({
   totalGuests: room.totalGuests,
   isAvailable: room.isAvailable,
   roomImages: room.roomImages.map((img: any) => ({
-    imageUrl: img.urlImages,
+    urlImages: img.urlImages,
     isCover: img.isCover,
   })),
 });
@@ -54,9 +52,7 @@ export default function PropertyDetail() {
   const nights = countNights(checkIn, checkOut);
 
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedRoom, setSelectedRoom] = useState<RoomPropertyCard | null>(
-    null
-  );
+  const [selectedRoom, setSelectedRoom] = useState<RoomIdPublic | null>(null);
 
   const {
     data: property,
@@ -94,7 +90,7 @@ export default function PropertyDetail() {
     );
   }
 
-  const rooms: RoomPropertyCard[] = property.rooms.map(mapRoomToCard);
+  const rooms: RoomIdPublic[] = property.rooms.map(mapRoomToCard);
   const availableRooms = rooms.filter((r) => r.isAvailable);
 
   const lowestPrice =
@@ -122,7 +118,7 @@ export default function PropertyDetail() {
         </button>
       </div>
 
-      <main className="container pb-20 md:pb-12">
+      <main className="container mx-auto pb-20 md:pb-12 mt-16">
         <div className="mt-6 px-4 md:px-0">
           <PropertyDetailSearchBar
             propertyId={propertyId}
@@ -166,7 +162,13 @@ export default function PropertyDetail() {
               </div>
             </div>
 
-            <p className="text-muted-foreground">{property.description}</p>
+            <h2 className="text-muted-foreground">Property Description</h2>
+            <div
+              className="prose prose-neutral max-w-none text-muted-foreground"
+              dangerouslySetInnerHTML={{
+                __html: property.description as string,
+              }}
+            />
 
             <PropertyAmenities amenities={property.amenities} />
 

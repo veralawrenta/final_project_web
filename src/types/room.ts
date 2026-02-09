@@ -1,6 +1,6 @@
 export interface Room {
   id: number;
-  propertyId?: number;
+  propertyId: number;
   property?: {
     name: string;
     category: {
@@ -24,7 +24,13 @@ export interface Room {
   basePrice: number;
   description: string;
   roomImages: RoomImage[];
-  seasonalRates?: SeasonalRates[];
+  seasonalRates?: {
+    id: number;
+    name: string;
+    fixedPrice: string;
+    startDate: Date | string;
+    endDate: Date | string;
+  };
   roomNonAvailability?: RoomNonAvailability[];
   createdAt?: string;
   updatedAt?: string;
@@ -35,7 +41,7 @@ export interface Room {
 export interface RoomPropertyCard {
   id: number;
   name: string;
-  basePrice: number;
+  basePrice?: number;
   totalGuests: number;
   totalUnits: number;
   roomImages: {
@@ -64,14 +70,7 @@ export interface RoomImage {
   isCover: boolean;
 }
 
-export interface SeasonalRates {
-  id: number;
-  name?: string;
-  propertyName?: string;
-  startDate: string;
-  endDate: string;
-  fixedPrice: number;
-}
+
 
 export interface RoomNonAvailability {
   id: number;
@@ -90,15 +89,31 @@ export interface RoomNonAvailability {
   };
 }
 
-export interface RoomManagementTypes {
+export interface RoomIdPublic {
   id: number;
-  propertyId: number;
-  propertyName: string;
   name: string;
-  type: string;
-  capacity: number;
-  price: number;
-  status: "Available" | "Occupied" | "Maintenance";
+  basePrice: number;
+  totalUnits?: number;
+  totalGuests: number;
+  displayPrice: number;
   description?: string;
-  roomImages?: string[];
+  isAvailable: boolean;
+  roomImages: {
+    id?: number;
+    urlImages: string;
+    isCover: boolean;
+  }[];
+  seasonalRates?: {
+    id: number;
+    name: string;
+    fixedPrice: number;
+    startDate: Date | string;
+    endDate: Date | string;
+  }[];
+  roomNonAvailability?: {
+    id: number;
+    startDate: Date | string;
+    endDate: Date | string;
+    reason?: string;
+  }[];
 }

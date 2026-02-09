@@ -31,8 +31,8 @@ const MaintenanceDeleteDialog = ({
   const getRoomName = () => {
     if (!record) return "";
     if (record.room?.name) return record.room.name;
-    const match = rooms.find((r) => r.id === record.roomId);
-    return match?.name || `Room #${record.roomId}`;
+    const match = rooms.find((r) => r.id === record.room?.id);
+    return match?.name || `Room #${record.room?.id}`;
   };
 
   return (

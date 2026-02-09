@@ -39,8 +39,8 @@ export function LoginForUserForm({
 
   const { mutateAsync: login, isPending } = useMutation({
     mutationFn: async (credentials: z.infer<typeof loginSchema>) => {
-      const { data } = await axiosInstance.post("auth/login", credentials);
-      return data;
+      const response = await axiosInstance.post("auth/login", credentials);
+      return response.data;
     },
     onSuccess: async (data) => {
       if (data.role === Role.TENANT || data.user?.role === Role.TENANT) {

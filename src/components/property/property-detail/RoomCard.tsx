@@ -3,11 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/price/currency";
 import { cn } from "@/lib/utils";
-import { RoomPropertyCard } from "@/types/room";
+import { RoomIdPublic } from "@/types/room";
 import { Check, Users } from "lucide-react";
 
 interface RoomCardProps {
-  room: RoomPropertyCard;
+  room: RoomIdPublic;
   nights: number;
   isSelected?: boolean;
   onSelect: () => void;
@@ -22,7 +22,7 @@ const RoomCard = ({
   onBook,
 }: RoomCardProps) => {
   const image = room.roomImages.find((img) => img.isCover) ||
-    room.roomImages[0] || { imageUrl: "/placeholder.svg" };
+    room.roomImages[0] || { urlImages: "/placeholder.svg" };
 
   const totalPrice = room.displayPrice * nights;
   return (
@@ -37,9 +37,9 @@ const RoomCard = ({
       <div className="md:flex">
         <div className="relative w-full md:w-48 h-48">
           <img
-            src={image.imageUrl}
+            src={image.urlImages}
             alt={room.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover pl-2"
           />
           {!room.isAvailable && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

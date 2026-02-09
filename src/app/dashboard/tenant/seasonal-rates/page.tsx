@@ -1,6 +1,6 @@
 "use client"
 import SeasonalRateManagementTab from "@/components/dashboard-tenant/seasonal-rates/SeasonalRateManagement";
-import { SeasonalRates } from "@/types/room";
+import { SeasonalRates } from "@/types/seasonal-rates";
 import { useRouter } from "next/navigation";
 
 const SeasonalRatesPage = () => {

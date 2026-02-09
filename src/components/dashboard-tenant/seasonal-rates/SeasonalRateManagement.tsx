@@ -1,26 +1,5 @@
 "use client";
-import { useState } from "react";
-import { useQueryState, parseAsInteger } from "nuqs";
-import { useDebounceValue } from "usehooks-ts";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  CalendarIcon,
-  DollarSign,
-  Search,
-  Filter,
-  TrendingUp,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import PaginationSection from "@/components/PaginationSection";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,12 +10,32 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SeasonalRates } from "@/types/room";
-import { useGetSeasonalRatesbyTenant, useDeleteSeasonalRates } from "@/hooks/useSeasonalRates";
-import PaginationSection from "@/components/PaginationSection";
-import { format } from "date-fns";
-import { fromDateString } from "@/lib/date/date";
+import { useDeleteSeasonalRates, useGetSeasonalRatesbyTenant } from "@/hooks/useSeasonalRates";
+import { formatLocalDate, fromDateString } from "@/lib/date/date";
+import { formatCurrency } from "@/lib/price/currency";
+import { SeasonalRates } from "@/types/seasonal-rates";
+import {
+  CalendarIcon,
+  Edit,
+  Filter,
+  Plus,
+  Search,
+  Trash2,
+  TrendingUp
+} from "lucide-react";
+import { parseAsInteger, useQueryState } from "nuqs";
+import { useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
 
 interface SeasonalRateManagementTabProps {
   onAddRate: () => void;
@@ -76,12 +75,12 @@ const SeasonalRateManagementTab = ({
   // Get unique property names for the filter dropdown
   const allRates: SeasonalRates[] = seasonalRates?.data ?? [];
   const propertyOptions = Array.from(
-    new Set(allRates.map((rate) => rate.propertyName).filter(Boolean))
+    new Set(allRates.map((rate) => rate.property?.name).filter(Boolean))
   ) as string[];
 
   const filteredRates = allRates.filter((rate) => {
     if (selectedProperty === "all") return true;
-    return rate.propertyName === selectedProperty;
+    return rate.property?.name === selectedProperty;
   });
 
   return (
@@ -129,7 +128,7 @@ const SeasonalRateManagementTab = ({
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="space-y-4">
         {/* Loading State: Skeleton Cards */}
         {isPending &&
           Array.from({ length: 3 }).map((_, i) => (
@@ -152,7 +151,7 @@ const SeasonalRateManagementTab = ({
 
         {/* Empty State */}
         {!isPending && filteredRates.length === 0 && (
-          <div className="col-span-full flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed rounded-3xl bg-muted/30">
+          <div className="flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed rounded-3xl bg-muted/30">
             <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-4">
               <TrendingUp className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -178,18 +177,13 @@ const SeasonalRateManagementTab = ({
             )}
           </div>
         )}
-
-        {/* Seasonal Rate Grid */}
         {!isPending && filteredRates.map((rate) => (
           <div
             key={rate.id}
-            className="group bg-card rounded-2xl border border-border p-5 hover:shadow-md transition-all duration-200"
+            className="bg-card rounded-2xl border border-border p-5 hover:shadow-md transition-all duration-200"
           >
-            <div className="flex items-start justify-between mb-4">
-              <span className="px-2.5 py-1 bg-secondary text-secondary-foreground rounded-lg text-[10px] font-bold tracking-wider uppercase">
-                ID: {rate.id}
-              </span>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-start justify-end mb-4">
+              <div className="flex gap-1">
                 <Button
                   variant="outline"
                   size="icon"
@@ -213,18 +207,17 @@ const SeasonalRateManagementTab = ({
               {rate.name}
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {rate.propertyName}
+              {rate.property?.name}
             </p>
 
             <div className="flex items-center gap-3 py-3 border-t border-border mt-auto">
               <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
                 <CalendarIcon className="h-4 w-4" />
-                <span>{format(fromDateString(rate.startDate), "MMM d")} - {format(fromDateString(rate.endDate), "MMM d")}</span>
+                <span> {formatLocalDate(fromDateString(rate.startDate.split("T")[0]))} to {formatLocalDate(fromDateString(rate.endDate.split("T")[0]))}</span>
               </div>
               <div className="ml-auto flex items-baseline gap-1">
-                <span className="text-sm font-medium text-primary">$</span>
                 <span className="text-xl font-bold tracking-tight text-foreground">
-                  {rate.fixedPrice.toLocaleString()}
+                 {formatCurrency(rate.fixedPrice)}
                 </span>
                 <span className="text-[12px] text-muted-foreground font-medium">/night</span>
               </div>

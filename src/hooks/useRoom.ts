@@ -28,6 +28,7 @@ export const useGetTenantRooms = (queries?: GetTenantRoomsQuery) => {
       );
       return data;
     },
+    enabled: !!session.data?.user.accessToken,
   });
 };
 

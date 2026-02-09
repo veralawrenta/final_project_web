@@ -72,11 +72,25 @@ function DateRangePicker({
 
   const displayText = useMemo(() => {
     if (!value?.from) return placeholder;
-    if (!value.to) return format(value.from, "MMM d, yyyy");
-    return `${format(value.from, "MMM d, yyyy")} – ${format(
-      value.to,
-      "MMM d, yyyy"
-    )}`;
+    
+    try {
+      // Check if the date is valid before formatting
+      if (isNaN(value.from.getTime())) return placeholder;
+      
+      if (!value.to) return format(value.from, "MMM d, yyyy");
+      
+      // Check if end date is valid
+      if (isNaN(value.to.getTime())) return format(value.from, "MMM d, yyyy");
+      
+      return `${format(value.from, "MMM d, yyyy")} – ${format(
+        value.to,
+        "MMM d, yyyy"
+      )}`;
+    } catch (error) {
+      // If date formatting fails, return placeholder
+      console.error("Date formatting error:", error);
+      return placeholder;
+    }
   }, [value, placeholder]);
 
   return (

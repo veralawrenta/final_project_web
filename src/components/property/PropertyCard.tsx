@@ -31,7 +31,7 @@ const PropertyCardForm = ({ property }: Props) => {
         />
 
         <span className="absolute top-3 left-3 px-2.5 py-1 bg-card/90 rounded-lg text-xs font-medium capitalize">
-          {property.propertyType.toLowerCase()}
+          {property.propertyType}
         </span>
 
         <button
@@ -49,7 +49,7 @@ const PropertyCardForm = ({ property }: Props) => {
 
         <div className="flex items-center gap-1 text-muted-foreground mt-1">
           <MapPin className="h-3.5 w-3.5" />
-          <span className="text-sm">{property.city.name}</span>
+          <span className="text-sm">{property.city?.name}</span>
         </div>
 
         <div className="flex items-end justify-between pt-4 mt-4 border-t border-border">

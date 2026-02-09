@@ -48,20 +48,15 @@ export default function PropertyPage() {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-5xl mx-auto px-4 space-y-12">
-        {/* Gallery Section */}
         <section>
           <PropertyGallery 
             images={property.images || []} 
             propertyName={property.name} 
           />
         </section>
-
-        {/* Property Details Section */}
         <section>
           <PropertyDetails property={property} />
         </section>
-
-        {/* Rooms Section */}
         <section>
           <h2 className="text-2xl font-bold mb-6">Available Rooms</h2>
           <div className="space-y-4">
