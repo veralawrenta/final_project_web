@@ -1,7 +1,6 @@
 "use client";
 
 import { formatCurrency } from "@/lib/price/currency";
-import { getPropertyPrice } from "@/lib/price/property-price";
 import { PropertyCard } from "@/types/property";
 import { Heart, MapPin } from "lucide-react";
 import Link from "next/link";
@@ -16,7 +15,7 @@ const PropertyCardForm = ({ property }: Props) => {
     property.propertyImages[0]?.urlImages ??
     "/placeholder.jpg";
 
-  const price = getPropertyPrice(property);
+  const price = property.displayPrice ?? (property.rooms?.length ? Math.min(...property.rooms.map((r) => r.basePrice)) : 0);
 
   return (
     <Link

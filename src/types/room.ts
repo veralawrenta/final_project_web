@@ -34,7 +34,7 @@ export interface Room {
     fixedPrice: string;
     startDate: Date | string;
     endDate: Date | string;
-  };
+  }[];
   roomNonAvailability?: RoomNonAvailability[];
   createdAt?: string;
   updatedAt?: string;
@@ -73,9 +73,6 @@ export interface RoomImage {
   urlImages: string;
   isCover: boolean;
 }
-
-
-
 export interface RoomNonAvailability {
   id: number;
   startDate: string;

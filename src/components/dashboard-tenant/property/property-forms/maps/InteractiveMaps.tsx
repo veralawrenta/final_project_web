@@ -11,7 +11,6 @@ interface InteractiveMapProps {
   className?: string;
 }
 
-// Minimal loading component
 function MapLoading({ height }: { height: string }) {
   return (
     <div
@@ -26,8 +25,7 @@ function MapLoading({ height }: { height: string }) {
   );
 }
 
-// The actual map - loaded only on client
-const MapContent = dynamic(() => import("./MapContent"), {
+const MapContent = dynamic(() => import("../maps/MapContent"), {
   ssr: false,
   loading: () => <MapLoading height="350px" />,
 });

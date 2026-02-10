@@ -10,7 +10,7 @@ const destinations = [
   {
     id: 1,
     image: "/images/hero1.jpg",
-    title: "Discover Beachside Paradises",
+    title: "Discover Beachside Spots",
     subtitle: "Unwind in the world's most stunning coastal retreats.",
   },
   {
@@ -28,7 +28,7 @@ const destinations = [
   {
     id: 4,
     image: "/images/hero4.jpg",
-    title: "Relax in Serene Countryside",
+    title: "Relax in Serene Countrysides",
     subtitle: "Reconnect with nature in peaceful rural settings.",
   },
 ];

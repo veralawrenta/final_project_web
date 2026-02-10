@@ -231,6 +231,7 @@ export const usePublishProperty = () => {
       return response.data;
     },
     onSuccess: () => {
+      toast.dismiss("create-room");
       toast.success("Property published successfully!");
       router.push("/dashboard/tenant/property");
       queryClient.invalidateQueries({ queryKey: ["properties", "tenant"] });

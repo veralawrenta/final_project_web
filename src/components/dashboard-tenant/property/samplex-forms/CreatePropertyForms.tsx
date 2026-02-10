@@ -5,12 +5,10 @@ import { useCreateProperty, usePublishProperty } from "@/hooks/useProperty";
 import { toast } from "sonner";
 import { useCreateRoom } from "@/hooks/useRoom";
 import { NewImageData } from "@/types/images";
-import {
-  CreatePropertyStep2Form,
-  SavedRoom,
-} from "./samplex-forms/CreatePropertyStepTwoForm";
 import { StepOneFormData } from "@/lib/validator/dashboard.create-property.schema";
-import { CreatePropertyStep1Form } from "./samplex-forms/CreatePropertyStepOneForm";
+import { CreatePropertyStep2Form, SavedRoom } from "./CreatePropertyStepTwoForm";
+import { CreatePropertyStep1Form } from "./CreatePropertyStepOneForm";
+
 
 interface CreatePropertyFormsProps {
   onCancel: () => void;

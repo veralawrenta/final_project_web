@@ -1,5 +1,4 @@
 "use client";
-import { format } from "date-fns";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +10,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Room, RoomNonAvailability } from "@/types/room";
-import { fromDateString } from "@/lib/date/date";
 
 interface MaintenanceDeleteDialogProps {
   record: RoomNonAvailability | null;
@@ -42,11 +40,7 @@ const MaintenanceDeleteDialog = ({
           <AlertDialogTitle>Delete Maintenance Block</AlertDialogTitle>
           <AlertDialogDescription>
             Are you sure you want to remove the maintenance block for{" "}
-            <strong>{getRoomName()}</strong> (
-            {record && format(fromDateString(record.startDate), "MMM d, yyyy")}{" "}
-            &ndash;{" "}
-            {record && format(fromDateString(record.endDate), "MMM d, yyyy")}
-            )? This action cannot be undone.
+            <strong>{getRoomName()}</strong> ? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -1,18 +1,23 @@
 "use client";
-import { useRouter, useParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { SeasonalRateForm } from "@/components/dashboard-tenant/seasonal-rates/SeasonalRateForm";
 import {
   useGetSeasonalRateById,
   useUpdateSeasonalRates,
 } from "@/hooks/useSeasonalRates";
-import { fromDateString, parseISODate } from "@/lib/date/date";
-import z from "zod";
+import {
+  formatLocalDate,
+  fromDateString,
+  normalizeLocalDate,
+  parseISODate,
+} from "@/lib/date/date";
 import { updateSeasonalRatesSchema } from "@/lib/validator/dashboard.seasonalrates.schema";
-import { SeasonalRateForm } from "@/components/dashboard-tenant/seasonal-rates/SeasonalRateForm";
-import { useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
+import { Loader2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import z from "zod";
 
 export default function UpdateSeasonalRatePage() {
   const router = useRouter();
@@ -35,19 +40,19 @@ export default function UpdateSeasonalRatePage() {
 
   useEffect(() => {
     if (!seasonalRate) return;
-    console.log("typeof startDate:", typeof seasonalRate.startDate);
+    //console.log("typeof startDate:", typeof seasonalRate.startDate);
     //console.log("instanceof Date:", seasonalRate.startDate instanceof Date);
-    console.log("Raw dates:", {
-      startDate: seasonalRate.startDate,
-      endDate: seasonalRate.endDate,
-    });
+    //console.log("Raw dates:", {
+    //  startDate: seasonalRate.startDate,
+    //  endDate: seasonalRate.endDate,
+    //});
     const startDate = parseISODate(seasonalRate.startDate);
     const endDate = parseISODate(seasonalRate.endDate);
 
     console.log("Converted dates:", {
       startDate,
       endDate,
-      startDateValid: !isNaN(startDate.getTime()),
+      startDateValid: !isNaN(startDate.getDate()),
       endDateValid: !isNaN(endDate.getTime()),
     });
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
@@ -65,7 +70,6 @@ export default function UpdateSeasonalRatePage() {
     });
   }, [seasonalRate, form]);
 
-  // ✅ NOW you can do the early return
   if (getSeasonalRateLoading || !seasonalRate) {
     return (
       <div className="flex justify-center py-12">
@@ -89,7 +93,6 @@ export default function UpdateSeasonalRatePage() {
     });
   };
 
-  // Get the applied scope info to display to user
   const appliedTo = seasonalRate.propertyId
     ? `${seasonalRate.property?.name} (All rooms)`
     : seasonalRate.room?.name
@@ -98,7 +101,6 @@ export default function UpdateSeasonalRatePage() {
 
   return (
     <div className="space-y-6">
-      {/* Display which property/room this rate applies to */}
       <div className="bg-muted/50 border rounded-lg p-4">
         <p className="text-sm text-muted-foreground">Applied to:</p>
         <p className="font-medium">{appliedTo}</p>

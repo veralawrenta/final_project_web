@@ -1,12 +1,11 @@
 import { axiosInstance } from "@/lib/axios";
 import { UpdateRoomFormData } from "@/lib/validator/dashboard.rooms.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
-import { PropertyType } from "@/types/property";
 import { Room } from "@/types/room";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface GetTenantRoomsQuery extends PaginationQueryParams {
@@ -34,25 +33,24 @@ export const useGetTenantRooms = (queries?: GetTenantRoomsQuery) => {
   });
 };
 
-export const usetGetAvailableRooms = (checkIn?: string, checkOut?: string) => {
-  const params = useParams();
-  const propertyId = Number(params.propertyId);
+export const useGetRoomId = (roomId: number) => {
+  const router = useRouter()
 
   return useQuery({
-    queryKey: ["available-rooms", propertyId, checkIn, checkOut],
+    queryKey: ["room-id", roomId],
     queryFn: async () => {
       const { data } = await axiosInstance.get<Room>(
-        `/properties/${propertyId}/rooms`
+        `/rooms/${roomId}`,
       );
       return data;
     },
+    
+    staleTime: 5 * 60 * 1000,
   });
 };
 
-export const useGetRoomsProperty = () => {
+export const useGetRoomsProperty = (propertyId: number) => {
   const session = useSession();
-  const params = useParams();
-  const propertyId = Number(params.propertyId);
 
   return useQuery({
     queryKey: ["getrooms"],
@@ -99,7 +97,7 @@ export const useCreateRoom = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tenant-rooms"] });
-      toast.success("Room created successfully");
+      toast.success("Room created successfully", {id: "create-room"});
       router.push("/dashboard/tenant/room");
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -175,8 +173,6 @@ export const useDeleteRoom = () => {
 export const useUploadRoomImages = () => {
   const session = useSession();
   const queryClient = useQueryClient();
-  const router = useRouter();
-
   return useMutation({
     mutationFn: async ({
       roomId,
@@ -193,25 +189,38 @@ export const useUploadRoomImages = () => {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
       });
-
       const existingImagesCount = roomResponse.data.roomImages?.length || 0;
-      const uploadPromises = images.map(async (file, index) => {
+      const uploadedImages = [];
+      for (let index = 0; index < images.length; index++) {
+        const file = images[index];
         const formData = new FormData();
-        formData.append("urlImage", file);
+        formData.append("urlImage", file); 
         formData.append(
           "isCover",
           String(existingImagesCount === 0 && index === 0)
         );
+        try {
+          const response = await axiosInstance.post(
+            `/room-images/rooms/${roomId}`,
+            formData,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+                Authorization: `Bearer ${session.data?.user.accessToken}`,
+              },
+            }
+          );
+          uploadedImages.push(response.data);
+        } catch (error) {
+          console.error(`Failed to upload image ${index + 1}:`, error);
+        }
+      }
 
-        return axiosInstance.post(`/room-images/room/${roomId}`, formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${session.data?.user.accessToken}`,
-          },
-        });
-      });
-      await Promise.all(uploadPromises); //wait for all to upload completely
-      return { roomId, uploadedCount: images.length };
+      return { 
+        roomId, 
+        uploadedCount: uploadedImages.length,
+        totalAttempted: images.length
+      };
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["tenant-rooms"] });

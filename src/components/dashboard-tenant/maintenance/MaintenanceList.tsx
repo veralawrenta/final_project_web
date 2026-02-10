@@ -69,7 +69,6 @@ const MaintenanceList = ({
           <SelectContent>
             <SelectItem value="createdAt">Date Created</SelectItem>
             <SelectItem value="reason">Reason</SelectItem>
-            <SelectItem value="roomName">Room Name</SelectItem>
           </SelectContent>
         </Select>
 

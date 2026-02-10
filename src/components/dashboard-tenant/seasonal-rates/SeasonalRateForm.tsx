@@ -95,7 +95,6 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
                     const [type, id] = value.split("-");
 
                     if (type === "property") {
-                      // Clear roomId and set propertyId
                       if (fields.roomId) {
                         form.setValue(fields.roomId, null as never);
                       }
@@ -103,7 +102,6 @@ export function SeasonalRateForm<TFieldValues extends FieldValues>({
                         form.setValue(fields.propertyId, Number(id) as never);
                       }
                     } else if (type === "room") {
-                      // Clear propertyId and set roomId
                       if (fields.propertyId) {
                         form.setValue(fields.propertyId, null as never);
                       }

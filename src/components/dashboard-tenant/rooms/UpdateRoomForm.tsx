@@ -38,11 +38,11 @@ import { updateRoomSchema } from "@/lib/validator/dashboard.rooms.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import RoomImageUploader from "./RoomImageUploader";
-
+import { RichTextEditor } from "@/components/RichTextEditor";
 const UpdateRoomForm = () => {
   const router = useRouter();
   const params = useParams();
@@ -61,6 +61,7 @@ const UpdateRoomForm = () => {
   const [imageToDelete, setImageToDelete] = useState<number | null>(null);
 
   const roomData = tenantRooms?.data?.find((room) => room.id === roomId);
+  const existingImages = roomData?.roomImages || [];
 
   const form = useForm<z.infer<typeof updateRoomSchema>>({
     resolver: zodResolver(updateRoomSchema),
@@ -79,7 +80,7 @@ const UpdateRoomForm = () => {
       form.reset({
         propertyId: roomData.propertyId,
         name: roomData.name,
-        description: roomData.description,
+        description: roomData.description || "",
         basePrice: roomData.basePrice,
         totalGuests: roomData.totalGuests,
         totalUnits: roomData.totalUnits,
@@ -87,9 +88,29 @@ const UpdateRoomForm = () => {
     }
   }, [roomData, form]);
 
-  const handleCancel = () => {
+  useEffect(() => {
+    return () => {
+      newImages.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [newImages]);
 
-    newImages.forEach((url) => URL.revokeObjectURL(url));
+  const hasFormChanges = useMemo(() => {
+    if (!roomData) return false;
+
+    const values = form.getValues();
+    const hasFieldChanges =
+      values.name !== roomData.name ||
+      values.description !== (roomData.description || "") ||
+      values.basePrice !== roomData.basePrice ||
+      values.totalGuests !== roomData.totalGuests ||
+      values.totalUnits !== roomData.totalUnits;
+
+    const hasNewImages = newImageFiles.length > 0;
+
+    return hasFieldChanges || hasNewImages;
+  }, [form.watch(), newImageFiles.length, roomData]);
+
+  const handleCancel = () => {
     router.push("/dashboard/tenant/room");
   };
 
@@ -126,8 +147,9 @@ const UpdateRoomForm = () => {
           roomId,
           images: newImageFiles,
         });
-        newImages.forEach((url) => URL.revokeObjectURL(url));
       }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      router.push("/dashboard/tenant/room");
     } catch (error) {
       console.error("Update room failed:", error);
     } finally {
@@ -152,8 +174,6 @@ const UpdateRoomForm = () => {
       </div>
     );
   }
-
-  const existingImages = roomData.roomImages || [];
 
   return (
     <div className="space-y-6">
@@ -211,16 +231,18 @@ const UpdateRoomForm = () => {
                 </FormItem>
               )}
             />
-
-            {/* Room Name */}
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Room Name</FormLabel>
+                  <FormLabel htmlFor="name">Room Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Ocean View Suite" {...field} />
+                    <Input
+                      id="name"
+                      {...field}
+                      placeholder="e.g., Superior, Deluxe"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -233,31 +255,33 @@ const UpdateRoomForm = () => {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Describe the room amenities, view, etc."
-                      className="min-h-[100px]"
-                      {...field}
+                    <RichTextEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      placeholder="Describe the features..."
+                      disabled={isSubmitting}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {/* Base Price and Total Guests */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-3 gap-6">
               <FormField
                 control={form.control}
                 name="basePrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Base Price (per night)</FormLabel>
+                    <FormLabel htmlFor="basePrice">
+                      Base Price (per night)
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                           Rp
                         </span>
                         <Input
+                          id="basePrice"
                           type="number"
                           className="pl-7"
                           placeholder="0"
@@ -278,9 +302,10 @@ const UpdateRoomForm = () => {
                 name="totalGuests"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Maximum Guests</FormLabel>
+                    <FormLabel htmlFor="totalGuests">Maximum Guests</FormLabel>
                     <FormControl>
                       <Input
+                        id="totalGuests"
                         type="number"
                         min={1}
                         max={20}
@@ -294,16 +319,17 @@ const UpdateRoomForm = () => {
                 )}
               />
             </div>
-
-            {/* Total Units */}
             <FormField
               control={form.control}
               name="totalUnits"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Total Units Available</FormLabel>
+                  <FormLabel htmlFor="totalUnits">
+                    Total Units Available
+                  </FormLabel>
                   <FormControl>
                     <Input
+                      id="totalUnits"
                       type="number"
                       min={1}
                       placeholder="1"
@@ -315,8 +341,6 @@ const UpdateRoomForm = () => {
                 </FormItem>
               )}
             />
-
-            {/* Existing Room Images Display */}
             {existingImages.length > 0 && (
               <div className="space-y-2">
                 <FormLabel>Current Room Images</FormLabel>
@@ -330,15 +354,12 @@ const UpdateRoomForm = () => {
                           className="w-full h-full object-cover"
                         />
                       </div>
-
-                      {/* Cover Badge */}
                       {img.isCover && (
                         <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-2 py-0.5 rounded text-xs font-medium">
                           Cover
                         </div>
                       )}
 
-                      {/* Delete Button */}
                       <button
                         type="button"
                         onClick={() => setImageToDelete(img.id)}
@@ -352,8 +373,6 @@ const UpdateRoomForm = () => {
                 </div>
               </div>
             )}
-
-            {/* Upload New Room Images */}
             <div className="space-y-2">
               <FormLabel>
                 {existingImages.length > 0
@@ -364,7 +383,7 @@ const UpdateRoomForm = () => {
                 images={newImages}
                 imageFiles={newImageFiles}
                 onImagesChange={handleImagesChange}
-                maxImages={10 - existingImages.length}
+                maxImages={3 - existingImages.length}
               />
               {newImageFiles.length > 0 && (
                 <p className="text-xs text-muted-foreground">
@@ -374,7 +393,6 @@ const UpdateRoomForm = () => {
               )}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-6 border-t border-border">
               <Button
                 type="button"
@@ -384,7 +402,7 @@ const UpdateRoomForm = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting || !hasFormChanges}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -398,8 +416,6 @@ const UpdateRoomForm = () => {
           </form>
         </Form>
       </div>
-
-      {/* Delete Image Confirmation Dialog */}
       <AlertDialog
         open={imageToDelete !== null}
         onOpenChange={(open) => !open && setImageToDelete(null)}

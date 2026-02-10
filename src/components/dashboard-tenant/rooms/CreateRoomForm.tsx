@@ -118,7 +118,7 @@ const CreateRoomForm = () => {
           isLoading={isCreating}
           submitLabel="Create Room"
           title="Room Details"
-          description="Fill in the room information and upload images (max 10)"
+          description="Maximum 3 images per room"
         />
       ) : (
         <div className="bg-muted/30 rounded-lg border-2 border-dashed border-border p-12 text-center">

@@ -59,7 +59,7 @@ export function RoomFormCard({
   isLoading = false,
   submitLabel = "Save Room",
   showSecondaryAction = false,
-  secondaryActionLabel = "Save & Add Another",
+  //secondaryActionLabel = "Save & Add Another",
   onSecondaryAction,
   title = "Room Details",
   description = "Fill in the room information and upload images",
@@ -406,7 +406,7 @@ export function RoomFormCard({
                 </Button>
               )}
 
-              {showSecondaryAction && onSecondaryAction && (
+              {/*{showSecondaryAction && onSecondaryAction && (
                 <Button
                   type="button"
                   variant="secondary"
@@ -419,7 +419,7 @@ export function RoomFormCard({
                   <Plus className="h-4 w-4 mr-2" />
                   {secondaryActionLabel}
                 </Button>
-              )}
+              )}*/}
 
               <Button
                 type="button"

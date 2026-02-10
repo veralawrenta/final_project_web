@@ -25,25 +25,6 @@ export function normalizeLocalDate(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 };
 
-//this for inclusive range to check if a date is inside the range 
-export function isWithinRange(date: DateRange, start: string, end: string): boolean {
-  if (!date || !date.from) return false;
-  
-  const d = normalizeLocalDate(date.from);
-  const s = normalizeLocalDate(parseISODate(start));
-  const e = normalizeLocalDate(parseISODate(end));
-  
-  return d >= s && d <= e;
-};
-
-//this for ensuring both sides of a range are normalized
-export function normalizeDateRange(start: Date, end: Date) {
-  return {
-    start: normalizeLocalDate(start),
-    end: normalizeLocalDate(end),
-  };
-};
-
 
 export function countNights(
   start?: Date,

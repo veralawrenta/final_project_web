@@ -12,6 +12,9 @@ import {
   LayoutGrid,
   ImageIcon,
   X,
+  ChevronRight,
+  Bed,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,8 +73,18 @@ const RoomManagementTab = () => {
     router.push("/dashboard/tenant/room/create");
   };
 
-  const handleEditRoom = (room: Room) => {
+  const handleViewRoom = (roomId: number) => {
+    router.push(`/dashboard/tenant/room/${roomId}`);
+  };
+
+  const handleEditRoom = (e: React.MouseEvent, room: Room) => {
+    e.stopPropagation();
     router.push(`/dashboard/tenant/room/update/${room.id}`);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, room: Room) => {
+    e.stopPropagation();
+    setDeleteRoom(room);
   };
 
   const handleDelete = () => {
@@ -114,8 +127,6 @@ const RoomManagementTab = () => {
           Add New Room
         </Button>
       </div>
-
-      {/* Filter Section */}
       <div className="flex flex-wrap gap-2">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -127,7 +138,6 @@ const RoomManagementTab = () => {
           />
         </div>
 
-        {/* Property Type Filter */}
         <Select value={propertyType} onValueChange={setPropertyType}>
           <SelectTrigger className="w-[180px]">
             <Filter className="h-4 w-4 mr-2" />
@@ -142,7 +152,6 @@ const RoomManagementTab = () => {
           </SelectContent>
         </Select>
 
-        {/* Sort By */}
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Sort by" />
@@ -154,7 +163,6 @@ const RoomManagementTab = () => {
           </SelectContent>
         </Select>
 
-        {/* Sort Order */}
         <Select value={sortOrder} onValueChange={setSortOrder}>
           <SelectTrigger className="w-[130px]">
             <SelectValue placeholder="Order" />
@@ -243,70 +251,90 @@ const RoomManagementTab = () => {
           return (
             <div
               key={room.id}
-              className="group bg-card rounded-2xl border border-border p-5 hover:shadow-md transition-all duration-200"
+              onClick={() => handleViewRoom(room.id)}
+              className="group bg-card rounded-2xl border border-border p-5 hover:shadow-lg hover:border-primary/20 transition-all duration-200 cursor-pointer"
             >
               <div className="hidden md:flex items-center gap-6">
-                <div className="h-24 w-32 rounded-xl overflow-hidden bg-muted shrink-0">
+                <div className="relative h-28 w-40 rounded-xl overflow-hidden bg-muted shrink-0 ring-1 ring-border group-hover:ring-primary/30 transition-all">
                   {displayImage ? (
                     <img
                       src={displayImage}
                       alt={room.name}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center">
-                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      <ImageIcon className="h-10 w-10 text-muted-foreground" />
                     </div>
                   )}
-                </div>
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-heading font-bold text-xl leading-tight">{room.name}</h3>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Property: {room.property?.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {room.property?.city?.name} • {room.property?.category?.name}
-                  </p>
+                  <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
 
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center gap-1.5 text-sm font-medium">
+                <div className="flex-1 space-y-2.5 min-w-0">
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-heading font-bold text-xl leading-tight group-hover:text-primary transition-colors truncate">
+                        {room.name}
+                      </h3>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <Bed className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                        <p className="text-sm text-muted-foreground font-medium truncate">
+                          {room.property?.name}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">
+                      {room.property?.city?.name} • {room.property?.category?.name}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-6 shrink-0">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg">
                     <Users className="h-4 w-4 text-muted-foreground" />
-                    <span>{room.totalGuests} Guests</span>
+                    <span className="text-sm font-semibold">{room.totalGuests}</span>
+                    <span className="text-xs text-muted-foreground">guests</span>
                   </div>
                   
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-xl font-bold tracking-tight text-foreground">
-                      {formatCurrency(room.basePrice)}
-                    </span>
-                    <span className="text-[12px] text-muted-foreground font-medium">/night</span>
+                  <div className="text-right">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold tracking-tight text-foreground">
+                        {formatCurrency(room.basePrice)}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground font-medium">per night</span>
                   </div>
 
-                  <div className="flex gap-1 group-hover:text-primary transition-opacity">
+                  <div className="flex gap-1.5">
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-9 w-9 rounded-full"
-                      onClick={() => handleEditRoom(room)}
+                      className="h-9 w-9 rounded-full hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                      onClick={(e) => handleEditRoom(e, room)}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-9 w-9 rounded-full text-destructive hover:bg-destructive/10"
-                      onClick={() => setDeleteRoom(room)}
+                      className="h-9 w-9 rounded-full text-destructive hover:bg-destructive/10 hover:border-destructive/30"
+                      onClick={(e) => handleDeleteClick(e, room)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
+                    <div className="flex items-center justify-center h-9 w-9 rounded-full bg-primary/5 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ChevronRight className="h-4 w-4" />
+                    </div>
                   </div>
                 </div>
               </div>
+
               <div className="md:hidden space-y-4">
                 <div className="flex gap-4">
-                  <div className="h-20 w-24 rounded-xl overflow-hidden bg-muted shrink-0">
+                  <div className="relative h-24 w-28 rounded-xl overflow-hidden bg-muted shrink-0 ring-1 ring-border">
                     {displayImage ? (
                       <img
                         src={displayImage}
@@ -315,42 +343,50 @@ const RoomManagementTab = () => {
                       />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center">
-                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                        <ImageIcon className="h-7 w-7 text-muted-foreground" />
                       </div>
                     )}
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-heading font-bold text-lg leading-tight mb-1 truncate">{room.name}</h3>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {room.property?.name}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {room.property?.city?.name} • {room.property?.category?.name}
-                    </p>
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <h3 className="font-heading font-bold text-lg leading-tight truncate">
+                      {room.name}
+                    </h3>
+                    <div className="flex items-center gap-1.5">
+                      <Bed className="h-3 w-3 text-muted-foreground shrink-0" />
+                      <p className="text-xs text-muted-foreground font-medium truncate">
+                        {room.property?.name}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="h-3 w-3 text-muted-foreground shrink-0" />
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {room.property?.city?.name} • {room.property?.category?.name}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1.5 text-sm font-medium">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-muted/50 rounded-lg">
                       <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span>{room.totalGuests}</span>
+                      <span className="text-sm font-semibold">{room.totalGuests}</span>
                     </div>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-lg font-bold tracking-tight text-foreground">
+                    <div className="text-left">
+                      <div className="text-lg font-bold tracking-tight text-foreground">
                         {formatCurrency(room.basePrice)}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-medium">/night</span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground font-medium">per night</span>
                     </div>
                   </div>
 
-                  <div className="flex gap-1">
+                  <div className="flex gap-1.5">
                     <Button
                       variant="outline"
                       size="icon"
                       className="h-8 w-8 rounded-full"
-                      onClick={() => handleEditRoom(room)}
+                      onClick={(e) => handleEditRoom(e, room)}
                     >
                       <Edit className="h-3.5 w-3.5" />
                     </Button>
@@ -358,7 +394,7 @@ const RoomManagementTab = () => {
                       variant="outline"
                       size="icon"
                       className="h-8 w-8 rounded-full text-destructive hover:bg-destructive/10"
-                      onClick={() => setDeleteRoom(room)}
+                      onClick={(e) => handleDeleteClick(e, room)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>

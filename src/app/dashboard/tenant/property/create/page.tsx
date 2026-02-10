@@ -45,7 +45,6 @@ const CreatePropertyStep1Page = ({ onCancel }: CreatePropertyStep1PageProps) => 
     try {
       const formData = buildPropertyFormData(data, images);
       const property = await createProperty.mutateAsync(formData);
-      toast.success("Property created");
       
       router.push(`/dashboard/tenant/property/create/${property.id}/rooms`);
     } catch (error: any) {

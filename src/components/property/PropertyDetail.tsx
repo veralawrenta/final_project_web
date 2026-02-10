@@ -18,7 +18,8 @@ import {
   normalizeLocalDate,
 } from "@/lib/date/date";
 import { RoomIdPublic } from "@/types/room";
-import { RoomPricePreview } from "./property-detail/RoomPricePreview";
+import RoomPricePreview from "./property-detail/RoomPricePreview";
+
 
 const mapRoomToCard = (room: any): RoomIdPublic => ({
   id: room.id,
@@ -122,7 +123,7 @@ export default function PropertyDetail() {
         <div className="mt-6 px-4 md:px-0">
           <PropertyDetailSearchBar
             propertyId={propertyId}
-            maxGuests={Math.max(...rooms.map((r) => r.totalGuests))}
+            maxGuests={Math.max(...rooms.map((r) => r.totalGuests), 10)}
           />
         </div>
         <div className="relative mt-6 px-4 md:px-0">
@@ -152,8 +153,8 @@ export default function PropertyDetail() {
         <div className="grid md:grid-cols-3 gap-8 mt-6 px-4 md:px-0">
           <div className="md:col-span-2 space-y-6">
             <div>
-              <span className="inline-block px-3 py-1 bg-secondary rounded-full text-sm mb-2">
-                {property.propertyType.toLowerCase()}
+              <span className="inline-block px-3 py-1 bg-secondary rounded-full text-sm mb-2 font-semibold">
+                {property.propertyType}
               </span>
               <h1 className="text-3xl font-bold">{property.name}</h1>
               <div className="flex items-center gap-1 text-muted-foreground">
@@ -171,8 +172,6 @@ export default function PropertyDetail() {
             />
 
             <PropertyAmenities amenities={property.amenities} />
-
-            {/* Rooms */}
             <div>
               <h2 className="text-xl font-semibold mb-4">
                 Rooms ({availableRooms.length})

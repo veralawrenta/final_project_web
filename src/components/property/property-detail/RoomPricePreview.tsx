@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/price/currency";
 import { RoomIdPublic } from "@/types/room";
 import { format } from "date-fns";
+import { BedDouble } from "lucide-react";
 
 interface Props {
   room: RoomIdPublic | null;
@@ -12,18 +13,47 @@ interface Props {
   displayPrice: number;
 }
 
-export function RoomPricePreview({
+const RoomPricePreview = ({
   room,
   nights,
   checkIn,
   checkOut,
   guests,
   displayPrice,
-}: Props) {
+}: Props) => {
   if (!room) {
     return (
-      <div className="hidden md:block sticky top-24 p-6 border rounded-xl bg-card text-sm text-muted-foreground">
-        Select a room to preview price
+      <div className="hidden md:block sticky top-24 p-6 border rounded-xl bg-secondary/10 opacity-60 grayscale-50 select-none">
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <div className="h-3 w-20 bg-muted-foreground/20 rounded animate-pulse" />
+            <div className="h-6 w-full bg-muted-foreground/10 rounded" />
+          </div>
+
+          <div className="pb-4 border-b border-muted-foreground/20">
+            <div className="h-8 w-32 bg-muted-foreground/10 rounded" />
+          </div>
+
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-px bg-muted-foreground/20 border border-muted-foreground/20 rounded-lg overflow-hidden opacity-50">
+              <div className="bg-background/50 p-3 h-14" />
+              <div className="bg-background/50 p-3 h-14" />
+              <div className="col-span-2 bg-background/50 p-3 h-14 border-t border-muted-foreground/20" />
+            </div>
+          </div>
+
+          <Button
+            disabled
+            className="w-full bg-muted-foreground border-none"
+          >
+            Select a room
+          </Button>
+
+          <p className="text-[11px] text-center text-primary font-bold flex items-center justify-center gap-1">
+            <BedDouble className="w-3 h-3" />
+            Choose a room to view total
+          </p>
+        </div>
       </div>
     );
   }
@@ -79,4 +109,6 @@ export function RoomPricePreview({
       </p>
     </div>
   );
-}
+};
+
+export default RoomPricePreview;

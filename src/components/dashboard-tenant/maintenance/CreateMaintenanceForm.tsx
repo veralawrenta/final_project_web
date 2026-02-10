@@ -255,7 +255,7 @@ const CreateMaintenanceBlockForm = () => {
               name="roomInventory"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
+                  <FormLabel htmlFor="totalUnits">
                     Units to Block
                     {selectedRoom && (
                       <span className="text-muted-foreground font-normal ml-1">
@@ -265,6 +265,7 @@ const CreateMaintenanceBlockForm = () => {
                   </FormLabel>
                   <FormControl>
                     <Input
+                      id="totalUnits"
                       type="number"
                       min={1}
                       max={selectedRoom?.totalUnits}

@@ -1,4 +1,4 @@
-import CreatePropertyStep2Page from "@/components/dashboard-tenant/property/property-forms/CreateProperty2Page.tsx";
+import CreatePropertyStep2Page from "@/components/dashboard-tenant/property/property-forms/CreatePropertyPage-Client";
 
 export default async function CreateRoomsPage({
   params,

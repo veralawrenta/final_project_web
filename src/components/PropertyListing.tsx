@@ -13,7 +13,7 @@ import { useGetAllProperties, useSearchProperties } from "@/hooks/useProperty";
 import { fromDateString, normalizeLocalDate } from "@/lib/date/date";
 import { cn } from "@/lib/utils";
 import { PropertyType } from "@/types/property";
-import { SlidersHorizontal, X } from "lucide-react";
+import { Building2, Home, Hotel, LayoutGrid, Palmtree, SlidersHorizontal, X } from "lucide-react";
 import { useState } from "react";
 import PropertyCardForm from "./property/PropertyCard";
 import {
@@ -34,6 +34,14 @@ const propertyTypeLabels: Record<PropertyTypeFilter, string> = {
   HOTEL: "Hotel",
   APARTMENT: "Apartment",
   HOUSE: "House",
+};
+
+const propertyTypeConfig: Record<PropertyTypeFilter, { label: string; icon: any }> = {
+  all: { label: "All", icon: LayoutGrid },
+  VILLA: { label: "Villa", icon: Palmtree },
+  HOTEL: { label: "Hotel", icon: Hotel },
+  APARTMENT: { label: "Apartment", icon: Building2 },
+  HOUSE: { label: "House", icon: Home },
 };
 
 const PropertyListingComponent = () => {
@@ -110,12 +118,11 @@ const PropertyListingComponent = () => {
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handlePropertyTypeChange = (value: PropertyTypeFilter) => {
     setPropertyType(value);
-    setPage(1); // Reset to page 1 on filter change
+    setPage(1);
   };
 
   const handleSortByChange = (value: SortBy) => {
@@ -201,8 +208,8 @@ const PropertyListingComponent = () => {
               <SelectValue placeholder="Order" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="asc">Ascending</SelectItem>
-              <SelectItem value="desc">Descending</SelectItem>
+              <SelectItem value="asc">A to Z</SelectItem>
+              <SelectItem value="desc">Z to A</SelectItem>
             </SelectContent>
           </Select>
 

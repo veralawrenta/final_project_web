@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/homepage/HeroSection";
-import PromoCarousel from "@/components/homepage/PromoCarousel";
 import { SearchBar } from "@/components/homepage/SearchBar";
 
 import Navbar from "@/components/Navbar";
@@ -17,7 +16,6 @@ const Homepage = async () => {
       <Navbar />
       <HeroSection />
       <SearchBar />
-      <PromoCarousel />
       <PropertyListingComponent />
       <Footer />
     </div>

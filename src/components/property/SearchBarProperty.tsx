@@ -21,7 +21,7 @@ interface Props {
   maxGuests?: number;
 }
 
-export function PropertyDetailSearchBar({ propertyId, maxGuests = 6 }: Props) {
+export function PropertyDetailSearchBar({ propertyId, maxGuests = 10 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -46,8 +46,6 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 6 }: Props) {
 
   const search = () => {
     if (!checkIn || !checkOut) return;
-
-    // Navigate to the same page with updated query params
     const params = new URLSearchParams({
       checkIn: formatLocalDate(checkIn),
       checkOut: formatLocalDate(checkOut),
@@ -60,7 +58,6 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 6 }: Props) {
   return (
     <div className="glass rounded-2xl p-4 md:p-6 shadow-strong">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* CHECK-IN */}
         <DatePicker
           label="Check-in"
           open={openCheckIn}
@@ -84,7 +81,6 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 6 }: Props) {
           calendar={data?.calendar}
         />
 
-        {/* CHECK-OUT */}
         <DatePicker
           label="Check-out"
           open={openCheckOut}
@@ -133,8 +129,6 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 6 }: Props) {
             ))}
           </select>
         </div>
-
-        {/* SEARCH BUTTON */}
         <div className="flex flex-col justify-end gap-2">
           {nights > 0 && totalPrice > 0 && (
             <div className="text-xs text-center text-muted-foreground">

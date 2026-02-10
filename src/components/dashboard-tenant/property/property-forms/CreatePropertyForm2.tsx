@@ -42,7 +42,7 @@ export function CreatePropertyStep2Form({
   isLoading,
 }: CreatePropertyStep2Props) {
   const [savedRooms, setSavedRooms] = useState<SavedRoom[]>([]);
-  const [showForm, setShowForm] = useState(true); // Start with form open
+  const [showForm, setShowForm] = useState(true);
   const [editingRoomId, setEditingRoomId] = useState<number | null>(null);
 
   const handleAddNewRoom = () => {
@@ -74,14 +74,13 @@ export function CreatePropertyStep2Form({
         ...data,
       };
       setSavedRooms([...savedRooms, newRoom]);
-      toast.success("Room added");
     }
 
     setShowForm(false);
     setEditingRoomId(null);
   };
 
-  const handleSaveAndAddAnother = (data: RoomData) => {
+  /*const handleSaveAndAddAnother = (data: RoomData) => {
     const newRoom: SavedRoom = {
       id: Date.now(),
       ...data,
@@ -94,10 +93,9 @@ export function CreatePropertyStep2Form({
       setEditingRoomId(null);
       setShowForm(true);
     }, 50);
-  };
+  };*/
 
   const handleCancelForm = () => {
-    // Only allow cancel if there are already saved rooms
     if (savedRooms.length > 0) {
       setShowForm(false);
       setEditingRoomId(null);
@@ -124,16 +122,20 @@ export function CreatePropertyStep2Form({
         <p className="text-sm text-muted-foreground">
           Your property has been created. Now add rooms to publish it.
         </p>
+        <p className="text-sm text-muted-foreground">
+          Step 2 of 2 • Create Room and Images
+        </p>
       </div>
-
-      {/* Info Banner */}
+      <div className="flex gap-2">
+        <div className="h-1 flex-1 rounded-full bg-gray-200 dark:bg-gray-800 " />
+        <div className="h-1 flex-1 rounded-full bg-primary" />
+      </div>
       <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
         <p className="text-sm text-blue-800 dark:text-blue-200">
           <strong>Required:</strong> Add at least one room to publish your property. You can add more rooms later from the property dashboard.
         </p>
       </div>
 
-      {/* Saved Rooms List */}
       {savedRooms.length > 0 && !showForm && (
         <Card>
           <CardHeader className="pb-4">
@@ -207,7 +209,6 @@ export function CreatePropertyStep2Form({
         </Card>
       )}
 
-      {/* Room Form */}
       {showForm && (
         <RoomFormCard
           onSubmit={handleSaveRoom}
@@ -215,15 +216,14 @@ export function CreatePropertyStep2Form({
           isLoading={false}
           submitLabel={editingRoomId ? "Update Room" : "Save Room"}
           showSecondaryAction={!editingRoomId}
-          secondaryActionLabel="Save & Add Another"
-          onSecondaryAction={handleSaveAndAddAnother}
+          //secondaryActionLabel="Save & Add Another"
+         // onSecondaryAction={handleSaveAndAddAnother}
           title={editingRoomId ? "Edit Room" : "Add Room"}
           description={editingRoomId ? "Update room details" : "Fill in room details"}
           initialData={editingRoom}
         />
       )}
 
-      {/* Footer Actions - Only Publish button */}
       <div className="flex justify-end gap-3 pt-4 border-t">
         <Button
           onClick={handleComplete}
