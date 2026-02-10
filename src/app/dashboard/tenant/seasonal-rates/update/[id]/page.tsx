@@ -40,21 +40,9 @@ export default function UpdateSeasonalRatePage() {
 
   useEffect(() => {
     if (!seasonalRate) return;
-    //console.log("typeof startDate:", typeof seasonalRate.startDate);
-    //console.log("instanceof Date:", seasonalRate.startDate instanceof Date);
-    //console.log("Raw dates:", {
-    //  startDate: seasonalRate.startDate,
-    //  endDate: seasonalRate.endDate,
-    //});
     const startDate = parseISODate(seasonalRate.startDate);
     const endDate = parseISODate(seasonalRate.endDate);
-
-    console.log("Converted dates:", {
-      startDate,
-      endDate,
-      startDateValid: !isNaN(startDate.getDate()),
-      endDateValid: !isNaN(endDate.getTime()),
-    });
+    
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       console.error("Invalid dates:", {
         startDate: seasonalRate.startDate,

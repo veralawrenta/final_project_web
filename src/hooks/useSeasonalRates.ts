@@ -1,12 +1,10 @@
 import { axiosInstance } from "@/lib/axios";
 import { formatLocalDate } from "@/lib/date/date";
 import {
-  createSeasonalRatesSchema,
-  updateSeasonalRatesSchema,
+  createSeasonalRatesSchema
 } from "@/lib/validator/dashboard.seasonalrates.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import { SeasonalRates } from "@/types/seasonal-rates";
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";

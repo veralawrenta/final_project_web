@@ -10,19 +10,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import z from "zod";
 
-interface Payload {
-  avatar: File;
-}
-
 export const useMeProfile = () => {
   const session = useSession();
   return useQuery({
     queryKey: ["me-profile"],
     queryFn: async () => {
       const accessToken = session.data?.user.accessToken;
-      //console.log(
-      //  `Fetching profile with token:', ${accessToken}  ? 'Token exists' : 'No token`
-      //);
       const { data } = await axiosInstance.get<User>("users/me", {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,

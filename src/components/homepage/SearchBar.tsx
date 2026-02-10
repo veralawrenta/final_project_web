@@ -33,9 +33,6 @@ export function SearchBar() {
   const [debouncedCitySearch] = useDebounceValue(localCitySearch, 300);
   const { data: cities, isLoading: loadingCities } =
     useGetCities(debouncedCitySearch);
-  console.log("Cities data:", cities);
-  console.log("Loading state:", loadingCities);
-  console.log("Debounced search:", debouncedCitySearch);
 
   const [showCityDropdown, setShowCityDropdown] = useState(false);
 

@@ -104,15 +104,12 @@ const ProfileTenantTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* header */}
       <div>
         <h1 className="text-3xl font-bold">Tenant Profile</h1>
         <p className="text-muted-foreground">
           Manage your business information
         </p>
       </div>
-
-      {/* avatar */}
       <Card>
         <CardHeader>
           <CardTitle>Business Logo</CardTitle>
@@ -128,7 +125,6 @@ const ProfileTenantTab = () => {
         </CardContent>
       </Card>
 
-      {/* profile */}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">

@@ -14,9 +14,6 @@ export const createSeasonalRatesSchema = z
     const start = normalizeLocalDate(data.startDate);
     const end = normalizeLocalDate(data.endDate);
 
-    console.log("Start date:", start);
-    console.log("End date:", end);
-
     if (start > end) {
       ctx.addIssue({
         path: ["endDate"],

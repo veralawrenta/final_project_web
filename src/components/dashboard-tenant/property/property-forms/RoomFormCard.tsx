@@ -56,8 +56,6 @@ export function RoomFormCard({
   onCancel,
   isLoading = false,
   submitLabel = "Save Room",
-  //showSecondaryAction = false,
-  //secondaryActionLabel = "Save & Add Another",
   onSecondaryAction,
   title = "Room Details",
   description = "Fill in the room information and upload images",
@@ -197,9 +195,10 @@ export function RoomFormCard({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Room Name *</FormLabel>
+                  <FormLabel htmlFor="name">Room Name *</FormLabel>
                   <FormControl>
                     <Input
+                      id="name"
                       placeholder="e.g., Deluxe Ocean View Suite"
                       {...field}
                     />
@@ -213,7 +212,7 @@ export function RoomFormCard({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description *</FormLabel>
+                  <FormLabel htmlFor="description">Description *</FormLabel>
                   <FormControl>
                     <RichTextEditor
                       value={field.value}
@@ -232,13 +231,16 @@ export function RoomFormCard({
                 name="basePrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price (per night) *</FormLabel>
+                    <FormLabel htmlFor="basePrice">
+                      Price (per night) *
+                    </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
                           Rp
                         </span>
                         <Input
+                          id="basePrice"
                           type="number"
                           className="pl-10"
                           placeholder="100000"
@@ -260,10 +262,13 @@ export function RoomFormCard({
                 name="totalGuests"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Maximum Guests *</FormLabel>
+                    <FormLabel htmlFor="totalGuests">
+                      Maximum Guests *
+                    </FormLabel>
                     <FormControl>
                       <div className="flex items-center gap-2">
                         <Input
+                          id="totalGuests"
                           type="number"
                           className="text-center"
                           {...field}
@@ -283,10 +288,11 @@ export function RoomFormCard({
                 name="totalUnits"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Total Units *</FormLabel>
+                    <FormLabel htmlFor="totalUnits">Total Units *</FormLabel>
                     <FormControl>
                       <div className="flex items-center gap-2">
                         <Input
+                          id="totalUnits"
                           type="number"
                           className="text-center"
                           {...field}
@@ -301,11 +307,10 @@ export function RoomFormCard({
                 )}
               />
             </div>
-
-            {/* Room Images Upload */}
             <div className="space-y-3">
-              <FormLabel>Room Images *</FormLabel>
-              <input
+              <FormLabel htmlFor="images">Room Images *</FormLabel>
+              <Input
+                id="images"
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
@@ -390,8 +395,6 @@ export function RoomFormCard({
                 </p>
               )}
             </div>
-
-            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
               {onCancel && (
                 <Button
@@ -403,22 +406,6 @@ export function RoomFormCard({
                   Cancel
                 </Button>
               )}
-
-              {/*{showSecondaryAction && onSecondaryAction && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={form.handleSubmit(handleSecondarySubmit)}
-                  disabled={isLoading || roomImages.length === 0}
-                >
-                  {isLoading && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  )}
-                  <Plus className="h-4 w-4 mr-2" />
-                  {secondaryActionLabel}
-                </Button>
-              )}*/}
-
               <Button
                 type="button"
                 onClick={form.handleSubmit(handlePrimarySubmit)}

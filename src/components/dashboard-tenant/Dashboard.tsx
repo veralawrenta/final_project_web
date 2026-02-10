@@ -97,7 +97,6 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar */}
       <aside
         className={cn(
           "bg-sidebar text-sidebar-foreground transition-all duration-300 flex flex-col border-r border-sidebar-border fixed md:relative h-screen z-40 md:z-auto",
@@ -153,7 +152,6 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 bg-card border-b border-border flex items-center justify-between px-6 sticky top-0 z-40">
           <div className="flex items-center gap-4">
