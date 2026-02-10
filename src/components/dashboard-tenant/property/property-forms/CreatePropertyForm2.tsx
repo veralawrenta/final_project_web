@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { RoomData, RoomFormCard } from "../RoomFormCard";
+import { RoomData, RoomFormCard } from "./RoomFormCard";
 import { formatCurrency } from "@/lib/price/currency";
 
 export interface SavedRoom {

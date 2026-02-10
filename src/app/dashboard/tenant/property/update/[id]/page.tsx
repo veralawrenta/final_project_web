@@ -1,5 +1,5 @@
 "use client";
-import { EditPropertyForm } from "@/components/dashboard-tenant/property/samplex-forms/EditPropertyForm";
+import { EditPropertyForm } from "@/components/dashboard-tenant/property/property-forms/EditPropertyForm";
 import { Button } from "@/components/ui/button";
 import {
   useDeletePropertyImage,

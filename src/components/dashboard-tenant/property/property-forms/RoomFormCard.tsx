@@ -2,14 +2,26 @@
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { formatCurrency } from "@/lib/price/currency";
 import { roomsWithImageSchema } from "@/lib/validator/dashboard.rooms.schema";
 import { NewImageData } from "@/types/images";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Minus, Plus, Star, Upload, X } from "lucide-react";
+import { Loader2, Star, Upload, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -44,11 +56,11 @@ export function RoomFormCard({
   onCancel,
   isLoading = false,
   submitLabel = "Save Room",
-  showSecondaryAction = false,
-  secondaryActionLabel = "Save & Add Another",
+  //showSecondaryAction = false,
+  //secondaryActionLabel = "Save & Add Another",
   onSecondaryAction,
   title = "Room Details",
-  description = "Fill in the room information",
+  description = "Fill in the room information and upload images",
   initialData,
 }: RoomFormCardProps) {
   const [roomImages, setRoomImages] = useState<NewImageData[]>(
@@ -61,7 +73,7 @@ export function RoomFormCard({
     defaultValues: {
       name: initialData?.name || "",
       description: initialData?.description || "",
-      basePrice: initialData?.basePrice || 100000,
+      basePrice: initialData?.basePrice ?? 0,
       totalGuests: initialData?.totalGuests || 2,
       totalUnits: initialData?.totalUnits || 1,
       roomImages: initialData?.images?.map((img) => img.file) || [],
@@ -74,7 +86,7 @@ export function RoomFormCard({
 
     const remainingSlots = 10 - roomImages.length;
     if (remainingSlots === 0) {
-      toast.error("Maximum 10 images");
+      toast.error("Maximum 10 images allowed");
       return;
     }
 
@@ -132,12 +144,12 @@ export function RoomFormCard({
     callback: (roomData: RoomData) => void
   ) => {
     if (roomImages.length === 0) {
-      toast.error("Upload at least one image");
+      toast.error("Please upload at least one room image");
       return;
     }
 
     if (!data.description.trim() || data.description === "<p></p>") {
-      toast.error("Description is required");
+      toast.error("Room description is required");
       return;
     }
 
@@ -173,38 +185,40 @@ export function RoomFormCard({
 
   return (
     <Card>
-      <CardHeader className="pb-4">
-        <CardTitle className="text-lg">{title}</CardTitle>
-        <p className="text-sm text-muted-foreground">{description}</p>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form className="space-y-5">
+          <form className="space-y-6">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Room Name</FormLabel>
+                  <FormLabel>Room Name *</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Deluxe Ocean View" {...field} />
+                    <Input
+                      placeholder="e.g., Deluxe Ocean View Suite"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description *</FormLabel>
                   <FormControl>
                     <RichTextEditor
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder="Describe the room..."
+                      placeholder="Write your description..."
                     />
                   </FormControl>
                   <FormMessage />
@@ -212,13 +226,13 @@ export function RoomFormCard({
               )}
             />
 
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-3 gap-6">
               <FormField
                 control={form.control}
                 name="basePrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price/Night</FormLabel>
+                    <FormLabel>Price (per night) *</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
@@ -228,14 +242,14 @@ export function RoomFormCard({
                           type="number"
                           className="pl-10"
                           placeholder="100000"
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          value={field.value === 0 ? "" : field.value}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            field.onChange(v === "" ? 0 : Number(v));
+                          }}
                         />
                       </div>
                     </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      {formatCurrency(field.value || 0)}
-                    </p>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -246,33 +260,17 @@ export function RoomFormCard({
                 name="totalGuests"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Max Guests</FormLabel>
+                    <FormLabel>Maximum Guests *</FormLabel>
                     <FormControl>
                       <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => decrementField("totalGuests", 1)}
-                          disabled={field.value <= 1}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
                         <Input
                           type="number"
                           className="text-center"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => incrementField("totalGuests", 20)}
-                          disabled={field.value >= 20}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -285,33 +283,17 @@ export function RoomFormCard({
                 name="totalUnits"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Units</FormLabel>
+                    <FormLabel>Total Units *</FormLabel>
                     <FormControl>
                       <div className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => decrementField("totalUnits", 1)}
-                          disabled={field.value <= 1}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
                         <Input
                           type="number"
                           className="text-center"
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="icon"
-                          onClick={() => incrementField("totalUnits", 100)}
-                          disabled={field.value >= 100}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -320,9 +302,9 @@ export function RoomFormCard({
               />
             </div>
 
-            {/* Images */}
+            {/* Room Images Upload */}
             <div className="space-y-3">
-              <FormLabel>Room Images</FormLabel>
+              <FormLabel>Room Images *</FormLabel>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -334,36 +316,41 @@ export function RoomFormCard({
 
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed rounded-md p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
+                className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary/50 hover:bg-accent/50 transition-colors"
               >
-                <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                <p className="text-sm font-medium mb-1">Upload images</p>
+                <Upload className="h-10 w-10 mx-auto mb-3 text-muted-foreground" />
+                <p className="text-sm font-medium mb-1">
+                  Click to upload room images
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {roomImages.length}/10 images
+                  PNG, JPG up to 10 images ({roomImages.length}/10)
                 </p>
               </div>
 
               {roomImages.length > 0 && (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {roomImages.map((img, index) => (
                     <div
                       key={index}
-                      className="relative group aspect-square rounded-md overflow-hidden bg-gray-100 dark:bg-gray-900 border"
+                      className="relative group aspect-square rounded-lg overflow-hidden bg-muted border-2 border-border"
                     >
                       <img
                         src={img.preview}
-                        alt={`Room ${index + 1}`}
+                        alt={`Room image ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
 
                       {img.isCover && (
-                        <Badge className="absolute top-1.5 left-1.5 text-xs gap-1" variant="default">
-                          <Star className="h-2.5 w-2.5 fill-current" />
+                        <Badge
+                          className="absolute top-2 left-2 gap-1"
+                          variant="default"
+                        >
+                          <Star className="h-3 w-3 fill-current" />
                           Cover
                         </Badge>
                       )}
 
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         {!img.isCover && (
                           <Button
                             type="button"
@@ -373,9 +360,10 @@ export function RoomFormCard({
                               e.stopPropagation();
                               setCoverImage(index);
                             }}
-                            className="h-7 text-xs px-2"
+                            className="h-8 text-xs"
                           >
-                            <Star className="h-3 w-3" />
+                            <Star className="h-3 w-3 mr-1" />
+                            Set Cover
                           </Button>
                         )}
                         <Button
@@ -386,9 +374,9 @@ export function RoomFormCard({
                             e.stopPropagation();
                             removeImage(index);
                           }}
-                          className="h-7 w-7"
+                          className="h-8 w-8"
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
@@ -397,14 +385,14 @@ export function RoomFormCard({
               )}
 
               {roomImages.length === 0 && (
-                <p className="text-sm text-amber-600 dark:text-amber-400">
-                  At least one image is required
+                <p className="text-sm text-destructive">
+                  At least one room image is required
                 </p>
               )}
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t">
               {onCancel && (
                 <Button
                   type="button"
@@ -416,18 +404,20 @@ export function RoomFormCard({
                 </Button>
               )}
 
-              {showSecondaryAction && onSecondaryAction && (
+              {/*{showSecondaryAction && onSecondaryAction && (
                 <Button
                   type="button"
                   variant="secondary"
                   onClick={form.handleSubmit(handleSecondarySubmit)}
                   disabled={isLoading || roomImages.length === 0}
                 >
-                  {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {isLoading && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
                   <Plus className="h-4 w-4 mr-2" />
                   {secondaryActionLabel}
                 </Button>
-              )}
+              )}*/}
 
               <Button
                 type="button"

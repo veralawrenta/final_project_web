@@ -31,10 +31,11 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import CreateImageUploader from "../CreateImageUploader";
-import { InteractiveMap } from "../MapComponent";
+import CreateImageUploader from "../image-uploader/CreateImageUploader";
+
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { FieldDescription } from "@/components/ui/field";
+import { InteractiveMap } from "./maps/InteractiveMaps";
 
 const KOTA_TUA_LAT = -6.1352;
 const KOTA_TUA_LNG = 106.8133;
