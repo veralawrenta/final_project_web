@@ -67,8 +67,7 @@ const CategoryManagementTab = ({
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Category Management</h1>
           <p className="text-muted-foreground">
@@ -81,9 +80,8 @@ const CategoryManagementTab = ({
         </Button>
       </div>
 
-      {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           className="pl-10"
           placeholder="Search by category name..."
@@ -92,16 +90,13 @@ const CategoryManagementTab = ({
         />
       </div>
 
-      {/* Skeleton */}
       {isPending && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-40 rounded-xl" />
           ))}
         </div>
       )}
-
-      {/* Empty State */}
       {!isPending && categories.length === 0 && (
         <div className="text-center py-20 border-dashed border rounded-xl">
           <Tag className="mx-auto h-12 w-12 text-muted-foreground" />
@@ -116,10 +111,8 @@ const CategoryManagementTab = ({
           </Button>
         </div>
       )}
-
-      {/* Category Cards */}
       {!isPending && categories.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {categories.map((category) => (
             <div
               key={category.id}
@@ -164,7 +157,7 @@ const CategoryManagementTab = ({
         open={!!isDeletingCategory}
         onOpenChange={() => setIsDeletingCategory(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Category?</AlertDialogTitle>
             <AlertDialogDescription>

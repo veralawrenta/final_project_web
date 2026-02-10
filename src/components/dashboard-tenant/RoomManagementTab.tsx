@@ -300,7 +300,7 @@ const RoomManagementTab = () => {
                   </div>
                   
                   <div className="text-right">
-                    <div className="flex items-baseline gap-1">
+                    <div className="flex items-baseline gap-1 ">
                       <span className="text-2xl font-bold tracking-tight text-foreground">
                         {formatCurrency(room.basePrice)}
                       </span>

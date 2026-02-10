@@ -80,21 +80,6 @@ export function CreatePropertyStep2Form({
     setEditingRoomId(null);
   };
 
-  /*const handleSaveAndAddAnother = (data: RoomData) => {
-    const newRoom: SavedRoom = {
-      id: Date.now(),
-      ...data,
-    };
-    setSavedRooms([...savedRooms, newRoom]);
-    toast.success("Room added. Add another?");
-
-    setShowForm(false);
-    setTimeout(() => {
-      setEditingRoomId(null);
-      setShowForm(true);
-    }, 50);
-  };*/
-
   const handleCancelForm = () => {
     if (savedRooms.length > 0) {
       setShowForm(false);
@@ -143,10 +128,6 @@ export function CreatePropertyStep2Form({
               <CardTitle className="text-lg">
                 Rooms ({savedRooms.length})
               </CardTitle>
-              <Button onClick={handleAddNewRoom} variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Room
-              </Button>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">

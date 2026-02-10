@@ -49,6 +49,12 @@ const MaintenanceList = ({
     return match?.name || `Room #${values.id}`;
   };
 
+  const getPropertyName = (values: RoomNonAvailability) => {
+    if (values.room?.property?.name) return values.room.property.name;
+    const match = rooms.find((r) => r.id === values.id);
+    return match?.property?.name || `Property #${values.id}`;
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
@@ -106,6 +112,7 @@ const MaintenanceList = ({
                   </div>
 
                   <h3 className="font-heading font-semibold">{getRoomName(record)}</h3>
+                  <p className="text-sm text-blue-600">{getPropertyName(record)}</p>
                   {record.reason && (
                     <p className="text-sm text-muted-foreground mt-1">{record.reason}</p>
                   )}

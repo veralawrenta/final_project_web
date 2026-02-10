@@ -89,9 +89,7 @@ const VerifyAndSetPasswordForm = () => {
         router.push("/auth/login/user");
       } else if (role === Role.TENANT) {
         router.push("/auth/login/tenant");
-      } else {
-        router.replace("/");
-      }
+      };
     } catch (error) {
       if (error instanceof AxiosError) {
         setError(

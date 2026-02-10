@@ -19,7 +19,7 @@ const PropertyCardForm = ({ property }: Props) => {
 
   return (
     <Link
-      href={`/property/${property.id}`}
+      href={`/properties/${property.id}`}
       className="group block bg-card rounded-2xl overflow-hidden border border-border hover:shadow-lg transition"
     >
       <div className="relative aspect-4/3 overflow-hidden">

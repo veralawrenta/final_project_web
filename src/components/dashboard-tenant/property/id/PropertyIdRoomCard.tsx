@@ -35,7 +35,6 @@ export default function RoomCard({ room }: RoomCardProps) {
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <div className="flex flex-col md:flex-row">
-        {/* Room Image */}
         <div className="relative w-full md:w-48 h-48 bg-muted shrink-0">
           <Image
             src={roomImage}
@@ -46,8 +45,6 @@ export default function RoomCard({ room }: RoomCardProps) {
             loading="eager"
           />
         </div>
-
-        {/* Room Info */}
         <div className="flex-1 p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-start justify-between gap-4 mb-4">
