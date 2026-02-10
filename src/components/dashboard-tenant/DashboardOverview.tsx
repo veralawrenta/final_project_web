@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Building2,
   Wrench,
@@ -132,8 +131,6 @@ export function DashboardOverview() {
           </div>
         ))}
       </div>
-
-      {/* Profile Snippet */}
       <div className="bg-card rounded-2xl border border-border p-6">
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div className="flex items-center gap-4">

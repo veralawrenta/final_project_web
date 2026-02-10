@@ -197,8 +197,6 @@ export function CreatePropertyStep2Form({
           isLoading={false}
           submitLabel={editingRoomId ? "Update Room" : "Save Room"}
           showSecondaryAction={!editingRoomId}
-          //secondaryActionLabel="Save & Add Another"
-         // onSecondaryAction={handleSaveAndAddAnother}
           title={editingRoomId ? "Edit Room" : "Add Room"}
           description={editingRoomId ? "Update room details" : "Fill in room details"}
           initialData={editingRoom}

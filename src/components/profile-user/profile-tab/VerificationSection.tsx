@@ -18,7 +18,6 @@ interface VerificationSectionProps {
 export const VerificationSection: React.FC<VerificationSectionProps> = ({
   isVerified,
 }) => {
-  console.log("VerificationSection isVerified:", isVerified);
   const { mutate: resendVerification, isPending } = useResendVerification();
 
   return (

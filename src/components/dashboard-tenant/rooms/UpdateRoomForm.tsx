@@ -202,7 +202,7 @@ const UpdateRoomForm = () => {
               name="propertyId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Property</FormLabel>
+                  <FormLabel htmlFor="propertyId">Property</FormLabel>
                   <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     value={roomData.property?.name}
@@ -210,7 +210,7 @@ const UpdateRoomForm = () => {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select property" />
+                        <SelectValue id="propertyId" placeholder="Select property" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

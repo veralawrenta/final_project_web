@@ -27,7 +27,6 @@ const VerifyChangeEmailForm = () => {
             },
           }
         );
-        console.log("VERIFY RESPONSE:", response.data);
         const user = response.data?.user;
 
         toast.success("Account verified successfully");

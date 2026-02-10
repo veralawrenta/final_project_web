@@ -154,8 +154,6 @@ const CreateImageUploader = ({
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {images.map((img, index) => (
             <div key={index} className="relative group">
-              
-              {/* Image Container */}
               <div
                 className={`aspect-square rounded-lg overflow-hidden bg-muted border-2 ${
                   img.isCover ? "border-primary" : "border-border"

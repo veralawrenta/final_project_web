@@ -15,18 +15,18 @@ const Footer = ({ className = "" }: FooterProps) => {
     {
       title: "For Guests",
       links: [
-        { label: "Browse Properties", href: "/property-detail-page" },
-        { label: "Book a Stay", href: "/booking-page" },
-        { label: "Guest Dashboard", href: "/user-dashboard" },
-        { label: "Help Center", href: "/homepage" },
+        { label: "Browse Properties", href: "/" },
+        { label: "Book a Stay", href: "/auth/login/user" },
+        { label: "Guest Dashboard", href: "/profile/user" },
+        { label: "Help Center", href: "/" },
       ],
     },
     {
       title: "For Property Owners",
       links: [
-        { label: "List Your Property", href: "/tenant-dashboard" },
-        { label: "Owner Dashboard", href: "/tenant-dashboard" },
-        { label: "Revenue Calculator", href: "/tenant-dashboard" },
+        { label: "List Your Property", href: "/dashboard/tenant" },
+        { label: "Owner Dashboard", href: "/dashboard/tenant" },
+        { label: "Revenue Calculator", href: "/dashboard/tenant" },
       ],
     },
     {

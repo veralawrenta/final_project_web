@@ -166,7 +166,6 @@ const EditImageUploader = ({
   };
   return (
     <div className="space-y-4">
-      {/* Header with image count */}
       <div className="flex items-center justify-between">
         <FormLabel>Property Images *</FormLabel>
         <span className="text-xs text-muted-foreground">
@@ -174,7 +173,6 @@ const EditImageUploader = ({
         </span>
       </div>
 
-      {/* Warning Alert - Only show if published and only 1 image */}
       {showWarning && (
         <Alert
           variant="destructive"
@@ -188,7 +186,6 @@ const EditImageUploader = ({
         </Alert>
       )}
 
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -197,8 +194,6 @@ const EditImageUploader = ({
         onChange={handleImageUpload}
         className="hidden"
       />
-
-      {/* Upload Area */}
       {remainingSlots > 0 ? (
         <div
           onClick={() => fileInputRef.current?.click()}
@@ -221,10 +216,8 @@ const EditImageUploader = ({
         </div>
       )}
 
-      {/* Images Grid */}
       {totalImages > 0 && (
         <div className="space-y-4">
-          {/* SECTION 1: Existing Images (already on server) */}
           {existingImages.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs font-medium text-muted-foreground uppercase">
@@ -237,7 +230,6 @@ const EditImageUploader = ({
 
                   return (
                     <div key={img.id} className="relative group">
-                      {/* Image */}
                       <div
                         className={`aspect-square rounded-lg overflow-hidden bg-muted border-2 ${
                           img.isCover
@@ -252,16 +244,13 @@ const EditImageUploader = ({
                         />
                       </div>
 
-                      {/* Cover badge */}
                       {img.isCover && (
                         <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded shadow-lg font-medium">
                           Cover
                         </div>
                       )}
 
-                      {/* Action buttons (show on hover) */}
                       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {/* Set as cover button */}
                         {!img.isCover && (
                           <button
                             type="button"
@@ -272,8 +261,6 @@ const EditImageUploader = ({
                             <Star className="h-3.5 w-3.5" />
                           </button>
                         )}
-
-                        {/* Delete button */}
                         <button
                           type="button"
                           onClick={() => deleteExistingImage(img.id)}
@@ -304,12 +291,10 @@ const EditImageUploader = ({
               </p>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 {newImages.map((img, index) => {
-                  // Can we delete this image?
                   const canDelete = !(isPublished && isLastImage);
 
                   return (
                     <div key={index} className="relative group">
-                      {/* Image with dashed border to show it's new */}
                       <div
                         className={`aspect-square rounded-lg overflow-hidden bg-muted border-2 ${
                           img.isCover
@@ -323,15 +308,11 @@ const EditImageUploader = ({
                           className="w-full h-full object-cover"
                         />
                       </div>
-
-                      {/* Cover badge */}
                       {img.isCover && (
                         <div className="absolute top-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded shadow-lg font-medium">
                           Cover
                         </div>
                       )}
-
-                      {/* "New" badge */}
                       <div className="absolute bottom-2 left-2 bg-accent text-accent-foreground text-xs px-2 py-1 rounded shadow-sm font-medium">
                         New
                       </div>

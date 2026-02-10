@@ -20,7 +20,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
 
 import {
@@ -36,7 +36,6 @@ import { ExistingImageData, NewImageData } from "@/types/images";
 import { PropertyType, type TenantPropertyId } from "@/types/property";
 import { InteractiveMap } from "./maps/InteractiveMaps";
 import EditImageUploader from "../image-uploader/EditImageUploader";
-
 
 const PROPERTY_TYPES = Object.values(PropertyType);
 
@@ -162,9 +161,9 @@ export function EditPropertyForm({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Property Name</FormLabel>
+                    <FormLabel htmlFor="name">Property Name</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input id="name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -176,7 +175,7 @@ export function EditPropertyForm({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel htmlFor="description">Description</FormLabel>
                     <FormControl>
                       <RichTextEditor
                         value={field.value ?? ""}
@@ -194,7 +193,7 @@ export function EditPropertyForm({
                   name="propertyType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Type</FormLabel>
+                      <FormLabel htmlFor="propertyType">Type</FormLabel>
                       <Select
                         disabled={propertyTypeLocked}
                         value={field.value}
@@ -202,7 +201,10 @@ export function EditPropertyForm({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select property type" />
+                            <SelectValue
+                              id="propertyType"
+                              placeholder="Select property type"
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -223,7 +225,7 @@ export function EditPropertyForm({
                   name="cityId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
+                      <FormLabel htmlFor="cityId">City</FormLabel>
                       <Select
                         disabled={locationLocked}
                         value={field.value?.toString()}
@@ -231,7 +233,10 @@ export function EditPropertyForm({
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select city" />
+                            <SelectValue
+                              id="cityId"
+                              placeholder="Select city"
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -255,14 +260,17 @@ export function EditPropertyForm({
                   name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel htmlFor="categoryId">Category</FormLabel>
                       <Select
                         value={field.value?.toString()}
                         onValueChange={(v) => field.onChange(Number(v))}
                       >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
+                            <SelectValue
+                              id="categoryId"
+                              placeholder="Select category"
+                            />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -287,9 +295,10 @@ export function EditPropertyForm({
                   name="latitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Latitude</FormLabel>
+                      <FormLabel htmlFor="latitude">Latitude</FormLabel>
                       <FormControl>
                         <Input
+                          id="latitude"
                           disabled={locationLocked}
                           type="number"
                           step="any"
@@ -305,9 +314,10 @@ export function EditPropertyForm({
                   name="longitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Longitude</FormLabel>
+                      <FormLabel htmlFor="longitude">Longitude</FormLabel>
                       <FormControl>
                         <Input
+                          id="longitude"
                           disabled={locationLocked}
                           type="number"
                           step="any"

@@ -1,5 +1,4 @@
 import SettingTabComponent from '@/components/profile-user/SettingTab'
-import React from 'react'
 
 const SettingTabPage = () => {
   return (
