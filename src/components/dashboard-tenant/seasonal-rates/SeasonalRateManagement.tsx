@@ -182,8 +182,8 @@ const SeasonalRateManagementTab = ({
             </div>
           </div>
         ) : allRates.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 px-6 border-2 border-dashed rounded-[2rem] bg-card text-center">
-            <div className="h-20 w-20 bg-primary/5 rounded-full flex items-center justify-center mb-6 ring-8 ring-primary/[0.02]">
+          <div className="flex flex-col items-center justify-center py-24 px-6 border-2 border-dashed rounded-4xl bg-card text-center">
+            <div className="h-20 w-20 bg-primary/5 rounded-full flex items-center justify-center mb-6 ring-8 ring-primary/2">
               <TrendingUp className="h-10 w-10 text-primary/40" />
             </div>
             <h3 className="text-xl font-bold">No Rates Found</h3>
@@ -205,7 +205,7 @@ const SeasonalRateManagementTab = ({
             {allRates.map((rate) => (
               <div
                 key={rate.id}
-                className="group relative flex flex-col bg-card rounded-3xl border border-border/60 p-6 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/[0.05] transition-all duration-300"
+                className="group relative flex flex-col bg-card rounded-3xl border border-border/60 p-6 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
               >
                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <Button
@@ -262,10 +262,10 @@ const SeasonalRateManagementTab = ({
 
                   <div className="flex items-end justify-between border-t border-border/50 pt-4">
                     <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                      Rate Per Night
+                      Nightly Rate
                     </div>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-foreground">
+                      <span className="sm:text-md lg:text-2xl font-black text-foreground">
                         {formatCurrency(rate.fixedPrice)}
                       </span>
                     </div>

@@ -1,4 +1,3 @@
-// app/property/[id]/page.tsx
 "use client";
 
 import { ArrowLeft, MapPin } from "lucide-react";

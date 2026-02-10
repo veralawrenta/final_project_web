@@ -53,9 +53,9 @@ const RoomCard = ({
           )}
         </div>
         <div className="flex-1 p-4">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-starts">
             <div>
-              <h3 className="font-semibold text-lg">{room.name}</h3>
+              <h3 className="font-semibold md:text-lg">{room.name}</h3>
               <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
                 <Users className="h-4 w-4" />
                 <span>Up to {room.totalGuests} guests</span>
@@ -63,7 +63,7 @@ const RoomCard = ({
             </div>
 
             <div className="text-right">
-              <div className="text-xl font-bold text-primary">
+              <div className="md:text-xl font-bold text-primary">
                 {formatCurrency(room.displayPrice)}
               </div>
               <div className="text-xs text-muted-foreground">per night</div>

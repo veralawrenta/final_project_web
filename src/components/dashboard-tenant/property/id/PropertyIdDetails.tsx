@@ -1,4 +1,3 @@
-// components/property/PropertyDetails.tsx
 "use client";
 
 import { MapPin, Home, Zap, AlertCircle, CheckCircle2 } from "lucide-react";

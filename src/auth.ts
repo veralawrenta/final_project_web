@@ -44,10 +44,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
-        //console.log("ACCOUNT OBJECT:", account);
-
         if (!account.id_token) {
-          //console.error("Missing Google id_token");
           return false;
         }
         const { data } = await axiosInstance.post("/oauth/google", {

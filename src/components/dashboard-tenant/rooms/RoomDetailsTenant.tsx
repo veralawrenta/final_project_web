@@ -1,5 +1,4 @@
 "use client";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/price/currency";
@@ -160,8 +159,8 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
             </div>
             <div className="space-y-1">
               <FaMoneyBill1Wave className="h-5 w-5 text-primary" />
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Pricing</p>
-              <p className="font-bold">Dynamic</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase">Price</p>
+              <p className="font-bold">{formatCurrency(room.basePrice)}</p>
             </div>
           </div>
 
