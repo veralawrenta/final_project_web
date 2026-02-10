@@ -34,8 +34,9 @@ import { useGetCategories } from "@/hooks/useCategory";
 import { useGetCities } from "@/hooks/useGetCities";
 import { ExistingImageData, NewImageData } from "@/types/images";
 import { PropertyType, type TenantPropertyId } from "@/types/property";
-import EditImageUploader from "../EditImageUploader";
-import { InteractiveMap } from "../MapComponent";
+import { InteractiveMap } from "./maps/InteractiveMaps";
+import EditImageUploader from "../image-uploader/EditImageUploader";
+
 
 const PROPERTY_TYPES = Object.values(PropertyType);
 
