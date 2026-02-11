@@ -1,5 +1,4 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -41,10 +40,11 @@ export function ResetPasswordForm({
     },
     onSuccess: () => {
       toast.success("Reset password success");
-      router.push("/");
+      router.push("/auth/login/user");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       const message = error.response?.data.message ?? "Authentication failed";
+      toast.error(message);
     },
   });
 
@@ -79,6 +79,7 @@ export function ResetPasswordForm({
                   type="password"
                   placeholder="Enter your password here..."
                   required
+                  disabled={isPending}
                   {...form.register("password")}
                 />
               </Field>
@@ -91,6 +92,7 @@ export function ResetPasswordForm({
                   type="password"
                   placeholder="Confirm your password here..."
                   required
+                  disabled={isPending}
                   {...form.register("confirmPassword")}
                 />
               </Field>
@@ -100,7 +102,7 @@ export function ResetPasswordForm({
                   disabled={isPending}
                   className="font-bold text-white rounded-l-lg bg-blue-500 hover:bg-blue-600 w-full h-12"
                 >
-                  {isPending ? "Loading" : "Submit"}
+                  {isPending ? "Resetting" : "Reset Password"}
                 </Button>
               </Field>
             </FieldGroup>

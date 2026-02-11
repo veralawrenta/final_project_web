@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Field,
@@ -15,8 +14,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import z from "zod";
 import { registerSchemaCredentials } from "../../lib/validator/auth.register-user.schema";
 import ButtonGoogle from "../google/ButtonGoogle";

@@ -11,7 +11,9 @@ export const axiosInstance = axios.create({
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response?.status === 401) {
+    const originalRequest = error.config;
+    
+    if (error.response && error.response?.status === 401 && !originalRequest.url?.includes("/auth/verify-change-email")) {
       const session = await getSession();
       const role = session?.user?.role;
 
