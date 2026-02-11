@@ -94,7 +94,6 @@ export function EditPropertyForm({
 
   const locationLocked = property.hasMaintenance || property.hasSeasonalRate;
 
-  const propertyTypeLocked = property.status === "PUBLISHED";
   const selectedAmenities = form.watch("amenities") ?? [];
   const toggleAmenity = (code: string) => {
     const current = form.getValues("amenities") ?? [];
@@ -192,7 +191,6 @@ export function EditPropertyForm({
                     <FormItem>
                       <FormLabel htmlFor="propertyType">Type</FormLabel>
                       <Select
-                        disabled={propertyTypeLocked}
                         value={field.value}
                         onValueChange={field.onChange}
                       >
