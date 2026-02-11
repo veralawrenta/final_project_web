@@ -86,10 +86,12 @@ const VerifyAndSetPasswordForm = () => {
       const role = response.data.user.role;
 
       if (role === Role.USER) {
-        router.push("/auth/login/user");
+        router.replace("/auth/login/user");
       } else if (role === Role.TENANT) {
-        router.push("/auth/login/tenant");
-      };
+        router.replace("/auth/login/tenant");
+      } else {
+        router.replace("/")
+      }
     } catch (error) {
       if (error instanceof AxiosError) {
         setError(

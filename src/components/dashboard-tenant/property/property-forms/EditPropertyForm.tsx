@@ -3,7 +3,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -22,12 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import {
   UpdatePropertFormValues,
   updatePropertySchema,
 } from "@/lib/validator/dashboard.update-property.schema";
-
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { useGetMasterAmenities } from "@/hooks/useAmenities";
 import { useGetCategories } from "@/hooks/useCategory";
@@ -263,7 +260,7 @@ export function EditPropertyForm({
                       <FormLabel htmlFor="categoryId">Category</FormLabel>
                       <Select
                         value={field.value?.toString()}
-                        onValueChange={(v) => field.onChange(Number(v))}
+                        onValueChange={(v) =>  {field.onChange(v ? Number(v) : undefined)}}
                       >
                         <FormControl>
                           <SelectTrigger>

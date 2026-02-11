@@ -32,7 +32,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import CreateImageUploader from "../image-uploader/CreateImageUploader";
-
 import { RichTextEditor } from "@/components/RichTextEditor";
 import { FieldDescription } from "@/components/ui/field";
 import { InteractiveMap } from "./maps/InteractiveMaps";
@@ -82,7 +81,7 @@ export function CreatePropertyStep1Form({
     return {
       ...data,
       cityId: Number(data.cityId),
-      categoryId: Number(data.categoryId),
+      categoryId: data.categoryId ? Number(data.categoryId) : undefined,
     };
   };
 
@@ -109,10 +108,10 @@ export function CreatePropertyStep1Form({
       return false;
     }
 
-    if (!formData.categoryId) {
-      toast.error("Category is required");
-      return false;
-    }
+    // if (!formData.categoryId) {
+    //   toast.error("Category is required");
+    //   return false;
+    // }
 
     if (formData.amenities.length === 0) {
       toast.error("Please select at least one amenity");
@@ -171,7 +170,9 @@ export function CreatePropertyStep1Form({
                         required
                       />
                     </FormControl>
-                    <FieldDescription>This field must be filled out.</FieldDescription>
+                    <FieldDescription>
+                      This field must be filled out.
+                    </FieldDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -182,7 +183,9 @@ export function CreatePropertyStep1Form({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="form-description">Description</FormLabel>
+                    <FormLabel htmlFor="form-description">
+                      Description
+                    </FormLabel>
                     <FormControl>
                       <RichTextEditor
                         value={field.value}
@@ -265,7 +268,12 @@ export function CreatePropertyStep1Form({
                   name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="categoryId">Category</FormLabel>
+                      <FormLabel htmlFor="categoryId">
+                        Category
+                        <span className="text-muted-foreground text-xs font-normal">
+                          (Optional)
+                        </span>
+                      </FormLabel>
                       {loadingCategories ? (
                         <Skeleton className="h-10 w-full" />
                       ) : (
@@ -310,7 +318,10 @@ export function CreatePropertyStep1Form({
                         required
                       />
                     </FormControl>
-                    <FormDescription>You can drag your location via map below and edit your address here.</FormDescription>
+                    <FormDescription>
+                      You can drag your location via map below and edit your
+                      address here.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -387,13 +398,13 @@ export function CreatePropertyStep1Form({
                     form.setValue("longitude", parseFloat(lng.toFixed(6)), {
                       shouldValidate: false,
                     });
-                
+
                     try {
                       const res = await fetch(
                         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=id`
                       );
                       const data = await res.json();
-                
+
                       if (data?.display_name) {
                         form.setValue("address", data.display_name, {
                           shouldValidate: true,

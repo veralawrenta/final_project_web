@@ -5,15 +5,16 @@ import { formatCurrency } from "@/lib/price/currency";
 import { Room } from "@/types/room";
 import { format, isValid, parseISO } from "date-fns";
 import {
-    ArrowLeft,
-    BedDouble,
-    ChevronLeft,
-    ChevronRight,
-    Home,
-    Info,
-    TrendingUp,
-    Users,
-    Wrench
+  ArrowLeft,
+  BedDouble,
+  ChevronLeft,
+  ChevronRight,
+  Home,
+  Info,
+  Pencil,
+  TrendingUp,
+  Users,
+  Wrench,
 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -57,20 +58,33 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
   const hasImages = totalImages > 0;
   const currentImage = validImages[currentImageIndex];
 
-  const nextImage = () => setCurrentImageIndex((prev) => (prev + 1) % totalImages);
-  const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + totalImages) % totalImages);
+  const nextImage = () =>
+    setCurrentImageIndex((prev) => (prev + 1) % totalImages);
+  const prevImage = () =>
+    setCurrentImageIndex((prev) => (prev - 1 + totalImages) % totalImages);
 
   return (
     <div className="max-w-6xl mx-auto pb-12 space-y-8">
       <div className="flex flex-col gap-4">
-        <Button
-          variant="ghost"
-          className="w-fit -ml-2 text-muted-foreground hover:text-primary transition-colors"
-          onClick={() => router.back()}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to listing
-        </Button>
+        <div className="flex items-center justify-between">
+          <Button
+            variant="ghost"
+            className="w-fit -ml-2 text-muted-foreground hover:text-primary transition-colors"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to listing
+          </Button>
+
+          <Button
+            variant="default"
+            className="gap-2 bg-slate-600"
+            onClick={() => router.push(`dashboard/tenant/room/update/${room.id}`)}
+          >
+            <Pencil className="h-4 w-4" />
+            Edit Room
+          </Button>
+        </div>
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -85,15 +99,18 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-primary">{formatCurrency(price)}</p>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Base Price / Night</p>
+            <p className="text-2xl font-bold text-primary">
+              {formatCurrency(price)}
+            </p>
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+              Base Price / Night
+            </p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-8 space-y-8">
-          
           <div className="space-y-3">
             <div className="relative aspect-video w-full bg-muted rounded-2xl overflow-hidden group border border-border">
               {hasImages ? (
@@ -105,16 +122,28 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
                   priority
                 />
               ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground">No Images</div>
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  No Images
+                </div>
               )}
 
               {totalImages > 1 && (
                 <>
                   <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="icon" variant="secondary" className="rounded-full shadow-md" onClick={prevImage}>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="rounded-full shadow-md"
+                      onClick={prevImage}
+                    >
                       <ChevronLeft className="h-5 w-5" />
                     </Button>
-                    <Button size="icon" variant="secondary" className="rounded-full shadow-md" onClick={nextImage}>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="rounded-full shadow-md"
+                      onClick={nextImage}
+                    >
                       <ChevronRight className="h-5 w-5" />
                     </Button>
                   </div>
@@ -131,10 +160,17 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
                     key={idx}
                     onClick={() => setCurrentImageIndex(idx)}
                     className={`relative shrink-0 w-24 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      currentImageIndex === idx ? "border-primary ring-2 ring-primary/20" : "border-transparent opacity-70 hover:opacity-100"
+                      currentImageIndex === idx
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-transparent opacity-70 hover:opacity-100"
                     }`}
                   >
-                    <Image src={url} alt="Thumbnail" fill className="object-cover" />
+                    <Image
+                      src={url}
+                      alt="Thumbnail"
+                      fill
+                      className="object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -144,22 +180,30 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-6 border-y border-border">
             <div className="space-y-1">
               <Users className="h-5 w-5 text-primary" />
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Capacity</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase">
+                Capacity
+              </p>
               <p className="font-bold">{capacity} Guests</p>
             </div>
             <div className="space-y-1">
               <BedDouble className="h-5 w-5 text-primary" />
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Type</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase">
+                Type
+              </p>
               <p className="font-bold">{typeLabels[roomType] || roomType}</p>
             </div>
             <div className="space-y-1">
               <Home className="h-5 w-5 text-primary" />
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Units</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase">
+                Units
+              </p>
               <p className="font-bold">{room.totalUnits || 0} Total</p>
             </div>
             <div className="space-y-1">
               <FaMoneyBill1Wave className="h-5 w-5 text-primary" />
-              <p className="text-xs text-muted-foreground font-semibold uppercase">Price</p>
+              <p className="text-xs text-muted-foreground font-semibold uppercase">
+                Price
+              </p>
               <p className="font-bold">{formatCurrency(room.basePrice)}</p>
             </div>
           </div>
@@ -169,7 +213,7 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
               <h3 className="text-xl font-bold flex items-center gap-2">
                 <Info className="h-5 w-5" /> About this room
               </h3>
-              <div 
+              <div
                 className="text-muted-foreground leading-relaxed prose prose-neutral dark:prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: room.description }}
               />
@@ -186,10 +230,15 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
             {seasonalRates.length > 0 ? (
               <div className="space-y-3">
                 {seasonalRates.map((rate: any) => (
-                  <div key={rate.id} className="p-3 rounded-xl bg-muted/50 border border-border/50">
+                  <div
+                    key={rate.id}
+                    className="p-3 rounded-xl bg-muted/50 border border-border/50"
+                  >
                     <div className="flex justify-between items-start">
                       <span className="font-semibold text-sm">{rate.name}</span>
-                      <span className="font-bold text-primary">{formatCurrency(Number(rate.fixedPrice))}</span>
+                      <span className="font-bold text-primary">
+                        {formatCurrency(Number(rate.fixedPrice))}
+                      </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-1">
                       {formatDate(rate.startDate)} — {formatDate(rate.endDate)}
@@ -198,7 +247,9 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground italic">No seasonal adjustments.</p>
+              <p className="text-sm text-muted-foreground italic">
+                No seasonal adjustments.
+              </p>
             )}
           </div>
 
@@ -210,10 +261,14 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
               </h3>
               <div className="space-y-3">
                 {maintenanceBlocks.map((block) => (
-                  <div key={block.id} className="text-sm border-l-2 border-amber-400 pl-3">
+                  <div
+                    key={block.id}
+                    className="text-sm border-l-2 border-amber-400 pl-3"
+                  >
                     <p className="font-medium">{block.reason}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatDate(block.startDate)} — {formatDate(block.endDate)}
+                      {formatDate(block.startDate)} —{" "}
+                      {formatDate(block.endDate)}
                     </p>
                   </div>
                 ))}

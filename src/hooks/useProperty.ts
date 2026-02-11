@@ -191,7 +191,7 @@ export const useGetTenantPropertyId = (propertyId: number) => {
 
 export const useCreateProperty = () => {
   const session = useSession();
-  const router = useRouter();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (formData: FormData) => {
@@ -205,6 +205,7 @@ export const useCreateProperty = () => {
     },
     onSuccess: () => {
       toast.success("Property created successfully");
+      queryClient.invalidateQueries({ queryKey: ["properties", "tenant"] });
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data.message || "Failed to create property");

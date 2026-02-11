@@ -14,7 +14,7 @@ export const createPropertyOneSchema = z.object({
   description: z.string().min(1, "Description is required"),
   address: z.string().min(1, "Address is required").max(255),
   cityId: z.number().min(1, "Please select a city"),
-  categoryId: z.number().min(1, "Please select a category"),
+  categoryId: z.number().min(1).optional(),
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   propertyType: PropertyTypeEnum,
