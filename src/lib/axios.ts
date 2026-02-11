@@ -1,3 +1,4 @@
+import { Role } from "@/types/user";
 import axios from "axios";
 import { getSession, signOut } from "next-auth/react";
 import { toast } from "sonner";
@@ -17,7 +18,7 @@ axiosInstance.interceptors.response.use(
       toast.error("Session expired. Please login again.")
 
       const loginUrl =
-        role === "TENANT" ? "/auth/login/tenant" : "auth/login/user";
+        role === Role.TENANT ? "/auth/login/tenant" : "/auth/login/user";
       await signOut({ callbackUrl: loginUrl });
     };
     return Promise.reject(error);
