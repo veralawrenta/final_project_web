@@ -79,7 +79,7 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
           <Button
             variant="default"
             className="gap-2 bg-slate-600"
-            onClick={() => router.push(`dashboard/tenant/room/update/${room.id}`)}
+            onClick={() => router.push(`/dashboard/tenant/room/update/${room.id}`)}
           >
             <Pencil className="h-4 w-4" />
             Edit Room
