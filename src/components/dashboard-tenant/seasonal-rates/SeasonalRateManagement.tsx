@@ -23,7 +23,7 @@ import {
   useDeleteSeasonalRates,
   useGetSeasonalRatesbyTenant,
 } from "@/hooks/useSeasonalRates";
-import { formatLocalDate, fromDateString } from "@/lib/date/date";
+import { formatLocalDate, fromDateString, toDDMMYYYY } from "@/lib/date/date";
 import { formatCurrency } from "@/lib/price/currency";
 import { SeasonalRates } from "@/types/seasonal-rates";
 import {
@@ -248,14 +248,14 @@ const SeasonalRateManagementTab = ({
                   <div className="flex items-center gap-2 p-3 rounded-2xl bg-muted/40 text-sm font-medium">
                     <CalendarIcon className="h-4 w-4 text-primary" />
                     <span className="text-xs lg:text-[11px] xl:text-xs">
-                      {formatLocalDate(
-                        fromDateString(rate.startDate.split("T")[0])
+                      {toDDMMYYYY(formatLocalDate(
+                        fromDateString(rate.startDate.split("T")[0]))
                       )}
                     </span>
                     <ArrowRight className="h-3 w-3 text-muted-foreground mx-auto" />
                     <span className="text-xs lg:text-[11px] xl:text-xs">
-                      {formatLocalDate(
-                        fromDateString(rate.endDate.split("T")[0])
+                      {toDDMMYYYY(formatLocalDate(
+                        fromDateString(rate.endDate.split("T")[0]))
                       )}
                     </span>
                   </div>

@@ -92,7 +92,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
   };
 
   const handleLogout = async () => {
-    await signOut();
+    await signOut({ callbackUrl: "/" });
   };
 
   return (

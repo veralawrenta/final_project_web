@@ -259,7 +259,7 @@ const CreateMaintenanceBlockForm = () => {
                     Units to Block
                     {selectedRoom && (
                       <span className="text-muted-foreground font-normal ml-1">
-                        (max {selectedRoom.totalUnits})
+                        (min 1 unit)
                       </span>
                     )}
                   </FormLabel>

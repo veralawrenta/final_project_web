@@ -168,8 +168,8 @@ const RoomManagementTab = () => {
             <SelectValue placeholder="Order" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="asc">Ascending</SelectItem>
-            <SelectItem value="desc">Descending</SelectItem>
+            <SelectItem value="asc">A to Z</SelectItem>
+            <SelectItem value="desc">Z to A</SelectItem>
           </SelectContent>
         </Select>
 

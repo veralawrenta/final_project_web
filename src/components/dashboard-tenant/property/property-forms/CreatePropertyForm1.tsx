@@ -1,7 +1,9 @@
 "use client";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FieldDescription } from "@/components/ui/field";
 import {
   Form,
   FormControl,
@@ -32,8 +34,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import CreateImageUploader from "../image-uploader/CreateImageUploader";
-import { RichTextEditor } from "@/components/RichTextEditor";
-import { FieldDescription } from "@/components/ui/field";
 import { InteractiveMap } from "./maps/InteractiveMaps";
 
 const KOTA_TUA_LAT = -6.1352;
@@ -108,11 +108,6 @@ export function CreatePropertyStep1Form({
       return false;
     }
 
-    // if (!formData.categoryId) {
-    //   toast.error("Category is required");
-    //   return false;
-    // }
-
     if (formData.amenities.length === 0) {
       toast.error("Please select at least one amenity");
       return false;
@@ -150,7 +145,7 @@ export function CreatePropertyStep1Form({
       </div>
 
       <Form {...form}>
-        <form id="form-create-property" className="space-y-6">
+        <form className="space-y-6">
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-lg">Basic Information</CardTitle>
@@ -161,10 +156,9 @@ export function CreatePropertyStep1Form({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="form-create-property-name">Property Name</FormLabel>
+                    <FormLabel>Property Name</FormLabel>
                     <FormControl>
                       <Input
-                        id="form-create-property-name"
                         placeholder="e.g., Sunset Beach Villa"
                         {...field}
                         required
@@ -183,7 +177,7 @@ export function CreatePropertyStep1Form({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="form-create-property-description">
+                    <FormLabel>
                       Description
                     </FormLabel>
                     <FormControl>
@@ -204,7 +198,7 @@ export function CreatePropertyStep1Form({
                   name="propertyType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="form-create-property-propertyType">
+                      <FormLabel>
                         Property Type
                       </FormLabel>
                       <Select
@@ -212,7 +206,7 @@ export function CreatePropertyStep1Form({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger id="form-create-property-propertyType">
+                          <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                         </FormControl>
@@ -233,7 +227,7 @@ export function CreatePropertyStep1Form({
                   name="cityId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="cityId">City</FormLabel>
+                      <FormLabel>City</FormLabel>
                       {loadingCities ? (
                         <Skeleton className="h-10 w-full" />
                       ) : (
@@ -242,7 +236,7 @@ export function CreatePropertyStep1Form({
                           onValueChange={field.onChange}
                         >
                           <FormControl>
-                            <SelectTrigger id="form-create-property-cityId">
+                            <SelectTrigger>
                               <SelectValue placeholder="Select city" />
                             </SelectTrigger>
                           </FormControl>
@@ -268,7 +262,7 @@ export function CreatePropertyStep1Form({
                   name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="form-create-property-categoryId">
+                      <FormLabel>
                         Category
                         <span className="text-muted-foreground text-xs font-normal">
                           (Optional)
@@ -282,7 +276,7 @@ export function CreatePropertyStep1Form({
                           onValueChange={field.onChange}
                         >
                           <FormControl>
-                            <SelectTrigger id="form-create-property-categoryId">
+                            <SelectTrigger>
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                           </FormControl>
@@ -309,10 +303,9 @@ export function CreatePropertyStep1Form({
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="form-create-property-address">Address</FormLabel>
+                    <FormLabel>Address</FormLabel>
                     <FormControl>
                       <Input
-                        id="form-create-property-address"
                         placeholder="Full address"
                         {...field}
                         required
@@ -339,12 +332,11 @@ export function CreatePropertyStep1Form({
                   name="latitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="form-create-property-latitude" className="text-sm">
+                      <FormLabel className="text-sm">
                         Latitude
                       </FormLabel>
                       <FormControl>
                         <Input
-                          id="form-create-property-latitude"
                           type="number"
                           step="any"
                           {...field}
@@ -365,12 +357,11 @@ export function CreatePropertyStep1Form({
                   name="longitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="form-create-property-longitude" className="text-sm">
+                      <FormLabel className="text-sm">
                         Longitude
                       </FormLabel>
                       <FormControl>
                         <Input
-                          id="form-create-property-longitude"
                           type="number"
                           step="any"
                           {...field}

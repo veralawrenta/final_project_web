@@ -9,10 +9,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, X } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 
 interface PersonalInfoSectionProps {
   isEditing: boolean;
+  isSubmitting: boolean;
   formData: {
     firstName: string;
     lastName: string;
@@ -38,6 +39,7 @@ interface PersonalInfoSectionProps {
 
 export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
   isEditing,
+  isSubmitting = false,
   formData,
   editData,
   onEdit,
@@ -103,11 +105,20 @@ export const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
               onChange={onInputChange}
             />
             <div className="flex gap-3 pt-2">
-              <Button onClick={onSave}>
-                <Check className="w-4 h-4 mr-2" />
-                Save Changes
+              <Button onClick={onSave} disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
               </Button>
-              <Button onClick={onCancel} variant="outline">
+              <Button onClick={onCancel} variant="outline" disabled={isSubmitting}>
                 <X className="w-4 h-4 mr-2" />
                 Cancel
               </Button>

@@ -34,6 +34,7 @@ const ProfileUserTab = () => {
   const [isLoadingAvatar, setIsLoadingAvatar] = useState(false);
   const [formData, setFormData] = useState<UserProfileForm | null>(null);
   const [editData, setEditData] = useState<UserProfileForm | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!me) return;
@@ -94,14 +95,21 @@ const ProfileUserTab = () => {
     setEditData(formData);
   };
 
-  const handleSave = () => {
-    const payload = updateDataUserSchema.parse(editData);
-    updateProfile.mutate(payload, {
-      onSuccess: () => {
-        setFormData(editData);
-        setIsEditing(false);
-      },
-    });
+  const handleSave = async () => {
+    setIsSubmitting(true);
+    try {
+      const payload = updateDataUserSchema.parse(editData);
+      updateProfile.mutate(payload, {
+        onSuccess: () => {
+          setFormData(editData);
+          setIsEditing(false);
+        },
+      });
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (
@@ -122,7 +130,6 @@ const ProfileUserTab = () => {
     <div className="space-y-6">
       <ProfileHeader />
 
-
       <AvatarSection
         avatar={formData.avatar}
         firstName={formData.firstName}
@@ -137,6 +144,7 @@ const ProfileUserTab = () => {
 
       <PersonalInfoSection
         isEditing={isEditing}
+        isSubmitting={isSubmitting}
         formData={formData}
         editData={editData}
         onEdit={handleEdit}
@@ -149,4 +157,3 @@ const ProfileUserTab = () => {
 };
 
 export default ProfileUserTab;
-

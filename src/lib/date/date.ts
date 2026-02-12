@@ -5,7 +5,7 @@ export function formatLocalDate(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
 
-  return `${day}-${month}-${year}`;
+  return `${year}-${month}-${day}`;
 }
 
 //converting string back to date object guarantees no timezone shift and accidental utc parsing
@@ -13,7 +13,10 @@ export function fromDateString(dateStr: string): Date {
   const [y, m, d] = dateStr.split("-").map(Number);
   return new Date(y, m - 1, d);
 };
-
+export const toDDMMYYYY = (dateString: string) => {
+  const [year, month, day] = dateString.split("-");
+  return `${day}-${month}-${year}`;
+};
 //parse ISO string date to Date object
 export function parseISODate(isoString: string): Date {
   const dateOnly = isoString.split("T")[0];
