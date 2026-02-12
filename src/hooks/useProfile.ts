@@ -15,12 +15,13 @@ export const useMeProfile = () => {
   return useQuery({
     queryKey: ["me-profile"],
     queryFn: async () => {
-      const accessToken = session.data?.user.accessToken;
       const { data } = await axiosInstance.get<User>("users/me", {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
       });
+      console.log("API RESPONSE DATA:", data);
+      console.log("PROVIDER IN RESPONSE:", data.provider);
       return data;
     },
     staleTime: 5 * 60 * 1000,
@@ -60,7 +61,7 @@ export const useUpdateProfileUser = () => {
 export const useUpdateProfileTenant = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const session = useSession()
+  const session = useSession();
 
   return useMutation({
     mutationFn: async (payload: {
@@ -70,11 +71,15 @@ export const useUpdateProfileTenant = () => {
       bankName?: string;
       bankNumber?: string;
     }) => {
-      const { data } = await axiosInstance.patch("/users/data-tenant", payload, {
-        headers: {
-          Authorization: `Bearer ${session.data?.user.accessToken}`,
+      const { data } = await axiosInstance.patch(
+        "/users/data-tenant",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
         }
-      });
+      );
       return data;
     },
     onSuccess: () => {
@@ -116,8 +121,8 @@ export const useUploadAvatar = () => {
     onSuccess: (data) => {
       toast.success("Upload avatar success");
       setTimeout(() => {
-          router.refresh()
-      }, 1000)
+        router.refresh();
+      }, 1000);
       queryClient.setQueryData(["me-profile"], (oldData: User | undefined) => {
         if (oldData) {
           return {
@@ -140,11 +145,15 @@ export const useResendVerification = () => {
 
   return useMutation({
     mutationFn: async () => {
-      const { data } = await axiosInstance.post("/auth/resend-change-email", {}, {
-        headers: {
-          Authorization: `Bearer ${session.data?.user.accessToken}`,
-        },
-      });
+      const { data } = await axiosInstance.post(
+        "/auth/resend-change-email",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        }
+      );
       return data;
     },
     onSuccess: () => {
