@@ -35,8 +35,8 @@ export const useSearchProperties = (
   return useQuery({
     queryKey: ["properties", queries?.search ?? "",
       queries.cityId,
-      formatLocalDate(queries.checkIn),
-      formatLocalDate(queries.checkOut),
+      queries.checkIn ? formatLocalDate(queries.checkIn) : "",
+      queries.checkOut ? formatLocalDate(queries.checkOut) : "",
       queries.take ?? 3,
       queries.page ?? 1,
       queries.sortBy ?? "name",
@@ -44,9 +44,14 @@ export const useSearchProperties = (
       queries.propertyType ?? "",
     ],
     queryFn: async () => {
+      const params = {
+        ...queries,
+        checkIn: formatLocalDate(queries.checkIn),
+        checkOut: formatLocalDate(queries.checkOut),
+      };
       const { data } = await axiosInstance.get<PageableResponse<Property>>(
         "/properties/search",
-        {params: queries}
+        {params}
       );
       return data;
     },

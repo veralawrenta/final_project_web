@@ -1,15 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { createSeasonalRatesSchema } from "@/lib/validator/dashboard.seasonalrates.schema";
-import { useCreateSeasonalRates } from "@/hooks/useSeasonalRates";
-import { useGetTenantRooms } from "@/hooks/useRoom";
-import { useGetTenantProperties } from "@/hooks/useProperty";
-import z from "zod";
 import { SeasonalRateForm } from "@/components/dashboard-tenant/seasonal-rates/SeasonalRateForm";
+import { useGetTenantProperties } from "@/hooks/useProperty";
+import { useGetTenantRooms } from "@/hooks/useRoom";
+import { useCreateSeasonalRates } from "@/hooks/useSeasonalRates";
+import { createSeasonalRatesSchema } from "@/lib/validator/dashboard.seasonalrates.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { useForm } from "react-hook-form";
+import z from "zod";
 
 export default function CreateSeasonalRatePage() {
   const router = useRouter();
@@ -67,7 +67,6 @@ export default function CreateSeasonalRatePage() {
       onCancel={() => router.back()}
       onSubmit={handleSubmit}
       properties={properties}
-      rooms={rooms}
       fields={{
         name: "name",
         startDate: "startDate",

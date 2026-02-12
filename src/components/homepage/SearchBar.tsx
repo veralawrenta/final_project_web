@@ -96,7 +96,7 @@ export function SearchBar() {
   };
 
   const handleSearch = () => {
-    if (!cityId || !checkIn || !checkOut || !guests) {
+    if (!checkIn || !checkOut || !guests) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -108,6 +108,17 @@ export function SearchBar() {
       toast.error("Check-out date must be after check-in date");
       return;
     }
+
+    const params = new URLSearchParams({
+      checkIn,
+      checkOut,
+      guests: guests.toString(),
+    });
+    
+    if (cityId) {
+      params.set('cityId', cityId.toString());
+    }
+  
 
     router.push(
       `/properties?cityId=${cityId}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}`
