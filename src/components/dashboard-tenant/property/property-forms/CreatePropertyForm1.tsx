@@ -150,7 +150,7 @@ export function CreatePropertyStep1Form({
       </div>
 
       <Form {...form}>
-        <form className="space-y-6">
+        <form id="form-create-property" className="space-y-6">
           <Card>
             <CardHeader className="pb-4">
               <CardTitle className="text-lg">Basic Information</CardTitle>
@@ -161,10 +161,10 @@ export function CreatePropertyStep1Form({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="form-name">Property Name</FormLabel>
+                    <FormLabel htmlFor="form-create-property-name">Property Name</FormLabel>
                     <FormControl>
                       <Input
-                        id="name"
+                        id="form-create-property-name"
                         placeholder="e.g., Sunset Beach Villa"
                         {...field}
                         required
@@ -183,7 +183,7 @@ export function CreatePropertyStep1Form({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="form-description">
+                    <FormLabel htmlFor="form-create-property-description">
                       Description
                     </FormLabel>
                     <FormControl>
@@ -204,7 +204,7 @@ export function CreatePropertyStep1Form({
                   name="propertyType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="propertyType">
+                      <FormLabel htmlFor="form-create-property-propertyType">
                         Property Type
                       </FormLabel>
                       <Select
@@ -212,11 +212,11 @@ export function CreatePropertyStep1Form({
                         value={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger id="form-create-property-propertyType">
                             <SelectValue />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent id="propertyType">
+                        <SelectContent >
                           <SelectItem value="VILLA">Villa</SelectItem>
                           <SelectItem value="HOUSE">House</SelectItem>
                           <SelectItem value="APARTMENT">Apartment</SelectItem>
@@ -242,7 +242,7 @@ export function CreatePropertyStep1Form({
                           onValueChange={field.onChange}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger id="form-create-property-cityId">
                               <SelectValue placeholder="Select city" />
                             </SelectTrigger>
                           </FormControl>
@@ -268,7 +268,7 @@ export function CreatePropertyStep1Form({
                   name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="categoryId">
+                      <FormLabel htmlFor="form-create-property-categoryId">
                         Category
                         <span className="text-muted-foreground text-xs font-normal">
                           (Optional)
@@ -282,7 +282,7 @@ export function CreatePropertyStep1Form({
                           onValueChange={field.onChange}
                         >
                           <FormControl>
-                            <SelectTrigger>
+                            <SelectTrigger id="form-create-property-categoryId">
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                           </FormControl>
@@ -309,10 +309,10 @@ export function CreatePropertyStep1Form({
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="form-address">Address</FormLabel>
+                    <FormLabel htmlFor="form-create-property-address">Address</FormLabel>
                     <FormControl>
                       <Input
-                        id="form-address"
+                        id="form-create-property-address"
                         placeholder="Full address"
                         {...field}
                         required
@@ -339,12 +339,12 @@ export function CreatePropertyStep1Form({
                   name="latitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="form-latitude" className="text-sm">
+                      <FormLabel htmlFor="form-create-property-latitude" className="text-sm">
                         Latitude
                       </FormLabel>
                       <FormControl>
                         <Input
-                          id="form-latitude"
+                          id="form-create-property-latitude"
                           type="number"
                           step="any"
                           {...field}
@@ -365,12 +365,12 @@ export function CreatePropertyStep1Form({
                   name="longitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="form-longitude" className="text-sm">
+                      <FormLabel htmlFor="form-create-property-longitude" className="text-sm">
                         Longitude
                       </FormLabel>
                       <FormControl>
                         <Input
-                          id="form-longitude"
+                          id="form-create-property-longitude"
                           type="number"
                           step="any"
                           {...field}

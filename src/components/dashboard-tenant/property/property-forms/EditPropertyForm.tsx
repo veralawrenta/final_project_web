@@ -150,16 +150,16 @@ export function EditPropertyForm({
       </div>
       <div className="bg-card rounded-2xl border p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form id="form-edit-property" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <section className="space-y-6">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="name">Property Name</FormLabel>
+                    <FormLabel htmlFor="form-edit-property=name">Property Name</FormLabel>
                     <FormControl>
-                      <Input id="name" {...field} />
+                      <Input id="form-edit-property-name" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -171,7 +171,7 @@ export function EditPropertyForm({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="description">Description</FormLabel>
+                    <FormLabel htmlFor="form-edit-property-description">Description</FormLabel>
                     <FormControl>
                       <RichTextEditor
                         value={field.value ?? ""}
@@ -189,15 +189,14 @@ export function EditPropertyForm({
                   name="propertyType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="propertyType">Type</FormLabel>
+                      <FormLabel htmlFor="form-edit-property-propertyType">Type</FormLabel>
                       <Select
                         value={field.value}
                         onValueChange={field.onChange}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger id="form-edit-property-propertyType">
                             <SelectValue
-                              id="propertyType"
                               placeholder="Select property type"
                             />
                           </SelectTrigger>
@@ -220,16 +219,15 @@ export function EditPropertyForm({
                   name="cityId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="cityId">City</FormLabel>
+                      <FormLabel htmlFor="form-edit-property-cityId">City</FormLabel>
                       <Select
                         disabled={locationLocked}
                         value={field.value?.toString()}
                         onValueChange={(v) => field.onChange(Number(v))}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger id="form-edit-property-cityId">
                             <SelectValue
-                              id="cityId"
                               placeholder="Select city"
                             />
                           </SelectTrigger>
@@ -255,15 +253,14 @@ export function EditPropertyForm({
                   name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="categoryId">Category</FormLabel>
+                      <FormLabel htmlFor="form-edit-property-categoryId">Category</FormLabel>
                       <Select
                         value={field.value?.toString()}
                         onValueChange={(v) =>  {field.onChange(v ? Number(v) : undefined)}}
                       >
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger id="form-edit-property-categoryId">
                             <SelectValue
-                              id="categoryId"
                               placeholder="Select category"
                             />
                           </SelectTrigger>
@@ -290,10 +287,10 @@ export function EditPropertyForm({
                   name="latitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="latitude">Latitude</FormLabel>
+                      <FormLabel htmlFor="form-edit-property-latitude">Latitude</FormLabel>
                       <FormControl>
                         <Input
-                          id="latitude"
+                          id="form-edit-property-latitude"
                           disabled={locationLocked}
                           type="number"
                           step="any"
@@ -309,10 +306,10 @@ export function EditPropertyForm({
                   name="longitude"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="longitude">Longitude</FormLabel>
+                      <FormLabel htmlFor="form-edit-property-longitude">Longitude</FormLabel>
                       <FormControl>
                         <Input
-                          id="longitude"
+                          id="form-edit-property-longitude"
                           disabled={locationLocked}
                           type="number"
                           step="any"

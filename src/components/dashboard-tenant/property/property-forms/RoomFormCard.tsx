@@ -165,22 +165,6 @@ export function RoomFormCard({
     validateAndSubmit(data, onSubmit);
   };
 
-  const handleSecondarySubmit = (data: RoomFormData) => {
-    if (onSecondaryAction) {
-      validateAndSubmit(data, onSecondaryAction);
-    }
-  };
-
-  const incrementField = (field: "totalGuests" | "totalUnits", max: number) => {
-    const current = form.getValues(field);
-    if (current < max) form.setValue(field, current + 1);
-  };
-
-  const decrementField = (field: "totalGuests" | "totalUnits", min: number) => {
-    const current = form.getValues(field);
-    if (current > min) form.setValue(field, current - 1);
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -189,16 +173,16 @@ export function RoomFormCard({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form className="space-y-6">
+          <form id="form-create-room" className="space-y-6">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="name">Room Name *</FormLabel>
+                  <FormLabel htmlFor="form-create-room-name">Room Name *</FormLabel>
                   <FormControl>
                     <Input
-                      id="name"
+                      id="form-create-room-name"
                       placeholder="e.g., Deluxe Ocean View Suite"
                       {...field}
                     />
@@ -212,7 +196,7 @@ export function RoomFormCard({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel htmlFor="description">Description *</FormLabel>
+                  <FormLabel htmlFor="form-create-room-description">Description *</FormLabel>
                   <FormControl>
                     <RichTextEditor
                       value={field.value}
@@ -231,7 +215,7 @@ export function RoomFormCard({
                 name="basePrice"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="basePrice">
+                    <FormLabel htmlFor="form-create-room-basePrice">
                       Price (per night) *
                     </FormLabel>
                     <FormControl>
@@ -240,7 +224,7 @@ export function RoomFormCard({
                           Rp
                         </span>
                         <Input
-                          id="basePrice"
+                          id="form-create-room-basePrice"
                           type="number"
                           className="pl-10"
                           placeholder="100000"
@@ -262,13 +246,13 @@ export function RoomFormCard({
                 name="totalGuests"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="totalGuests">
+                    <FormLabel htmlFor="form-create-room-totalGuests">
                       Maximum Guests *
                     </FormLabel>
                     <FormControl>
                       <div className="flex items-center gap-2">
                         <Input
-                          id="totalGuests"
+                          id="form-create-room-totalGuests"
                           type="number"
                           className="text-center"
                           {...field}
@@ -288,11 +272,11 @@ export function RoomFormCard({
                 name="totalUnits"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel htmlFor="totalUnits">Total Units *</FormLabel>
+                    <FormLabel htmlFor="form-create-room-totalUnits">Total Units *</FormLabel>
                     <FormControl>
                       <div className="flex items-center gap-2">
                         <Input
-                          id="totalUnits"
+                          id="form-create-room-totalUnits"
                           type="number"
                           className="text-center"
                           {...field}
@@ -308,9 +292,9 @@ export function RoomFormCard({
               />
             </div>
             <div className="space-y-3">
-              <FormLabel htmlFor="images">Room Images *</FormLabel>
+              <FormLabel htmlFor="form-create-room-images">Room Images *</FormLabel>
               <Input
-                id="images"
+                id="form-create-room-images"
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"

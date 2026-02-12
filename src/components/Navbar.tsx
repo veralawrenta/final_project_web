@@ -176,7 +176,7 @@ const Navbar = () => {
           ) : (
             <>
               <Link
-                href="/auth/login/tenant"
+                href="/auth/register/tenant"
                 className="text-lg font-bold text-[#334155]"
               >
                 List your property
