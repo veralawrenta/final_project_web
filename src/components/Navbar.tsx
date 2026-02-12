@@ -125,7 +125,7 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <Link href="/auth/register/tenant">
+              <Link href="/auth/login/tenant">
                 <Button
                   variant="ghost"
                   className="rounded-full px-6 font-bold text-[#334155] hover:bg-[#C7E1FB]/20 transition-all"
