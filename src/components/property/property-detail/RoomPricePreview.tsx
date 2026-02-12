@@ -64,7 +64,7 @@ const RoomPricePreview = ({
   return (
     <div className="hidden md:block sticky top-24 p-6 border rounded-xl bg-card space-y-4">
       <div>
-        <p className="text-sm text-muted-foreground">Selected Room</p>
+        <p className="text-sm text-primary">Selected Room</p>
         <h3 className="font-semibold">{room.name}</h3>
       </div>
 

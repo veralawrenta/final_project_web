@@ -2,7 +2,7 @@
 
 import { ArrowLeft, MapPin } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -65,6 +65,13 @@ export default function PropertyDetail() {
     guests,
     Boolean(propertyId)
   );
+
+  useEffect(() => {
+    if (property && !selectedRoom) {
+      const firstAvailable = rooms.find((r) => r.isAvailable);
+      if(firstAvailable) { setSelectedRoom(firstAvailable)}
+    }
+  }, [property])
 
   if (isLoading) {
     return (
@@ -184,6 +191,7 @@ export default function PropertyDetail() {
                     nights={nights}
                     isSelected={selectedRoom?.id === room.id}
                     onSelect={() => room.isAvailable && setSelectedRoom(room)}
+                    onBook={() => {router.refresh()}}
                   />
                 ))}
               </div>

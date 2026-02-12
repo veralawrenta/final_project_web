@@ -92,8 +92,6 @@ export function EditPropertyForm({
     );
   }, [property.images]);
 
-  const locationLocked = property.hasMaintenance || property.hasSeasonalRate;
-
   const selectedAmenities = form.watch("amenities") ?? [];
   const toggleAmenity = (code: string) => {
     const current = form.getValues("amenities") ?? [];
@@ -221,7 +219,6 @@ export function EditPropertyForm({
                     <FormItem>
                       <FormLabel>City</FormLabel>
                       <Select
-                        disabled={locationLocked}
                         value={field.value?.toString()}
                         onValueChange={(v) => field.onChange(Number(v))}
                       >
@@ -290,7 +287,7 @@ export function EditPropertyForm({
                       <FormLabel>Latitude</FormLabel>
                       <FormControl>
                         <Input
-                          disabled={locationLocked}
+                          disabled
                           type="number"
                           step="any"
                           {...field}
@@ -308,7 +305,7 @@ export function EditPropertyForm({
                       <FormLabel>Longitude</FormLabel>
                       <FormControl>
                         <Input
-                          disabled={locationLocked}
+                          disabled
                           type="number"
                           step="any"
                           {...field}

@@ -39,16 +39,17 @@ export function ResendVerificationForm({
       toast.success("Verification Sent", {
         description: "Please check your inbox (and spam) for the link.",
       });
-      setTimeout(() => router.push("/"), 2000);
+      setTimeout(() => router.push("/"), 1000);
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || "Failed to send verification email.";
+      const message =
+        error.response?.data?.message || "Failed to send verification email.";
       toast.error(message);
     },
   });
 
   async function onSubmit(values: z.infer<typeof resendVerificationSchema>) {
-      await resendVerification(values);
+    await resendVerification(values);
   }
 
   return (
@@ -68,7 +69,9 @@ export function ResendVerificationForm({
                   className="h-auto w-auto"
                 />
                 <div className="space-y-1">
-                  <h1 className="text-2xl font-bold tracking-tight text-slate-900">Verify Email Address</h1>
+                  <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                    Verify Email Address
+                  </h1>
                   <p className="text-slate-500 text-sm">
                     Enter your email to receive a new verification link
                   </p>
@@ -77,7 +80,12 @@ export function ResendVerificationForm({
 
               <div className="space-y-4">
                 <Field className="space-y-2">
-                  <FieldLabel htmlFor="email" className="text-slate-700 font-medium">Email Address</FieldLabel>
+                  <FieldLabel
+                    htmlFor="email"
+                    className="text-slate-700 font-medium"
+                  >
+                    Email Address
+                  </FieldLabel>
                   <Input
                     id="email"
                     type="email"
@@ -86,7 +94,9 @@ export function ResendVerificationForm({
                     {...form.register("email")}
                   />
                   {form.formState.errors.email && (
-                    <p className="text-xs text-red-500 mt-1">{form.formState.errors.email.message}</p>
+                    <p className="text-xs text-red-500 mt-1">
+                      {form.formState.errors.email.message}
+                    </p>
                   )}
                 </Field>
 
@@ -106,7 +116,7 @@ export function ResendVerificationForm({
               </div>
             </FieldGroup>
           </form>
-          
+
           <div className="relative hidden md:block bg-slate-100">
             <img
               src="https://images.unsplash.com/photo-1761920555057-54bbc392135c?q=80&w=1974&auto=format&fit=crop"
@@ -117,10 +127,17 @@ export function ResendVerificationForm({
           </div>
         </CardContent>
       </Card>
-      
+
       <FieldDescription className="px-6 text-center text-slate-400 text-xs">
-        By clicking continue, you agree to our <a href="#" className="underline hover:text-slate-600">Terms of Service</a>{" "}
-        and <a href="/" className="underline hover:text-slate-600">Privacy Policy</a>.
+        By clicking continue, you agree to our{" "}
+        <a href="#" className="underline hover:text-slate-600">
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a href="/" className="underline hover:text-slate-600">
+          Privacy Policy
+        </a>
+        .
       </FieldDescription>
     </div>
   );

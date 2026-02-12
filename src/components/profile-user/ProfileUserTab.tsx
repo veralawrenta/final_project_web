@@ -47,7 +47,7 @@ const ProfileUserTab = () => {
       address: me.address ?? "",
       aboutMe: me.aboutMe ?? "",
       avatar: me.avatar,
-      provider: "CREDENTIAL",
+      provider: me.provider,
       isVerified: me.isVerified,
     };
     setFormData(mapped);

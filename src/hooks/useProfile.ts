@@ -20,8 +20,6 @@ export const useMeProfile = () => {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
       });
-      console.log("API RESPONSE DATA:", data);
-      console.log("PROVIDER IN RESPONSE:", data.provider);
       return data;
     },
     staleTime: 5 * 60 * 1000,

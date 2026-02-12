@@ -13,7 +13,7 @@ import {
   Settings,
   User,
   Wrench,
-  X
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -87,7 +87,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
   const isActive = (href: string) => {
     if (href === "/dashboard/tenant") {
       return pathname === href;
-    };
+    }
     return pathname === href || pathname.startsWith(href + "/");
   };
 
@@ -112,6 +112,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               width={180}
               height={180}
               alt="Website Logo"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority
               className="h-auto w-auto"
             />
@@ -176,13 +177,13 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               <button className="flex items-center gap-2 p-1.5 hover:bg-muted rounded-lg">
                 <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-600 flex items-center justify-center">
                   {me?.avatar ? (
-                   
                     <Image
                       src={me.avatar}
                       alt="Avatar"
                       width={36}
                       height={36}
-                      className="h-auto w-auto"
+                      className="w-full h-full object-cover"
+                      style={{ width: "auto", height: "auto" }}
                     />
                   ) : (
                     <span className="text-primary-foreground font-semibold text-sm">
@@ -192,7 +193,9 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                 </div>
 
                 <div className="hidden md:flex flex-col items-start">
-                  <span className="text-xs font-semibold">{me?.tenant?.tenantName}</span>
+                  <span className="text-xs font-semibold">
+                    {me?.tenant?.tenantName}
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {me?.role}
                   </span>
@@ -203,9 +206,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-1.5">
                 <p className="text-sm font-semibold">{me?.tenant.tenantName}</p>
-                <p className="text-xs text-muted-foreground">
-                  {me?.email}
-                </p>
+                <p className="text-xs text-muted-foreground">{me?.email}</p>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
@@ -227,7 +228,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive gap-2">
                 <Button onClick={handleLogout}>
-                  <LogOut className="w-4 h-4 text-primary-foreground"/> Logout
+                  <LogOut className="w-4 h-4 text-primary-foreground" /> Logout
                 </Button>
               </DropdownMenuItem>
             </DropdownMenuContent>
