@@ -4,8 +4,11 @@ import {
   useChangePassword,
   useMeProfile,
 } from "@/hooks/useProfile";
-import { useSession } from "next-auth/react";
+import { Label } from "@radix-ui/react-label";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import React, { useState } from "react";
+import { Toaster } from "sonner";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
@@ -13,19 +16,10 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Label } from "@radix-ui/react-label";
-import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { Toaster } from "sonner";
 
 const SettingTabComponent = () => {
   const { data: profile, isPending } = useMeProfile();
-  const { data: session } = useSession();
-
-  console.log("Session data:", session);
-  console.log("Provider value:", session?.user.provider);
-  console.log("Provider type:", typeof session?.user.provider);
 
   const { mutateAsync: changeEmail, isPending: changeEmailPending } =
     useChangeEmail();
@@ -77,7 +71,6 @@ const SettingTabComponent = () => {
   };
 
   const isGoogleUser = profile?.provider === "GOOGLE";
-  console.log("Is Google User?", isGoogleUser)
 
   return (
     <div className="space-y-6">

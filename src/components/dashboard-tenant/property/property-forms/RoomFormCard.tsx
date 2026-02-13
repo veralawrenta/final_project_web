@@ -82,9 +82,9 @@ export function RoomFormCard({
     const files = e.target.files;
     if (!files) return;
 
-    const remainingSlots = 10 - roomImages.length;
+    const remainingSlots = 3 - roomImages.length;
     if (remainingSlots === 0) {
-      toast.error("Maximum 10 images allowed");
+      toast.error("Maximum 3 images allowed");
       return;
     }
 
@@ -307,7 +307,7 @@ export function RoomFormCard({
                   Click to upload room images
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  PNG, JPG up to 10 images ({roomImages.length}/10)
+                  PNG, JPG up to 3 images ({roomImages.length}/3)
                 </p>
               </div>
 
