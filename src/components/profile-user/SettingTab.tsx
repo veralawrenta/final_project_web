@@ -22,6 +22,11 @@ import { Toaster } from "sonner";
 const SettingTabComponent = () => {
   const { data: profile, isPending } = useMeProfile();
   const { data: session } = useSession();
+
+  console.log("Session data:", session);
+  console.log("Provider value:", session?.user.provider);
+  console.log("Provider type:", typeof session?.user.provider);
+
   const { mutateAsync: changeEmail, isPending: changeEmailPending } =
     useChangeEmail();
   const { mutateAsync: changePassword, isPending: changePasswordPending } =
@@ -56,6 +61,7 @@ const SettingTabComponent = () => {
 
   const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isGoogleUser) return;
     changePassword({
       currentPassword: passwordForm.currentPassword,
       newPassword: passwordForm.newPassword,
@@ -64,12 +70,14 @@ const SettingTabComponent = () => {
 
   const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isGoogleUser) return;
     changeEmail({
       newEmail: emailForm.newEmail,
     });
   };
 
   const isGoogleUser = session?.user.provider === "GOOGLE";
+  console.log("Is Google User?", isGoogleUser)
 
   return (
     <div className="space-y-6">
