@@ -76,7 +76,7 @@ const SettingTabComponent = () => {
     });
   };
 
-  const isGoogleUser = session?.user.provider === "GOOGLE";
+  const isGoogleUser = profile?.provider === "GOOGLE";
   console.log("Is Google User?", isGoogleUser)
 
   return (
