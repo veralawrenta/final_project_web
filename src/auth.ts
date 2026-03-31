@@ -11,7 +11,8 @@ declare module "next-auth" {
     lastName: string;
     avatar: string;
     role: "USER" | "TENANT";
-    provider: "GOOGLE" | "CREDENTIAL"
+    provider: "GOOGLE" | "CREDENTIAL";
+    isVerified: boolean;
     accessToken?: string;
   }
   interface Session {
@@ -58,6 +59,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         user.avatar = data.user.avatar;
         user.role = data.user.role;
         user.provider = data.user.provider;
+        user.isVerified = data.user.isVerified;
         user.accessToken = data.accessToken;
       }
       return true;

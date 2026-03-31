@@ -11,7 +11,11 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
   
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar />
+      <Sidebar
+      firstName={session.user.firstName}
+      lastName={session.user.lastName}
+      isVerified={session.user.isVerified}
+      />
       <main className="flex-1 overflow-auto">
         <div className="md:p-8 p-4 pt-16 md:pt-8">{children}</div>
       </main>

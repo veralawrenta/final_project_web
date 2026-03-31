@@ -104,7 +104,7 @@ export function RoomFormCard({
     );
 
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = ""; // for clearing the input so you can upload the same file again if needed
     }
   };
 
@@ -116,7 +116,7 @@ export function RoomFormCard({
       updatedImages.length > 0 &&
       !updatedImages.some((img) => img.isCover)
     ) {
-      updatedImages[0].isCover = true;
+      updatedImages[0].isCover = true; //if deleting the cover image and there is still image left it automatically make the first remaining image a new cover
     }
 
     setRoomImages(updatedImages);
@@ -126,11 +126,11 @@ export function RoomFormCard({
       { shouldValidate: true }
     );
 
-    URL.revokeObjectURL(roomImages[index].preview);
+    URL.revokeObjectURL(roomImages[index].preview); //delete the blob url to free up some memory
   };
 
   const setCoverImage = (index: number) => {
-    const updatedImages = roomImages.map((img, i) => ({
+    const updatedImages = roomImages.map((img, i) => ({ //changing cover
       ...img,
       isCover: i === index,
     }));
