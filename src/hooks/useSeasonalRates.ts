@@ -1,5 +1,4 @@
 import { axiosInstance } from "@/lib/axios";
-import { formatLocalDate } from "@/lib/date/date";
 import {
   createSeasonalRatesSchema
 } from "@/lib/validator/dashboard.seasonalrates.schema";
@@ -7,6 +6,7 @@ import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import { SeasonalRates } from "@/types/seasonal-rates";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { format } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -72,10 +72,9 @@ export const useCreateSeasonalRates = () => {
     ) => {
       const formattedBody = {
         name: payload.name,
-        startDate: formatLocalDate(payload.startDate),
-        endDate: formatLocalDate(payload.endDate),
+        startDate: format(payload.startDate, "dd-MM-yyyy"),
+        endDate: format(payload.endDate, "dd-MM-yyyy"),
         fixedPrice: payload.fixedPrice,
-        roomId: payload.roomId,
         propertyId: payload.propertyId,
       };
       const { data } = await axiosInstance.post(

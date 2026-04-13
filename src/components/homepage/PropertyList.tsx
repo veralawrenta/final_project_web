@@ -2,11 +2,11 @@
 
 import PaginationSection from "@/components/PaginationSection";
 import { useGetAllProperties, useSearchProperties } from "@/hooks/useProperty";
-import { fromDateString, normalizeLocalDate } from "@/lib/date/date";
+import { PropertyType } from "@/types/property";
 import { useSearchParams } from "next/navigation";
 import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
 import PropertyCardForm from "../property/PropertyCard";
-import { PropertyType } from "@/types/property";
+import { parse } from "date-fns";
 
 type SortBy = "name" | "price";
 type SortOrder = "asc" | "desc";
@@ -44,8 +44,8 @@ export default function PropertyListingPage() {
 
   const searchQuery = useSearchProperties({
     cityId: Number(cityId),
-    checkIn: normalizeLocalDate(fromDateString(checkIn!)),
-    checkOut: normalizeLocalDate(fromDateString(checkOut!)),
+    checkIn: parse(checkIn!, "dd-MM-yyyy", new Date()),
+    checkOut: parse(checkOut!, "dd-MM-yyyy", new Date()),
     totalGuests: Number(guests),
     page,
     sortBy,

@@ -1,23 +1,18 @@
 "use client";
 
+import Navbar from "@/components/Navbar";
+import { PropertyDetailSearchBar } from "@/components/property/SearchBarProperty";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, MapPin } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import Navbar from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { PropertyDetailSearchBar } from "@/components/property/SearchBarProperty";
 import { PropertyAmenities } from "./amenities/PropertyAmenities";
 import RoomCard from "./property-detail/RoomCard";
-
 import { useGetPropertyWithAvailability } from "@/hooks/useProperty";
-import {
-  countNights,
-  fromDateString,
-  normalizeLocalDate,
-} from "@/lib/date/date";
 import { RoomIdPublic } from "@/types/room";
 import RoomPricePreview from "./property-detail/RoomPricePreview";
+import { differenceInCalendarDays, parse } from "date-fns";
 
 
 const mapRoomToCard = (room: any): RoomIdPublic => ({
@@ -42,14 +37,14 @@ export default function PropertyDetail() {
   const checkOutParam = searchParams.get("checkOut");
   const guestsParam = searchParams.get("guests");
 
-  const today = normalizeLocalDate(new Date());
-  const checkIn = checkInParam ? fromDateString(checkInParam) : today;
+  const today = new Date();
+  const checkIn = checkInParam ? parse(checkInParam, "dd-MM-yyyy", new Date()) : today;
   const checkOut = checkOutParam
-    ? fromDateString(checkOutParam)
+    ? parse(checkOutParam, "dd-MM-yyyy", new Date())
     : new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
   const guests = guestsParam ? Number(guestsParam) : 1;
-  const nights = countNights(checkIn, checkOut);
+  const nights = differenceInCalendarDays(checkOut, checkIn);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState<RoomIdPublic | null>(null);

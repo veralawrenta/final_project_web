@@ -7,7 +7,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { normalizeLocalDate } from "@/lib/date/date";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -37,7 +36,7 @@ function DateRangePicker({
 }: DateRangePickerProps) {
   const [open, setOpen] = useState(false);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
-  const today = useMemo(() => normalizeLocalDate(new Date()), []);
+  const today = useMemo(() => new Date(), []);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 640px)");
@@ -57,8 +56,8 @@ function DateRangePicker({
       }
 
       const normalized: DateRange = {
-        from: range.from ? normalizeLocalDate(range.from) : undefined,
-        to: range.to ? normalizeLocalDate(range.to) : undefined,
+        from: range.from,
+        to: range.to,
       };
 
       onSelect?.(normalized);

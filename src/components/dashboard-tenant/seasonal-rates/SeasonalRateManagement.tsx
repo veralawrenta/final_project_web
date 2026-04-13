@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -23,9 +24,9 @@ import {
   useDeleteSeasonalRates,
   useGetSeasonalRatesbyTenant,
 } from "@/hooks/useSeasonalRates";
-import { formatLocalDate, fromDateString } from "@/lib/date/date";
 import { formatCurrency } from "@/lib/price/currency";
 import { SeasonalRates } from "@/types/seasonal-rates";
+import { format, parseISO } from "date-fns";
 import {
   ArrowRight,
   CalendarIcon,
@@ -37,12 +38,10 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { formatDate } from "date-fns";
 
 interface SeasonalRateManagementTabProps {
   onAddRate: () => void;
@@ -248,15 +247,11 @@ const SeasonalRateManagementTab = ({
                   <div className="flex items-center gap-2 p-3 rounded-2xl bg-muted/40 text-sm font-medium">
                     <CalendarIcon className="h-4 w-4 text-primary" />
                     <span className="text-xs lg:text-[11px] xl:text-xs">
-                      {formatLocalDate(
-                        fromDateString(rate.startDate.split("T")[0])
-                      )}
+                      {format(parseISO(rate.startDate), "dd-MM-yyyy")}
                     </span>
                     <ArrowRight className="h-3 w-3 text-muted-foreground mx-auto" />
                     <span className="text-xs lg:text-[11px] xl:text-xs">
-                      {formatLocalDate(
-                        fromDateString(rate.endDate.split("T")[0])
-                      )}
+                    {format(parseISO(rate.endDate), "dd-MM-yyyy")}
                     </span>
                   </div>
 

@@ -2,9 +2,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { formatLocalDate } from "@/lib/date/date";
 import { formatCurrency } from "@/lib/price/currency";
 import { RoomPropertyCard } from "@/types/room";
+import { format } from "date-fns";
 import { AlertCircle, Home, TrendingUp, Users } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -30,7 +30,7 @@ export default function RoomCard({ room }: RoomCardProps) {
 
   const formatDate = (date: Date | string) => {
     const dateObj = typeof date === "string" ? new Date(date) : date;
-    return formatLocalDate(dateObj);
+    return format(dateObj, "dd-MM-yyyy");
   };
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">

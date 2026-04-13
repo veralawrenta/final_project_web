@@ -17,11 +17,20 @@ export enum TransactionPaymentMethod {
 
 export interface Transactions {
   transactionId: string;
+  room: {
+    roomName: string;
+    roomId: number;
+    property : {
+      propertyName: string;
+      address: string;
+      propertyImages: {
+        urlImages: string[];
+      }
+    };
+  }
   firstName: string;
   lastName: string;
   email: string;
-  propertyName: string;
-  roomName: string;
   checkIn: string;
   checkOut: string;
   status: TransactionStatus;

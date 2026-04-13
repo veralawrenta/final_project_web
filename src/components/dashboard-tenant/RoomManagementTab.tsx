@@ -1,30 +1,5 @@
 "use client";
-import { useState } from "react";
-import { useQueryState, parseAsInteger } from "nuqs";
-import { useDebounceValue } from "usehooks-ts";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Users,
-  Search,
-  Filter,
-  LayoutGrid,
-  ImageIcon,
-  X,
-  ChevronRight,
-  Bed,
-  MapPin,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import PaginationSection from "@/components/PaginationSection";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,13 +10,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Room } from "@/types/room";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useDeleteRoom, useGetTenantRooms } from "@/hooks/useRoom";
-import PaginationSection from "@/components/PaginationSection";
-import { useGetTenantProperties } from "@/hooks/useProperty";
-import { useRouter } from "next/navigation";
 import { formatCurrency } from "@/lib/price/currency";
+import { Room } from "@/types/room";
+import {
+  Bed,
+  ChevronRight,
+  Edit,
+  Filter,
+  ImageIcon,
+  LayoutGrid,
+  MapPin,
+  Plus,
+  Search,
+  Trash2,
+  Users,
+  X,
+} from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { parseAsInteger, useQueryState } from "nuqs";
+import { useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
 
 const RoomManagementTab = () => {
   const router = useRouter();
@@ -54,7 +53,6 @@ const RoomManagementTab = () => {
   const [debounceSearch] = useDebounceValue(search, 500);
   const [deleteRoom, setDeleteRoom] = useState<Room | null>(null);
 
-  const { data: tenantProperties } = useGetTenantProperties();
   const { data: tenantRooms, isPending } = useGetTenantRooms({
     page,
     take: 6,

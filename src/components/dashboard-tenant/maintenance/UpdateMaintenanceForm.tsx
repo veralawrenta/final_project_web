@@ -29,7 +29,6 @@ import {
   useGetRoomNonAvailability,
   useUpdateRoomNonAvailability,
 } from "@/hooks/useRoomNonAvailability";
-import { formatLocalDate, parseISODate } from "@/lib/date/date";
 import { cn } from "@/lib/utils";
 import {
   updateMaintenanceBlockSchema,
@@ -37,7 +36,7 @@ import {
 } from "@/lib/validator/dashboard.maintenance.schema";
 import { TenantProperty } from "@/types/property";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { ArrowLeft, CalendarIcon, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -88,8 +87,8 @@ export default function UpdateMaintenanceBlockPage() {
       }
       setSelectedRoomId(String(blockData.room?.id));
 
-      const startDate = parseISODate(blockData.startDate);
-      const endDate = parseISODate(blockData.endDate);
+      const startDate = parseISO(blockData.startDate);
+      const endDate = parseISO(blockData.endDate);
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         console.error("❌ Invalid dates after parsing!");
@@ -121,9 +120,9 @@ export default function UpdateMaintenanceBlockPage() {
         id: roomNonAvailabilityId,
         body: {
           startDate: values.startDate
-            ? formatLocalDate(values.startDate)
+            ? format(values.startDate, "dd-MM-yyyy")
             : undefined,
-          endDate: values.endDate ? formatLocalDate(values.endDate) : undefined,
+          endDate: values.endDate ? format(values.endDate, "dd-MM-yyyy") : undefined,
           reason: values.reason,
           roomInventory: values.roomInventory,
         },

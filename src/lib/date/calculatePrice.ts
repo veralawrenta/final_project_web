@@ -1,4 +1,4 @@
-import { formatLocalDate } from "./date";
+import { format } from "date-fns";
 interface CalendarDay {
   date: string;
   lowestPrice: number | null;
@@ -13,7 +13,7 @@ export function calculateTotalPrice(
   const current = new Date(checkIn);
 
   while (current < checkOut) {
-    const dateStr = formatLocalDate(current);
+    const dateStr = format(current, "dd-MM-yyyy");
     const day = calendar.find((d) => d.date === dateStr);
 
     if (day?.lowestPrice) {

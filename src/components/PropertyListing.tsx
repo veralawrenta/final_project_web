@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGetAllProperties, useSearchProperties } from "@/hooks/useProperty";
-import { fromDateString, normalizeLocalDate } from "@/lib/date/date";
 import { cn } from "@/lib/utils";
 import { PropertyType } from "@/types/property";
 import { Building2, Home, Hotel, LayoutGrid, Palmtree, SlidersHorizontal, X } from "lucide-react";
@@ -21,6 +20,7 @@ import {
   parseAsStringEnum,
   useQueryState,
 } from "nuqs";
+import { parse } from "date-fns";
 
 type PropertyTypeFilter = "all" | PropertyType;
 type SortBy = "name" | "price";
@@ -85,8 +85,8 @@ const PropertyListingComponent = () => {
   const searchQuery = useSearchProperties(
     {
       cityId: cityId ?? 0,
-      checkIn: checkIn ? normalizeLocalDate(fromDateString(checkIn)) : new Date(),
-      checkOut: checkOut ? normalizeLocalDate(fromDateString(checkOut)) : new Date(),
+      checkIn: checkIn ? parse(checkIn, "dd-MM-yyyy", new Date()) : new Date(),
+      checkOut: checkOut ? parse(checkOut, "dd-MM-yyyy", new Date()) : new Date(),
       totalGuests: guests,
       page,
       take: ITEMS_PER_PAGE,

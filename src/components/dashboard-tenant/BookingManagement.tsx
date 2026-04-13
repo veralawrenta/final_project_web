@@ -14,7 +14,7 @@ import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { Button } from "../ui/button";
-import { useGetAllTenantBookings } from "@/hooks/useTransactions";
+import { useGetAllTenantTransactions } from "@/hooks/useTransactions";
 
 type ViewMode = "list" | "calendar";
 type sortBy = "propertyName" | "status" | "createdAt";
@@ -95,7 +95,7 @@ const BookingManagement = () => {
   const [debounceSearch] = useDebounceValue(search, 500);
   const [calendarMonth, setCalendarMonth] = useState(new Date())
 
-  const { data: tenantBookings, isPending } = useGetAllTenantBookings({
+  const { data: tenantBookings, isPending } = useGetAllTenantTransactions({
     search: debounceSearch,
     page,
     take: 6,
