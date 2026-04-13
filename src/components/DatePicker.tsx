@@ -51,7 +51,7 @@ export function DatePicker({
             className="w-full h-12 bg-secondary justify-start"
           >
             <Calendar className="mr-2 h-4 w-4" />
-            {value ? format(value, "MMM dd, yyyy") : "Select date"}
+            {value ? format(value, "dd MMM yyyy") : "Select date"}
           </Button>
         </PopoverTrigger>
 

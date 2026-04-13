@@ -3,18 +3,12 @@
 import { Button } from "@/components/ui/button";
 import { useGetMonthCalendarSearch } from "@/hooks/useProperty";
 import { calculateTotalPrice } from "@/lib/date/calculatePrice";
-import {
-  countNights,
-  formatLocalDate,
-  isBeforeToday,
-  normalizeLocalDate,
-} from "@/lib/date/date";
-import { addMonths } from "date-fns";
+import { formatCurrency } from "@/lib/price/currency";
+import { addMonths, differenceInCalendarDays, format, isBefore, startOfDay } from "date-fns";
 import { Search } from "lucide-react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { DatePicker } from "../DatePicker";
-import { formatCurrency } from "@/lib/price/currency";
 
 interface Props {
   propertyId: number;
@@ -33,11 +27,11 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10 }: Props) {
 
   const maxCheckoutDate = checkIn ? addMonths(checkIn, 1) : undefined;
 
-  const calendarMonth = normalizeLocalDate(checkIn ?? new Date());
+  const calendarMonth = checkIn ?? new Date();
 
   const { data } = useGetMonthCalendarSearch(propertyId, calendarMonth, true);
 
-  const nights = countNights(checkIn, checkOut);
+  const nights = checkIn && checkOut ? differenceInCalendarDays(checkOut, checkIn) : 0;
 
   const totalPrice =
     checkIn && checkOut && data
@@ -47,8 +41,8 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10 }: Props) {
   const search = () => {
     if (!checkIn || !checkOut) return;
     const params = new URLSearchParams({
-      checkIn: formatLocalDate(checkIn),
-      checkOut: formatLocalDate(checkOut),
+      checkIn: format(checkIn, "dd-MM-yyyy"),
+      checkOut: format(checkOut, "dd-MM-yyyy"),
       guests: guests.toString(),
     });
 
@@ -65,15 +59,15 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10 }: Props) {
           value={checkIn}
           onSelect={(date) => {
             if (!date) return;
-            setCheckIn(normalizeLocalDate(date));
+            setCheckIn(date);
             setCheckOut(undefined);
             setOpenCheckIn(false);
           }}
           disabledDate={(date) => {
-            const d = normalizeLocalDate(date);
-            if (isBeforeToday(d)) return true;
+            const d = date;
+            if (isBefore(startOfDay(d), startOfDay(new Date()))) return true;
             const day = data?.calendar.find(
-              (c) => c.date === formatLocalDate(d)
+              (c) => c.date === format(d, "dd-MM-yyyy")
             );
             if (day && day.availableRoomsCount === 0) return true;
             return false;
@@ -89,20 +83,20 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10 }: Props) {
           disabled={!checkIn}
           onSelect={(date) => {
             if (!date) return;
-            setCheckOut(normalizeLocalDate(date));
+            setCheckOut(date);
             setOpenCheckOut(false);
           }}
           disabledDate={(date) => {
             if (!checkIn) return true;
 
-            const d = normalizeLocalDate(date);
+            const d = date;
 
             if (d <= checkIn) return true;
-            if (maxCheckoutDate && d > normalizeLocalDate(maxCheckoutDate))
+            if (maxCheckoutDate && d > maxCheckoutDate)
               return true;
 
             const day = data?.calendar.find(
-              (c) => c.date === formatLocalDate(d)
+              (c) => c.date === format(d, "dd-MM-yyyy")
             );
 
             if (day && day.availableRoomsCount === 0) return true;

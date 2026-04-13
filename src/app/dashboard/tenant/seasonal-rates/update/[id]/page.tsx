@@ -4,15 +4,9 @@ import {
   useGetSeasonalRateById,
   useUpdateSeasonalRates,
 } from "@/hooks/useSeasonalRates";
-import {
-  formatLocalDate,
-  fromDateString,
-  normalizeLocalDate,
-  parseISODate,
-} from "@/lib/date/date";
 import { updateSeasonalRatesSchema } from "@/lib/validator/dashboard.seasonalrates.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -40,8 +34,8 @@ export default function UpdateSeasonalRatePage() {
 
   useEffect(() => {
     if (!seasonalRate) return;
-    const startDate = parseISODate(seasonalRate.startDate);
-    const endDate = parseISODate(seasonalRate.endDate);
+    const startDate = parseISO(seasonalRate.startDate);
+    const endDate = parseISO(seasonalRate.endDate);
     
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       console.error("Invalid dates:", {
@@ -72,10 +66,10 @@ export default function UpdateSeasonalRatePage() {
     await mutateAsync({
       name: values.name,
       startDate: values.startDate
-        ? format(values.startDate, "yyyy-MM-dd")
+        ? format(values.startDate, "dd-MM-yyyy")
         : undefined,
       endDate: values.endDate
-        ? format(values.endDate, "yyyy-MM-dd")
+        ? format(values.endDate, "dd-MM-yyyy")
         : undefined,
       fixedPrice: values.fixedPrice,
     });

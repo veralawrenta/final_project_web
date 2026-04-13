@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { formatLocalDate } from "@/lib/date/date";
 import { formatCurrency } from "@/lib/price/currency";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import type { DayButton } from "react-day-picker";
 
 interface PropertyDayButtonProps
@@ -21,7 +21,7 @@ export function PropertyDayButton({
   ...props
 }: PropertyDayButtonProps) {
   const dayData = calendar.find(
-    (d) => d.date === formatLocalDate(day.date)
+    (d) => d.date === format(day.date, "dd-MM-yyyy")
   );
 
   const isSeasonal = dayData?.roomPrices?.some(

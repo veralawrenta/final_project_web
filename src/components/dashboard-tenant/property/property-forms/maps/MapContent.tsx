@@ -1,6 +1,6 @@
 "use client";
 import L from "leaflet";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 if (typeof window !== "undefined") {
   delete (L.Icon.Default.prototype as any)._getIconUrl;

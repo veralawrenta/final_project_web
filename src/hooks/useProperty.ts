@@ -1,5 +1,4 @@
 import { axiosInstance } from "@/lib/axios";
-import { formatLocalDate } from "@/lib/date/date";
 import { UpdatePropertFormValues } from "@/lib/validator/dashboard.update-property.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import {
@@ -12,6 +11,7 @@ import {
 } from "@/types/property";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { format } from "date-fns";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -35,8 +35,8 @@ export const useSearchProperties = (
   return useQuery({
     queryKey: ["properties", queries?.search ?? "",
       queries.cityId,
-      queries.checkIn ? formatLocalDate(queries.checkIn) : "",
-      queries.checkOut ? formatLocalDate(queries.checkOut) : "",
+      queries.checkIn ? format(queries.checkIn, "dd-MM-yyyy") : "",
+      queries.checkOut ? format(queries.checkOut, "dd-MM-yyyy") : "",
       queries.take ?? 3,
       queries.page ?? 1,
       queries.sortBy ?? "name",
@@ -46,8 +46,8 @@ export const useSearchProperties = (
     queryFn: async () => {
       const params = {
         ...queries,
-        checkIn: formatLocalDate(queries.checkIn),
-        checkOut: formatLocalDate(queries.checkOut),
+        checkIn: format(queries.checkIn, "dd-MM-yyyy"),
+        checkOut: format(queries.checkOut, "dd-MM-yyyy"),
       };
       const { data } = await axiosInstance.get<PageableResponse<Property>>(
         "/properties/search",
@@ -95,8 +95,8 @@ export const useGetPropertyWithAvailability = (
       propertyId,
       "availability",
       {
-        checkIn: formatLocalDate(checkIn),
-        checkOut: formatLocalDate(checkOut),
+        checkIn: format(checkIn, "dd-MM-yyyy"),
+        checkOut: format(checkOut, "dd-MM-yyyy"),
         totalGuests,
       },
     ],
@@ -105,8 +105,8 @@ export const useGetPropertyWithAvailability = (
         `/properties/${propertyId}/availability`,
         {
           params: {
-            checkIn: formatLocalDate(checkIn),
-            checkOut: formatLocalDate(checkOut),
+            checkIn: format(checkIn, "dd-MM-yyyy"),
+            checkOut: format(checkOut, "dd-MM-yyyy"),
             totalGuests,
           },
         }
@@ -128,13 +128,13 @@ export const useGetMonthCalendarSearch = (
       "property",
       propertyId,
       "calendar",
-      startDate ? formatLocalDate(startDate) : undefined,
+      startDate ? format(startDate, "dd-MM-yyyy") : undefined,
     ],
     queryFn: async () => {
       const { data } = await axiosInstance.get<CalendarResponse>(
         `/properties/${propertyId}/calendar-prices`,
         {
-          params: startDate ? { startDate: formatLocalDate(startDate) } : {},
+          params: startDate ? { startDate: format(startDate, "dd-MM-yyyy") } : {},
         }
       );
       return data;

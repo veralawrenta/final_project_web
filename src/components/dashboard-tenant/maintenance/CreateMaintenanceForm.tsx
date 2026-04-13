@@ -26,7 +26,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useGetTenantProperties } from "@/hooks/useProperty";
 import { useGetTenantRooms } from "@/hooks/useRoom";
 import { useCreateRoomNonAvailability } from "@/hooks/useRoomNonAvailability";
-import { formatLocalDate } from "@/lib/date/date";
 import { cn } from "@/lib/utils";
 import {
   createMaintenanceBlockSchema,
@@ -78,8 +77,8 @@ const CreateMaintenanceBlockForm = () => {
       await createBlock.mutateAsync({
         roomId: Number(values.roomId),
         body: {
-          startDate: formatLocalDate(values.startDate),
-          endDate: formatLocalDate(values.endDate),
+          startDate: format(values.startDate, "dd-MM-yyyy"),
+          endDate: format(values.endDate, "dd-MM-yyyy"),
           reason: values.reason,
           roomInventory: values.roomInventory,
         },

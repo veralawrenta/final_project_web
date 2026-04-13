@@ -1,5 +1,4 @@
 import z from "zod";
-import { normalizeLocalDate } from "../date/date";
 
 export const createMaintenanceBlockSchema = z
   .object({
@@ -12,8 +11,8 @@ export const createMaintenanceBlockSchema = z
       .min(1, "Must be at least 1"),
   })
   .superRefine((data, ctx) => {
-    const start = normalizeLocalDate(data.startDate);
-    const end = normalizeLocalDate(data.endDate);
+    const start = data.startDate;
+    const end = data.endDate;
 
     if (start >= end) {
       ctx.addIssue({
@@ -34,9 +33,9 @@ export const updateMaintenanceBlockSchema = z
   .superRefine((data, ctx) => {
     if (!data.startDate || !data.endDate) return;
 
-    const today = normalizeLocalDate(new Date());
-    const start = normalizeLocalDate(data.startDate);
-    const end = normalizeLocalDate(data.endDate);
+    const today = new Date();
+    const start = data.startDate;
+    const end = data.endDate;
 
     if (start < today) {
       ctx.addIssue({

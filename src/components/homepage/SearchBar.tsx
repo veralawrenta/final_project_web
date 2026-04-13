@@ -1,12 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useGetCities } from "@/hooks/useGetCities";
-import {
-  formatLocalDate,
-  fromDateString,
-  normalizeLocalDate,
-} from "@/lib/date/date";
 import { City } from "@/types/city";
+import { format, parse } from "date-fns";
 import { MapPin, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { parseAsInteger, useQueryState } from "nuqs";
@@ -37,10 +33,10 @@ export function SearchBar() {
   const [showCityDropdown, setShowCityDropdown] = useState(false);
 
   const [checkInDate, setCheckInDate] = useState<Date | null>(
-    checkIn ? normalizeLocalDate(fromDateString(checkIn)) : null
+    checkIn ? parse(checkIn, "dd-MM-yyyy", new Date()) : null
   );
   const [checkOutDate, setCheckOutDate] = useState<Date | null>(
-    checkOut ? normalizeLocalDate(fromDateString(checkOut)) : null
+    checkOut ? parse(checkOut, "dd-MM-yyyy", new Date()) : null
   );
 
   const cityDropdownRef = useRef<HTMLDivElement>(null);
@@ -60,13 +56,13 @@ export function SearchBar() {
 
   useEffect(() => {
     if (checkIn) {
-      setCheckInDate(normalizeLocalDate(fromDateString(checkIn)));
+      setCheckInDate(parse(checkIn, "dd-MM-yyyy", new Date()));
     }
   }, [checkIn]);
 
   useEffect(() => {
     if (checkOut) {
-      setCheckOutDate(normalizeLocalDate(fromDateString(checkOut)));
+      setCheckOutDate(parse(checkOut, "dd-MM-yyyy", new Date()));
     }
   }, [checkOut]);
 
@@ -78,11 +74,10 @@ export function SearchBar() {
 
   const handleCheckInChange = (date: Date | null) => {
     if (!date) return;
-    const normalized = normalizeLocalDate(date);
-    setCheckInDate(normalized);
-    setCheckIn(formatLocalDate(normalized));
+    setCheckInDate(date);
+    setCheckIn(format(date, "dd-MM-yyyy"));
 
-    if (checkOutDate && checkOutDate <= normalized) {
+    if (checkOutDate && checkOutDate <= date) {
       setCheckOutDate(null);
       setCheckOut("");
     }
@@ -90,9 +85,8 @@ export function SearchBar() {
 
   const handleCheckOutChange = (date: Date | null) => {
     if (!date) return;
-    const normalized = normalizeLocalDate(date);
-    setCheckOutDate(normalized);
-    setCheckOut(formatLocalDate(normalized));
+    setCheckOutDate(date);
+    setCheckOut(format(date, "dd-MM-yyyy"));
   };
 
   const handleSearch = () => {
@@ -101,8 +95,8 @@ export function SearchBar() {
       return;
     }
 
-    const checkInDateObj = fromDateString(checkIn);
-    const checkOutDateObj = fromDateString(checkOut);
+    const checkInDateObj = parse(checkIn, "dd-MM-yyyy", new Date());
+    const checkOutDateObj = parse(checkOut, "dd-MM-yyyy", new Date());
 
     if (checkOutDateObj <= checkInDateObj) {
       toast.error("Check-out date must be after check-in date");
@@ -135,7 +129,7 @@ export function SearchBar() {
     setCheckOutDate(null);
   };
 
-  const today = normalizeLocalDate(new Date());
+  const today = new Date();
 
   return (
     <div className="w-full max-w-4xl mx-auto -mt-8 md:-mt-12 relative z-10 px-4">
@@ -209,7 +203,7 @@ export function SearchBar() {
               selected={checkInDate}
               onChange={handleCheckInChange}
               minDate={today}
-              dateFormat="MMM dd, yyyy"
+              dateFormat="dd MMM yyyy"
               placeholderText="Select date"
               className="w-full px-4 py-3 bg-secondary rounded-xl text-sm"
             />

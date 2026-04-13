@@ -9,9 +9,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatLocalDate, fromDateString, toDDMMYYYY } from "@/lib/date/date";
 import { PageableResponse } from "@/types/pagination";
 import { Room, RoomNonAvailability } from "@/types/room";
+import { format, parseISO } from "date-fns";
 import { Edit, Loader2, Search, Trash2 } from "lucide-react";
 
 interface MaintenanceListProps {
@@ -118,8 +118,8 @@ const MaintenanceList = ({
                   )}
 
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                    {toDDMMYYYY(formatLocalDate(fromDateString(record.startDate.split("T")[0])))} to{" "}
-                    {toDDMMYYYY(formatLocalDate(fromDateString(record.endDate.split("T")[0])))}
+                    {format(parseISO(record.startDate), "dd-MM-yyyy")} to{" "}
+                    {format(parseISO(record.endDate), "dd-MM-yyyy")}
                   </div>
                 </div>
 
