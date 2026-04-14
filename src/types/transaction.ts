@@ -1,43 +1,80 @@
 export enum TransactionStatus {
-    ALL = "ALL",
-    WAITING_FOR_CONFIRMATION = "WAITING_FOR_CONFIRMATION",
-    WAITING_FOR_PAYMENT = "WAITING_FOR_PAYMENT",
-    CANCELLED_BY_USER = "CANCELLED_BY_USER",
-    CANCELLED_BY_TENANT = "CANCELLED_BY_TENANT",
-    CONFIRMED = "CONFIRMED",
-    EXPIRED = "EXPIRED",
-    COMPLETED = "COMPLETED"
+  ALL = "ALL",
+  WAITING_FOR_CONFIRMATION = "WAITING_FOR_CONFIRMATION",
+  WAITING_FOR_PAYMENT = "WAITING_FOR_PAYMENT",
+  CANCELLED_BY_USER = "CANCELLED_BY_USER",
+  CANCELLED_BY_TENANT = "CANCELLED_BY_TENANT",
+  CONFIRMED = "CONFIRMED",
+  EXPIRED = "EXPIRED",
+  COMPLETED = "COMPLETED",
 }
 
-export enum TransactionPaymentMethod {
-  BANK_TRANSFER = "BANK_TRANSFER",
-  CREDIT_CARD = "CREDIT_CARD",
-  SHOPEEPAY = "SHOPEEPAY",
-}
+export type TransactionStatusFilter = "all" | "pending" | "upcoming" | "ongoing" | "completed" | "cancelled";
+
+export interface TransactionSummary {
+  all: number;
+  upcoming: number;
+  ongoing: number;
+  completed: number;
+  cancelled: number;
+  pending: number;
+};
+
+export type TransactionPaymentMethod = "BANK_TRANSFER" | "CREDIT_CARD" | "SHOPEEPAY";
 
 export interface Transactions {
   transactionId: string;
   room: {
     roomName: string;
     roomId: number;
-    property : {
+    property: {
       propertyName: string;
       address: string;
+      city: string;
       propertyImages: {
-        urlImages: string[];
-      }
+        urlImages: string;
+      };
     };
-  }
-  firstName: string;
-  lastName: string;
-  email: string;
+  };
+  user: {
+    userId?: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  review?: {
+    rating?: number;
+    comment?: string;
+    reply?: string;
+  };
   checkIn: string;
   checkOut: string;
   status: TransactionStatus;
   totalPrice: number;
   totalGuests: number;
   paymentDate: string;
-  paymentMethod: TransactionPaymentMethod;
+  paymentMethod?: TransactionPaymentMethod;
   paymentProof?: string;
-  createdAt: string;
+  createdAt?: string;
 }
+
+export interface CreateTransactionPayload {
+  roomId: number;
+  checkIn: string;
+  checkOut: string;
+  totalGuests: number;
+  bookedUnits: number;
+  paymentMethod: TransactionPaymentMethod;
+  cardDetails?: {
+    cardNumber: string;
+    cardHolderName: string;
+    expiryDate: string;
+    cvv: string;
+    cardholderFirstName: string;
+    cardholderLastName: string;
+    cardholderEmail: string;
+    cardholderPhoneNumber: string;
+  };
+}
+
+

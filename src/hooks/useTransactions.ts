@@ -1,4 +1,5 @@
 import { axiosInstance } from "@/lib/axios";
+import { createTransactionSchema, uploadPaymentProofSchema } from "@/lib/validator/profile.transaction.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import { Transactions, TransactionStatus } from "@/types/transaction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,12 +7,13 @@ import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import z from "zod";
 
 interface TransactionQueryParams extends PaginationQueryParams {
   search?: string;
   propertyName?: string;
   transactionId?: string;
-  status: TransactionStatus;
+  status?: TransactionStatus;
 }
 
 export const useGetAllTenantTransactions = (
@@ -44,7 +46,7 @@ export const useGetAllUserTransaction = (queries?: TransactionQueryParams) => {
     queryKey: ["userTransactions", queries],
     queryFn: async () => {
       const { data } = await axiosInstance.get<PageableResponse<Transactions>>(
-        `/transactions/user/`,
+        `/transactions/user`,
         {
           params: queries,
           headers: {
@@ -63,10 +65,9 @@ export const useCreateTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData: FormData) => {
-      const { data } = await axiosInstance.post("/transactions", formData, {
+    mutationFn: async (body: z.infer<typeof createTransactionSchema>) => {
+      const { data } = await axiosInstance.post("/transactions", body, {
         headers: {
-          "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
       });
@@ -257,19 +258,13 @@ export const useUploadPaymentProof = () => {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: async ({
-      transactionId,
-      paymentProof,
-    }: {
-      transactionId: string;
-      paymentProof: File;
-    }) => {
+    mutationFn: async (body: z.infer<typeof uploadPaymentProofSchema>) => {
       const form = new FormData();
-      form.append("transactionId", transactionId);
-      form.append("paymentProof", paymentProof);
+      form.append("transactionId", body.transactionId);
+      form.append("paymentProof", body.paymentProof);
 
       const { data } = await axiosInstance.post<{ paymentProof: string }>(
-        `/transactions/${transactionId}/payment-proof`,
+        `/transactions/${body.transactionId}/payment-proof`,
         form,
         {
           headers: {
@@ -283,7 +278,7 @@ export const useUploadPaymentProof = () => {
     onSuccess: () => {
       toast.success("Payment proof uploaded successfully");
       setTimeout(() => {
-        router.push("/profile/user/booking/id");
+        router.push(`/profile/user/transactions`);
       }, 1000);
       queryClient.invalidateQueries({
         queryKey: ["tenantTransactions", "userTransactions"],
