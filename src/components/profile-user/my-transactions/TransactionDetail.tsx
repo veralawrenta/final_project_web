@@ -8,19 +8,13 @@ import {
 } from "@/hooks/useTransactions";
 import { formatCurrency } from "@/lib/price/currency";
 import { STATUS_CONFIG } from "@/lib/transaction-config";
-import { TransactionStatus } from "@/types/transaction";
+import { BANK, TransactionStatus } from "@/types/transaction";
 import { differenceInCalendarDays, formatDate, startOfDay } from "date-fns";
 import { ArrowLeft, Badge, CalendarDays, Check, CheckCircle, Copy, CreditCard, Eye, FileImage, Link, MapPin, Shield, Star, Upload, Users, X, XCircle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { GrStatusInfo } from "react-icons/gr";
 import { toast } from "sonner";
-
-const BANK = {
-  name: "Bank Central Asia (BCA)",
-  number: "1234567890",
-  holder: "PT Staynuit Indonesia",
-};
 
 
 const TransactionDetail = () => {

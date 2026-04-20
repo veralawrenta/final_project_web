@@ -1,5 +1,5 @@
 import { axiosInstance } from "@/lib/axios";
-import { createTransactionSchema, uploadPaymentProofSchema } from "@/lib/validator/profile.transaction.schema";
+import { CreateTransactionFormValues, uploadPaymentProofSchema } from "@/lib/validator/profile.transaction.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import { Transactions, TransactionStatus } from "@/types/transaction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +14,12 @@ interface TransactionQueryParams extends PaginationQueryParams {
   propertyName?: string;
   transactionId?: string;
   status?: TransactionStatus;
+}
+
+interface TransactionResponse{
+  transactionId: string;
+  paymentUrl: string;
+  status: TransactionStatus;
 }
 
 export const useGetAllTenantTransactions = (
@@ -65,8 +71,8 @@ export const useCreateTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (body: z.infer<typeof createTransactionSchema>) => {
-      const { data } = await axiosInstance.post("/transactions", body, {
+    mutationFn: async (values: CreateTransactionFormValues) : Promise<TransactionResponse>=> {
+      const { data } = await axiosInstance.post("/transactions", values, {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
         },
