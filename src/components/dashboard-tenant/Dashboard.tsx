@@ -63,6 +63,11 @@ const navItems: NavItem[] = [
     icon: <BedDouble className="w-5 h-5" />,
   },
   {
+    label: "Transactions",
+    href: "/dashboard/tenant/transaction",
+    icon: <BadgeDollarSign className="w-5 h-5" />,
+  },
+  {
     label: "Maintenance",
     href: "/dashboard/tenant/maintenance",
     icon: <Wrench className="w-5 h-5" />,

@@ -9,7 +9,13 @@ export enum TransactionStatus {
   COMPLETED = "COMPLETED",
 }
 
-export type TransactionStatusFilter = "all" | "pending" | "upcoming" | "ongoing" | "completed" | "cancelled";
+export type TransactionStatusFilter =
+  | "all"
+  | "pending"
+  | "upcoming"
+  | "ongoing"
+  | "completed"
+  | "cancelled";
 
 export interface TransactionSummary {
   all: number;
@@ -18,9 +24,12 @@ export interface TransactionSummary {
   completed: number;
   cancelled: number;
   pending: number;
-};
+}
 
-export type TransactionPaymentMethod = "BANK_TRANSFER" | "CREDIT_CARD" | "SHOPEEPAY";
+export type TransactionPaymentMethod =
+  | "BANK_TRANSFER"
+  | "CREDIT_CARD"
+  | "SHOPEEPAY";
 
 export interface Transactions {
   transactionId: string;
@@ -65,16 +74,22 @@ export interface CreateTransactionPayload {
   totalGuests: number;
   bookedUnits: number;
   paymentMethod: TransactionPaymentMethod;
-  cardDetails?: {
-    cardNumber: string;
-    cardHolderName: string;
-    expiryDate: string;
-    cvv: string;
-    cardholderFirstName: string;
-    cardholderLastName: string;
-    cardholderEmail: string;
-    cardholderPhoneNumber: string;
-  };
+  specialRequest?: string;
 }
 
+export interface CardFormPayload {
+  cardNumber: string;
+  cardHolderFirstName: string;
+  cardHolderLastName: string;
+  expiredMonth: string;
+  expiredYear: string;
+  cvv: string;
+  cardholderEmail?: string;
+  cardholderPhoneNumber?: string;
+}
 
+export const BANK = {
+  name: "Bank Central Asia (BCA)",
+  number: "1234567890",
+  holder: "PT Staynuit Indonesia",
+};

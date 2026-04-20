@@ -9,16 +9,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  useCancelTransactionByUser,
-  useGetAllUserTransaction,
+  useGetAllUserTransaction
 } from "@/hooks/useTransactions";
+import { SortBy, SortOrder } from "@/types/pagination";
 import { TransactionStatus, TransactionStatusFilter } from "@/types/transaction";
 import { Calendar, Search, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
 import { useDebounceValue } from "usehooks-ts";
-import TransactionCard from "./TransactionCard";
-import { SortBy, SortOrder } from "@/types/pagination";
+import TransactionCard from "./TransactionCardList";
 
 const ITEMS_PER_PAGE = 4;
 
@@ -81,8 +80,6 @@ const MyTransactions = () => {
     status: statusParams,
   });
 
-  const { mutate: cancelTransaction, isPending: isCancelling } =
-    useCancelTransactionByUser();
 
   const transactions = userTransactions?.data ?? [];
   const meta = userTransactions?.meta;
@@ -103,10 +100,6 @@ const MyTransactions = () => {
   const handleTabChange = (tab: TransactionStatusFilter) => {
     setActiveTab(tab);
     setPage(1);
-  };
-  const handlePageChange = (p: number) => {
-    setPage(p);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -227,8 +220,6 @@ const MyTransactions = () => {
               <TransactionCard
                 key={t.transactionId}
                 transaction={t}
-                onCancel={() => cancelTransaction(t.transactionId)}
-                isCancellable={isCancelling}
               />
             ))
           )}

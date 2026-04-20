@@ -101,6 +101,7 @@ export function DashboardOverview() {
         ]
       : []),
   ];
+ 
 
   return (
     <div className="space-y-6">
@@ -154,7 +155,7 @@ export function DashboardOverview() {
                 <div className="flex items-center gap-1 mt-1">
                   <Star className="h-4 w-4 fill-gold text-gold" />
                   <span className="text-sm font-medium">
-                    {stats.averageRating}
+                    {stats?.averageRating}
                   </span>
                   <span className="text-sm text-muted-foreground">
                     average rating
