@@ -55,13 +55,22 @@ export function DatePicker({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="p-0">
+        {/* FIX 1: constrain width to viewport on mobile, wider on sm+
+            - w-[calc(100vw-2rem)] caps it to screen width minus padding on mobile
+            - sm:w-auto lets it size naturally on larger screens
+            - overflow-hidden prevents any child from breaking out
+            - align="start" avoids it popping off the right edge         */}
+        <PopoverContent
+          className="p-0 w-[calc(100vw-2rem)] sm:w-auto overflow-hidden"
+          align="start"
+          sideOffset={8}
+        >
           <CalendarComponent
             mode="single"
             selected={value}
             onSelect={onSelect}
             disabled={disabledDate}
-            className="p-3"
+            className="p-2 sm:p-3 w-full"
             components={{
               DayButton: (props) => (
                 <PropertyDayButton {...props} calendar={calendar} />

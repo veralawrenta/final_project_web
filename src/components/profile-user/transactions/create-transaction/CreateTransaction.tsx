@@ -68,8 +68,6 @@ interface BookingPageProps {
   property: PropertyInfo;
 }
 
-// ─── Schemas ──────────────────────────────────────────────────────────────────
-
 const detailsSchema = createTransactionSchema.pick({
   checkIn: true,
   checkOut: true,
@@ -144,9 +142,8 @@ const CreateTransaction = ({ property }: BookingPageProps) => {
   // ── Derived ──
   const nights = calcNights(checkIn, checkOut);
   const subtotal = property.price * bookedUnits * nights;
-  const serviceFee = Math.round(subtotal * 0.1);
   const taxes = Math.round(subtotal * 0.11);
-  const total = subtotal + serviceFee + taxes;
+  const total = subtotal + taxes;
 
   // ── Handlers ──
 
@@ -515,8 +512,6 @@ const CreateTransaction = ({ property }: BookingPageProps) => {
                   </div>
                 </>
               )}
-
-              {/* ─── STEP: payment ─── */}
               {step === "payment" && (
                 <>
                   <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
@@ -1147,14 +1142,6 @@ const CreateTransaction = ({ property }: BookingPageProps) => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">
-                          Service fee (10%)
-                        </span>
-                        <span className="font-medium">
-                          {nights > 0 ? `${formatCurrency(serviceFee)}` : "—"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">
                           Taxes (11%)
                         </span>
                         <span className="font-medium">
@@ -1192,7 +1179,6 @@ const CreateTransaction = ({ property }: BookingPageProps) => {
                     </button>
                   </div>
 
-                  {/* Trust Badges */}
                   <div className="bg-card rounded-3xl border border-border p-5 shadow-sm">
                     <div className="space-y-3">
                       {[

@@ -13,7 +13,7 @@ interface TransactionQueryParams extends PaginationQueryParams {
   search?: string;
   propertyName?: string;
   transactionId?: string;
-  status?: TransactionStatus;
+  status?: TransactionStatus[];
 }
 
 interface TransactionResponse{

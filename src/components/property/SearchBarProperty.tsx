@@ -1,5 +1,4 @@
 "use client";
-
 import { Button } from "@/components/ui/button";
 import { useGetMonthCalendarSearch } from "@/hooks/useProperty";
 import { calculateTotalPrice } from "@/lib/date/calculatePrice";

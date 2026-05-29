@@ -5,6 +5,7 @@ export interface PaginationMeta {
     take: number;
     total: number;
     totalPages?: number;
+    pending?: number;
 }
 
 export interface PageableResponse<T> {
