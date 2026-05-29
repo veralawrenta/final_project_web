@@ -1,4 +1,4 @@
-import MyTransactions from "@/components/profile-user/my-transactions/MyTransactions";
+import MyTransactions from "@/components/profile-user/transactions/MyTransactions";
 
 const MyBookingsPage = () => {
   return (

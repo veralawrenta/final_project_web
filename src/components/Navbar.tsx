@@ -106,7 +106,7 @@ const Navbar = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/"
+                        href="/profile/user/bookings"
                         className="cursor-pointer font-medium"
                       >
                         My Bookings

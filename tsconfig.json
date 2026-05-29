@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "src/components/profile-user/my-transactions/create-transaction/CreateTransaction.tsx"  ],
+, "src/components/profile-user/transactions/create-transaction/CreateTransaction.tsx"  ],
   "exclude": ["node_modules"]
 }

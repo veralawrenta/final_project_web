@@ -11,11 +11,9 @@ export enum TransactionStatus {
 
 export type TransactionStatusFilter =
   | "all"
-  | "pending"
   | "upcoming"
   | "ongoing"
   | "completed"
-  | "cancelled";
 
 export interface TransactionSummary {
   all: number;
