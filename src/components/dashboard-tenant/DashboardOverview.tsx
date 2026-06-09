@@ -1,19 +1,23 @@
 "use client";
-import {
-  Building2,
-  Wrench,
-  Star,
-  User,
-  Home,
-  BedDouble,
-  BadgeDollarSign,
-  Layers,
-} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useDashboardOverview } from "@/hooks/useDashboardOverview";
 import { useMeProfile } from "@/hooks/useProfile";
+import {
+  AlertTriangle,
+  BadgeDollarSign,
+  BedDouble,
+  BookUser,
+  Building2,
+  Clock,
+  Layers,
+  MessageSquare,
+  Reply,
+  Star,
+  User,
+  Wrench
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function DashboardOverview() {
   const router = useRouter();
@@ -24,10 +28,6 @@ export function DashboardOverview() {
     refetch,
   } = useDashboardOverview();
   const { data: me } = useMeProfile();
-
-  const handleNavigate = (path: string) => {
-    router.push(path);
-  };
 
   if (isLoading) {
     return (
@@ -76,18 +76,18 @@ export function DashboardOverview() {
       bgColor: "bg-primary/10",
     },
     {
-      label: "Total Rooms",
-      value: stats.totalRooms,
-      icon: BedDouble,
-      color: "text-primary-foreground",
-      bgColor: "bg-primary",
+      label: "Active Transactions",
+      value: stats.totalActiveTransactions,
+      icon: BookUser,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
     },
     {
-      label: "Room Non-Availability",
-      value: stats.totalRoomNonAvailability,
-      icon: Wrench,
-      color: "text-red-500",
-      bgColor: "bg-destructive/10",
+      label: "Total Revenue",
+      value: stats.totalRevenue,
+      icon: BadgeDollarSign,
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
     },
     ...(stats.averageRating !== null
       ? [
@@ -101,7 +101,6 @@ export function DashboardOverview() {
         ]
       : []),
   ];
- 
 
   return (
     <div className="space-y-6">
@@ -113,6 +112,58 @@ export function DashboardOverview() {
           Welcome back! Here's an overview of your properties.
         </p>
       </div>
+
+      {stats.totalPendingTransactions > 0 && (
+        <div className="flex items-center gap-3 p-4 bg-gold/10 border border-gold/30 rounded-2xl">
+          <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center shrink-0">
+            <AlertTriangle className="h-5 w-5 text-gold" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold">
+              You have {stats.totalPendingTransactions} pending transaction
+              {stats.totalPendingTransactions > 1 ? "s" : ""}.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Please review and confirm pending reservations promptly.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-gold/50 text-gold hover:bg-gold/10 shrink-0"
+            onClick={() => router.push("/dashboard/tenant/transactions")}
+          >
+            <Clock className="h-4 w-4 mr-1" />
+            View Pending
+          </Button>
+        </div>
+      )}
+      {stats.totalPendingReviews > 0 && (
+        <div className="flex items-center gap-3 p-4 bg-primary/10 border border-primary/30 rounded-2xl">
+          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+            <MessageSquare className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold">
+              {stats.totalPendingReviews} new review
+              {stats.totalPendingReviews > 1 ? "s" : ""} received
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Guest{stats.totalPendingReviews > 1 ? "s have" : " has"} left
+              feedback. Reply to show you care!
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-primary/50 text-primary hover:bg-primary/10 shrink-0"
+            onClick={() => router.push("/dashboard/tenant/reviews")}
+          >
+            <Reply className="h-4 w-4 mr-1" />
+            View Reviews
+          </Button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsDisplay.map((stat) => (
@@ -132,6 +183,7 @@ export function DashboardOverview() {
           </div>
         ))}
       </div>
+
       <div className="bg-card rounded-2xl border border-border p-6">
         <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -167,14 +219,14 @@ export function DashboardOverview() {
           <Button
             variant="outline"
             className="w-full sm:w-auto"
-            onClick={() => handleNavigate("/dashboard/tenant/profile")}
+            onClick={() => router.push("/dashboard/tenant/profile")}
           >
             <User className="h-4 w-4 mr-2" />
             Edit Profile
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-border">
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-border">
           <div className="text-center">
             <p className="text-2xl font-heading font-bold">
               {stats.totalProperties}
@@ -183,9 +235,15 @@ export function DashboardOverview() {
           </div>
           <div className="text-center">
             <p className="text-2xl font-heading font-bold">
-              {stats.totalRooms}
+              {stats.totalActiveTransactions}
             </p>
-            <p className="text-sm text-muted-foreground">Total Rooms</p>
+            <p className="text-sm text-muted-foreground">Active Transactions</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-heading font-bold">
+              {stats.totalRevenue}
+            </p>
+            <p className="text-sm text-muted-foreground">Total Revenue</p>
           </div>
         </div>
       </div>
@@ -193,7 +251,7 @@ export function DashboardOverview() {
       {/* Quick Actions - Desktop Grid 3, Tablet 2, Mobile 1 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <button
-          onClick={() => handleNavigate("/dashboard/tenant/category")}
+          onClick={() => router.push("/dashboard/tenant/category")}
           className="bg-card rounded-2xl border border-border p-6 text-left hover:border-primary/50 transition-colors group"
         >
           <Layers className="h-8 w-8 text-blue-500 mb-3" />
@@ -204,7 +262,7 @@ export function DashboardOverview() {
         </button>
 
         <button
-          onClick={() => handleNavigate("/dashboard/tenant/property")}
+          onClick={() => router.push("/dashboard/tenant/property")}
           className="bg-card rounded-2xl border border-border p-6 text-left hover:border-primary/50 transition-colors group"
         >
           <Building2 className="h-8 w-8 text-primary mb-3" />
@@ -215,7 +273,7 @@ export function DashboardOverview() {
         </button>
 
         <button
-          onClick={() => handleNavigate("/dashboard/tenant/room")}
+          onClick={() => router.push("/dashboard/tenant/room")}
           className="bg-card rounded-2xl border border-border p-6 text-left hover:border-primary/50 transition-colors group"
         >
           <BedDouble className="h-8 w-8 text-primary mb-3" />
@@ -226,7 +284,7 @@ export function DashboardOverview() {
         </button>
 
         <button
-          onClick={() => handleNavigate("/dashboard/tenant/maintenance")}
+          onClick={() => router.push("/dashboard/tenant/maintenance")}
           className="bg-card rounded-2xl border border-border p-6 text-left hover:border-primary/50 transition-colors group"
         >
           <Wrench className="h-8 w-8 text-warning mb-3" />
@@ -237,7 +295,7 @@ export function DashboardOverview() {
         </button>
 
         <button
-          onClick={() => handleNavigate("/dashboard/tenant/seasonal-rates")}
+          onClick={() => router.push("/dashboard/tenant/seasonal-rates")}
           className="bg-card rounded-2xl border border-border p-6 text-left hover:border-primary/50 transition-colors group"
         >
           <BadgeDollarSign className="h-8 w-8 text-green-500 mb-3" />

@@ -9,8 +9,10 @@ export interface DashboardData {
     };
     stats: {
       totalProperties: number;
-      totalRooms: number;
-      totalRoomNonAvailability: number;
+      totalActiveTransactions: number;
+      totalPendingTransactions: number;
+      totalPendingReviews: number;
+      totalRevenue: number;
       averageRating: number | null;
     };
   }

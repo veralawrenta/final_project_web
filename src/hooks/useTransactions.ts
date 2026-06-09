@@ -1,7 +1,16 @@
 import { axiosInstance } from "@/lib/axios";
-import { CreateTransactionFormValues, uploadPaymentProofSchema } from "@/lib/validator/profile.transaction.schema";
+import {
+  CreateTransactionFormValues,
+  uploadPaymentProofSchema,
+} from "@/lib/validator/profile.transaction.schema";
 import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
-import { Transactions, TransactionStatus } from "@/types/transaction";
+import {
+  CalendarTransaction,
+  MonthlyRevenue,
+  TenantActivityResponse,
+  Transactions,
+  TransactionStatus,
+} from "@/types/transaction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
@@ -16,14 +25,14 @@ interface TransactionQueryParams extends PaginationQueryParams {
   status?: TransactionStatus[];
 }
 
-interface TransactionResponse{
+interface TransactionResponse {
   transactionId: string;
   paymentUrl: string;
   status: TransactionStatus;
 }
 
 export const useGetAllTenantTransactions = (
-  queries?: TransactionQueryParams
+  queries?: TransactionQueryParams,
 ) => {
   const session = useSession();
 
@@ -37,7 +46,7 @@ export const useGetAllTenantTransactions = (
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -58,7 +67,7 @@ export const useGetAllUserTransaction = (queries?: TransactionQueryParams) => {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -71,7 +80,9 @@ export const useCreateTransaction = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (values: CreateTransactionFormValues) : Promise<TransactionResponse>=> {
+    mutationFn: async (
+      values: CreateTransactionFormValues,
+    ): Promise<TransactionResponse> => {
       const { data } = await axiosInstance.post("/transactions", values, {
         headers: {
           Authorization: `Bearer ${session.data?.user.accessToken}`,
@@ -87,7 +98,7 @@ export const useCreateTransaction = () => {
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
-        error.response?.data.message || "Failed to create transaction"
+        error.response?.data.message || "Failed to create transaction",
       );
     },
   });
@@ -105,7 +116,7 @@ export const useGetTransactionIdByUser = (transactionId: string) => {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -125,7 +136,7 @@ export const useGetTransactionIdByTenant = (transactionId: string) => {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -147,7 +158,7 @@ export const useConfirmTransaction = () => {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -159,7 +170,7 @@ export const useConfirmTransaction = () => {
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
-        error.response?.data.message || "Failed to confirm transaction"
+        error.response?.data.message || "Failed to confirm transaction",
       );
     },
   });
@@ -178,7 +189,7 @@ export const useCancelTransactionByUser = () => {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -190,7 +201,7 @@ export const useCancelTransactionByUser = () => {
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
-        error.response?.data.message || "Failed to cancel transaction"
+        error.response?.data.message || "Failed to cancel transaction",
       );
     },
   });
@@ -209,7 +220,7 @@ export const useCancelTransactionByTenant = () => {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -221,7 +232,7 @@ export const useCancelTransactionByTenant = () => {
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
-        error.response?.data.message || "Failed to cancel transaction"
+        error.response?.data.message || "Failed to cancel transaction",
       );
     },
   });
@@ -232,15 +243,21 @@ export const useRejectTransaction = () => {
   const session = useSession();
 
   return useMutation({
-    mutationFn: async ({transactionId, reason}:{transactionId: string, reason: string}) => {
+    mutationFn: async ({
+      transactionId,
+      reason,
+    }: {
+      transactionId: string;
+      reason: string;
+    }) => {
       const { data } = await axiosInstance.post(
         `/transactions/${transactionId}/tenant/reject`,
-        {reason},
+        { reason },
         {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -252,7 +269,7 @@ export const useRejectTransaction = () => {
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
-        error.response?.data.message || "Failed to reject transaction"
+        error.response?.data.message || "Failed to reject transaction",
       );
     },
   });
@@ -277,7 +294,7 @@ export const useUploadPaymentProof = () => {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -292,9 +309,83 @@ export const useUploadPaymentProof = () => {
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
-        error.response?.data.message || "Failed to upload payment proof"
+        error.response?.data.message || "Failed to upload payment proof",
       );
     },
   });
 };
 
+export const useGetMonthlyRevenueForTenant = () => {
+  const session = useSession();
+
+  return useQuery({
+    queryKey: ["tenantMonthlyRevenue"],
+    queryFn: async () => {
+      const year = new Date().getFullYear();
+      const { data } = await axiosInstance.get<MonthlyRevenue[]>(
+        `/dashboard/me/revenue/monthly/${year}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        },
+      );
+      return data;
+    },
+    enabled: !!session.data?.user.accessToken,
+  });
+};
+
+export const useTenantActivity = () => {
+  const session = useSession();
+
+  return useQuery({
+    queryKey: ["tenantActivity"],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<TenantActivityResponse>(
+        `/dashboard/me/activity`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        },
+      );
+      return data;
+    },
+    enabled: !!session.data?.user.accessToken,
+  });
+};
+
+export const useTransactionForCalendar = (
+  startDate?: string,
+  endDate?: string,
+) => {
+  const session = useSession();
+
+  const now = new Date();
+  const defaultStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const defaultEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  const start = startDate ?? defaultStart;
+  const end = endDate ?? defaultEnd;
+
+  return useQuery({
+    queryKey: ["tenantTransactions", start, end],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<CalendarTransaction[]>(
+        "/transactions/tenant/transactionCalendar}",
+        {
+          params: {
+            startDate: start instanceof Date ? start.toISOString() : start,
+            endDate: end instanceof Date ? end.toISOString() : end,
+          },
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        },
+      );
+      return data;
+    },
+    enabled: !!session.data?.user.accessToken,
+  });
+};
