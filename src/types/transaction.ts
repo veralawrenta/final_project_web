@@ -13,7 +13,7 @@ export type TransactionStatusFilter =
   | "all"
   | "upcoming"
   | "ongoing"
-  | "completed"
+  | "completed";
 
 export interface TransactionSummary {
   all: number;
@@ -23,6 +23,16 @@ export interface TransactionSummary {
   cancelled: number;
   pending: number;
 }
+
+export const Transaction_Steps = [
+  "details",
+  "payment",
+  "upload_proof",
+  "processing_payment",
+  "confirmation",
+] as const;
+
+export type TransactionSteps = (typeof Transaction_Steps)[number];
 
 export type TransactionPaymentMethod =
   | "BANK_TRANSFER"
@@ -91,3 +101,77 @@ export const BANK = {
   number: "1234567890",
   holder: "PT Staynuit Indonesia",
 };
+
+export type MonthlyRevenue = {
+  month: number;
+  revenue: number;
+};
+
+export type RecentTransaction = {
+  totalPrice: number;
+  status: TransactionStatus;
+  room: {
+    name: string;
+    property: {
+      name: string;
+    };
+  };
+  user: {
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
+};
+
+export type RecentMaintenance = {
+  startDate: string;
+  endDate: string;
+  reason: string;
+  room: {
+    name: string;
+    property: {
+      name: string;
+    };
+  };
+};
+
+export type RecentReviews = {
+  ratings: number;
+  comment: string;
+  transaction: {
+    user: {
+      firstName: string;
+      lastName: string;
+      avatar: string;
+    };
+    room: {
+      name: string;
+      property: {
+        name: string;
+      };
+    };
+  };
+};
+
+export type TenantActivityResponse = {
+  recentTransactions: RecentTransaction[];
+  recentMaintenances: RecentMaintenance[];
+  recentReviews: RecentReviews[];
+}
+
+export type CalendarTransaction= {
+  id: string;
+  checkIn: string;
+  checkOut: string;
+  status: string;
+  room: {
+    name: string;
+    property: {
+      name: string;
+    };
+  };
+  user: {
+    firstName: string | null;
+    lastName: string | null;
+  };
+}

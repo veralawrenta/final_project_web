@@ -208,3 +208,13 @@ export interface TenantPropertyId {
 export type EditPropertyTypes ={
   name : string
 }
+
+export interface PropertyInfo {
+  roomName: string;
+  basePrice: number;
+  name: string;
+  address: string
+  propertyImage: string;
+  ratings: number;
+  reviews: number;
+}

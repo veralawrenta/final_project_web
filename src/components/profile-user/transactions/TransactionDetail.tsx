@@ -15,7 +15,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { GrStatusInfo } from "react-icons/gr";
 import { toast } from "sonner";
-
+import UploadBox from "./upload-payment/UploadBox";
 
 const TransactionDetail = () => {
   const params = useParams();
@@ -52,8 +52,6 @@ const TransactionDetail = () => {
         icon: Check,
       })
     : null;
-
-  const StatusIcon = statusConfig?.icon;
 
   const canCancel =
     transaction?.status === TransactionStatus.WAITING_FOR_PAYMENT &&
@@ -156,8 +154,6 @@ const TransactionDetail = () => {
   return (
     <main className="flex-1 px-4 py-6 pb-10 md:px-8">
         <div className="mx-auto max-w-4xl space-y-6">
-
-          {/* Back */}
           <button
             onClick={() => router.push("/profile/user/booking")}
             className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
@@ -166,7 +162,6 @@ const TransactionDetail = () => {
             Back to My Bookings
           </button>
 
-          {/* Header */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
@@ -196,10 +191,7 @@ const TransactionDetail = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* ── Left Column ───────────────────────────────────────────── */}
             <div className="lg:col-span-2 space-y-6">
-
-              {/* Property card */}
               <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
                 <div className="relative h-48 bg-muted">
                   {transaction.room.property.propertyImages?.urlImages ? (
@@ -246,8 +238,6 @@ const TransactionDetail = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Trip Schedule */}
               <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                 <h3 className="font-heading font-bold text-base mb-4 flex items-center gap-2">
                   <CalendarDays className="h-5 w-5 text-primary" /> Trip Schedule
@@ -265,8 +255,6 @@ const TransactionDetail = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Upload proof — only WAITING_FOR_PAYMENT + BANK_TRANSFER + no proof yet */}
               {paymentProof && (
                 <div className="rounded-2xl border-2 border-[hsl(var(--status-pending))]/30 bg-[hsl(var(--status-pending))]/5 p-6 shadow-sm">
                   <div className="flex items-center gap-3 mb-5">
@@ -278,8 +266,6 @@ const TransactionDetail = () => {
                       <p className="text-xs text-muted-foreground">Transfer to the account below, then upload your receipt</p>
                     </div>
                   </div>
-
-                  {/* Bank info */}
                   <div className="p-4 bg-card rounded-2xl border border-border space-y-2.5 text-sm mb-5">
                     <div className="flex justify-between"><span className="text-muted-foreground">Bank</span><span className="font-semibold">{BANK.name}</span></div>
                     <div className="flex justify-between"><span className="text-muted-foreground">Account Number</span><span className="font-mono font-semibold">{BANK.number}</span></div>
@@ -293,7 +279,6 @@ const TransactionDetail = () => {
                     </div>
                   </div>
 
-                  {/* File input */}
                   <input ref={fileInputRef} type="file" accept="image/*,.pdf" onChange={handleFileChange} className="hidden" />
 
                   {!paymentProof ? (
@@ -344,8 +329,6 @@ const TransactionDetail = () => {
                   </Button>
                 </div>
               )}
-
-              {/* Proof already submitted */}
               {alreadyUploadedProof && (
                 <div className="rounded-2xl border border-[hsl(var(--status-confirmed))]/30 bg-[hsl(var(--status-confirmed))]/5 p-5">
                   <div className="flex items-center gap-3">
@@ -361,12 +344,9 @@ const TransactionDetail = () => {
                   )}
                 </div>
               )}
-
             </div>
 
             <div className="space-y-5">
-
-              {/* Payment info */}
               <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                 <h3 className="font-heading font-bold text-base mb-4 flex items-center gap-2">
                   <CreditCard className="h-5 w-5 text-primary" /> Payment
@@ -389,8 +369,6 @@ const TransactionDetail = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Quick actions */}
               <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-2.5">
                 <h3 className="font-heading font-bold text-base mb-3">Quick Actions</h3>
 
@@ -421,6 +399,10 @@ const TransactionDetail = () => {
                 )}
               </div>
 
+              {needUploadPaymentProof && (
+                <UploadBox file={paymentProof} onFileSelect={setPaymentProof} />
+              )}
+
               <div className="rounded-2xl border border-border bg-muted/30 p-4">
                 <div className="flex items-center gap-2.5">
                   <Shield className="h-4 w-4 text-primary shrink-0" />
@@ -429,7 +411,6 @@ const TransactionDetail = () => {
                   </p>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
