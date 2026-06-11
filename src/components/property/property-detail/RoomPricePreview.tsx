@@ -19,7 +19,6 @@ const RoomPricePreview = ({
   checkIn,
   checkOut,
   guests,
-  displayPrice,
 }: Props) => {
   if (!room) {
     return (

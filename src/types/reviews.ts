@@ -1,7 +1,6 @@
 export interface Reviews {
   id: number;
   user: {
-    id: number;
     firstName: string;
     lastName: string;
     avatar: string;
@@ -9,6 +8,8 @@ export interface Reviews {
   ratings: number;
   comments: string;
   images?: string;
+  reply?: string;
+  createdAt: string;
   transaction: {
     id: string;
     checkIn: string;
@@ -21,10 +22,16 @@ export interface Reviews {
         city?: {
           name: string;
         };
+        tenant: {
+          tenantName: string;
+        }
         propertyImages?: {
-          imageUrl : string;
-        } [];
-      }
-    }
-  }
+          imageUrl: string;
+        }[];
+      };
+    };
+  };
 }
+
+
+

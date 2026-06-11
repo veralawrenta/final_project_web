@@ -13,7 +13,7 @@ import { useGetPropertyWithAvailability } from "@/hooks/useProperty";
 import { RoomIdPublic } from "@/types/room";
 import RoomPricePreview from "./property-detail/RoomPricePreview";
 import { differenceInCalendarDays, parse } from "date-fns";
-
+import PropertyReviewCard from "./PropertyReviewCard";
 
 const mapRoomToCard = (room: any): RoomIdPublic => ({
   id: room.id,
@@ -38,7 +38,9 @@ export default function PropertyDetail() {
   const guestsParam = searchParams.get("guests");
 
   const today = new Date();
-  const checkIn = checkInParam ? parse(checkInParam, "dd-MM-yyyy", new Date()) : today;
+  const checkIn = checkInParam
+    ? parse(checkInParam, "dd-MM-yyyy", new Date())
+    : today;
   const checkOut = checkOutParam
     ? parse(checkOutParam, "dd-MM-yyyy", new Date())
     : new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
@@ -58,15 +60,17 @@ export default function PropertyDetail() {
     checkIn,
     checkOut,
     guests,
-    Boolean(propertyId)
+    Boolean(propertyId),
   );
 
   useEffect(() => {
     if (property && !selectedRoom) {
       const firstAvailable = rooms.find((r) => r.isAvailable);
-      if(firstAvailable) { setSelectedRoom(firstAvailable)}
+      if (firstAvailable) {
+        setSelectedRoom(firstAvailable);
+      }
     }
-  }, [property])
+  }, [property]);
 
   if (isLoading) {
     return (
@@ -98,7 +102,7 @@ export default function PropertyDetail() {
   const lowestPrice =
     availableRooms.length > 0
       ? Math.min(...availableRooms.map((r) => r.displayPrice))
-      : rooms[0]?.basePrice ?? 0;
+      : (rooms[0]?.basePrice ?? 0);
 
   const displayPrice = selectedRoom?.displayPrice ?? lowestPrice;
 
@@ -186,10 +190,15 @@ export default function PropertyDetail() {
                     nights={nights}
                     isSelected={selectedRoom?.id === room.id}
                     onSelect={() => room.isAvailable && setSelectedRoom(room)}
-                    onBook={() => {router.refresh()}}
+                    onBook={() => {
+                      router.refresh();
+                    }}
                   />
                 ))}
               </div>
+            </div>
+            <div>
+              <PropertyReviewCard propertyId={propertyId} />
             </div>
           </div>
           <RoomPricePreview

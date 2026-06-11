@@ -84,7 +84,7 @@ const MyTransactions = () => {
 
   const transactions = userTransactions?.data ?? [];
   const meta = userTransactions?.meta;
-  const summary = userTransactions?.summary;
+  const summary = userTransactions?.data;
 
   const tabCount = (tab: (typeof FILTER_TABS)[number]): number => {
     if (tab.key === "all") return summary?.all ?? 0;

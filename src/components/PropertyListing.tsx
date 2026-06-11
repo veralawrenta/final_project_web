@@ -36,14 +36,6 @@ const propertyTypeLabels: Record<PropertyTypeFilter, string> = {
   HOUSE: "House",
 };
 
-const propertyTypeConfig: Record<PropertyTypeFilter, { label: string; icon: any }> = {
-  all: { label: "All", icon: LayoutGrid },
-  VILLA: { label: "Villa", icon: Palmtree },
-  HOTEL: { label: "Hotel", icon: Hotel },
-  APARTMENT: { label: "Apartment", icon: Building2 },
-  HOUSE: { label: "House", icon: Home },
-};
-
 const PropertyListingComponent = () => {
   const [cityId] = useQueryState("cityId", parseAsInteger);
   const [checkIn] = useQueryState("checkIn");
