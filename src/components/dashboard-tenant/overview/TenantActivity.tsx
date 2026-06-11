@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTenantActivity } from "@/hooks/useTransactions";
+import { useTenantActivity } from "@/hooks/useTenantTransactions";
 
 const TenantActivity = () => {
   const { data: tenantActivity, isPending } = useTenantActivity();

@@ -1,3 +1,5 @@
+import { Calendar, CheckCircle, Clock, ClockAlert, XCircle } from "lucide-react";
+
 export enum TransactionStatus {
   ALL = "ALL",
   WAITING_FOR_CONFIRMATION = "WAITING_FOR_CONFIRMATION",
@@ -13,16 +15,19 @@ export type TransactionStatusFilter =
   | "all"
   | "upcoming"
   | "ongoing"
-  | "completed";
+  | "completed"
+  | "cancelled"
+  | "pending";
 
 export interface TransactionSummary {
-  all: number;
+  totalTransactions: number;
+  totalIncome?: number;
   upcoming: number;
-  ongoing: number;
+  pending: number;
+  activeGuests: number;
   completed: number;
   cancelled: number;
-  pending: number;
-}
+};
 
 export const Transaction_Steps = [
   "details",
@@ -54,10 +59,10 @@ export interface Transactions {
     };
   };
   user: {
-    userId?: number;
     firstName: string;
     lastName: string;
     email: string;
+    avatar: string;
   };
   review?: {
     rating?: number;
@@ -66,13 +71,17 @@ export interface Transactions {
   };
   checkIn: string;
   checkOut: string;
-  status: TransactionStatus;
+  status: string;
   totalPrice: number;
   totalGuests: number;
   paymentDate: string;
   paymentMethod?: TransactionPaymentMethod;
   paymentProof?: string;
   createdAt?: string;
+}
+
+export interface TransactionManagementPayload extends Transactions {
+    displayStatus: string;
 }
 
 export interface CreateTransactionPayload {
@@ -175,3 +184,39 @@ export type CalendarTransaction= {
     lastName: string | null;
   };
 }
+
+export const transactionStatusConfig: Record<
+  string,
+  { label: string; color: string; bgColor: string; icon: typeof Clock }
+> = {
+  PENDING: {
+    label: "Pending",
+    color: "text-amber-800",
+    bgColor: "bg-amber-100",
+    icon: ClockAlert,
+  },
+  UPCOMING: {
+    label: "Upcoming",
+    color: "text-blue-800",
+    bgColor: "bg-blue-100",
+    icon: Calendar,
+  },
+  ONGOING: {
+    label: "Ongoing",
+    color: "text-emerald-800",
+    bgColor: "bg-emerald-100",
+    icon: Clock,
+  },
+  COMPLETED: {
+    label: "Completed",
+    color: "text-zinc-800",
+    bgColor: "bg-zinc-100",
+    icon: CheckCircle,
+  },
+  CANCELLED: {
+    label: "Cancelled",
+    color: "text-red-900",
+    bgColor: "text-red-100",
+    icon: XCircle,
+  },
+};

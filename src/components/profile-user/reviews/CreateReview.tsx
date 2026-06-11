@@ -1,7 +1,11 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useCreateReviewByUser } from "@/hooks/useReviews";
 import { useGetTransactionIdByUser } from "@/hooks/useTransactions";
+import { createReviewSchema } from "@/lib/validator/dashboard.reviews.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { formatDate } from "date-fns";
 import {
   ArrowLeft,
@@ -12,82 +16,94 @@ import {
   Star,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { parseAsString, useQueryState } from "nuqs";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { useState } from "react";
-import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useForm } from "react-hook-form";
+import z from "zod";
 
-const CreateReview = () => {
+const ratingLabels = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
+
+const CreateReviewComponent = () => {
   const { transactionId } = useParams<{ transactionId: string }>();
   const [comments, setComments] = useQueryState(
     "comments",
     parseAsString.withDefault(""),
   );
-  const [ratings, setRatings] = useState(0);
+  const [ratings, setRatings] = useQueryState(
+    "ratings",
+    parseAsInteger.withDefault(1),
+  );
   const [hoverRatings, setHoverRatings] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const { data: userTransaction, isPending } = useGetTransactionIdByUser(
-    transactionId ?? "",
-  );
+  const { data: userTransaction, isPending } =
+    useGetTransactionIdByUser(transactionId);
+  const {data: createReview, isPending: isLoading} = useCreateReviewByUser();
+  const form = useForm<z.infer<typeof createReviewSchema>>({
+    resolver: zodResolver(createReviewSchema),
+    defaultValues: {
+      transactionId: transactionId,
+      checkOut: undefined,
+      status: undefined,
+      ratings: 1,
+      comments: "",
+      images: undefined,
+    },
+  });
 
-  const ratingLabels = ["", "Poor", "Fair", "Good", "Very Good", "Excellent"];
-
-  const handleSubmitReview = () => {
-    if (ratings === 0) {
-      toast.error("Please select a rating.");
-      return;
-    }
-    if (comments.trim().length < 10) {
-      toast.error("Comment must be at least 10 characters.");
-      return;
-    }
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+  const handleSubmitReview = async (
+    value: z.infer<typeof createReviewSchema>,
+  ) => {
+    try {
+      await createReview.mutateAsync({
+        transactionId: value.transactionId,
+        ratings: value.ratings,
+        comments: value.comments,
+        images: value.images,
+      });
       setIsSubmitted(true);
-      toast.success("Review submitted successfully!");
-    }, 1200);
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+    }
   };
 
   if (isPending) {
-  return (
-    <div className="min-h-screen bg-muted/30">
-      <main className="container mx-auto max-w-2xl px-4 py-16 sm:py-20 space-y-6">
-        {/* Header Skeleton */}
-        <div className="flex flex-col items-center text-center space-y-3">
-          <Skeleton className="h-9 w-48 rounded-lg animate-pulse" />
-          <Skeleton className="h-4 w-64 rounded-md animate-pulse" />
-        </div>
-        <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 space-y-6 shadow-xs">
-          <div className="space-y-3">
-            <Skeleton className="h-5 w-1/3 rounded-md" />
-            <Skeleton className="h-12 w-full rounded-xl" />
+    return (
+      <div className="min-h-screen bg-muted/30">
+        <main className="container mx-auto max-w-2xl px-4 py-16 sm:py-20 space-y-6">
+          {/* Header Skeleton */}
+          <div className="flex flex-col items-center text-center space-y-3">
+            <Skeleton className="h-9 w-48 rounded-lg animate-pulse" />
+            <Skeleton className="h-4 w-64 rounded-md animate-pulse" />
           </div>
+          <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 space-y-6 shadow-xs">
+            <div className="space-y-3">
+              <Skeleton className="h-5 w-1/3 rounded-md" />
+              <Skeleton className="h-12 w-full rounded-xl" />
+            </div>
 
-          <div className="space-y-3">
-            <Skeleton className="h-5 w-1/4 rounded-md" />
-            <Skeleton className="h-24 w-full rounded-xl" />
-          </div>
-          <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-20 rounded-md" />
-              <Skeleton className="h-8 w-full rounded-lg" />
+            <div className="space-y-3">
+              <Skeleton className="h-5 w-1/4 rounded-md" />
+              <Skeleton className="h-24 w-full rounded-xl" />
             </div>
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-16 rounded-md" />
-              <Skeleton className="h-8 w-full rounded-lg" />
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20 rounded-md" />
+                <Skeleton className="h-8 w-full rounded-lg" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-16 rounded-md" />
+                <Skeleton className="h-8 w-full rounded-lg" />
+              </div>
+            </div>
+            <div className="pt-4 border-t border-border/50">
+              <Skeleton className="h-11 w-full rounded-xl" />
             </div>
           </div>
-          <div className="pt-4 border-t border-border/50">
-            <Skeleton className="h-11 w-full rounded-xl" />
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
+        </main>
+      </div>
+    );
+  }
 
   if (!userTransaction) {
     return (
@@ -227,10 +243,10 @@ const CreateReview = () => {
               variant="default"
               size="lg"
               className="w-full rounded-2xl"
-              onClick={handleSubmitReview}
-              disabled={isSubmitting || ratings === 0}
+              onClick={form.handleSubmit(handleSubmitReview)}
+              disabled={isLoading || ratings === 0}
             >
-              {isSubmitting ? (
+              {isLoading ? (
                 <span className="flex items-center gap-2">
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
                   Submitting...
@@ -278,4 +294,4 @@ const CreateReview = () => {
   );
 };
 
-export default CreateReview;
+export default CreateReviewComponent;
