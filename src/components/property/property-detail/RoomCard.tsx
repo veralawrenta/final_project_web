@@ -11,7 +11,6 @@ interface RoomCardProps {
   nights: number;
   isSelected?: boolean;
   onSelect: () => void;
-  onBook?: () => void;
 }
 
 const RoomCard = ({
@@ -19,20 +18,19 @@ const RoomCard = ({
   nights,
   isSelected = false,
   onSelect,
-  onBook,
 }: RoomCardProps) => {
   const image = room.roomImages.find((img) => img.isCover) ||
     room.roomImages[0] || { urlImages: "/placeholder.svg" };
 
   const totalPrice = room.displayPrice * nights;
   return (
-    <Card 
+    <Card
       className={cn(
         "overflow-hidden cursor-pointer transition-all",
         !room.isAvailable && 'opacity-50',
         isSelected && "ring-2 ring-primary",
       )}
-      onClick={() => room.isAvailable && onSelect?.()} 
+      onClick={() => room.isAvailable && onSelect?.()}
     >
       <div className="md:flex">
         <div className="relative w-full md:w-48 h-48">
@@ -80,14 +78,8 @@ const RoomCard = ({
                   {formatCurrency(totalPrice)}
                 </span>
               </div>
-              <Button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onBook?.();
-                }}
-                variant={isSelected ? "default" : "outline"}
-              >
-                {isSelected ? "Book This Room" : "Select & Book"}
+              <Button variant={isSelected ? "default" : "outline"}>
+                {isSelected ? "Selected" : "Select Room"}
               </Button>
             </div>
           )}

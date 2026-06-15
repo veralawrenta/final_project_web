@@ -43,7 +43,7 @@ const CreateTransactionStep = ({
     <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm">
       <div className="relative h-48">
         <img
-          src={property.propertyImage}
+          src={property.propertyImage.urlImage}
           alt={property.name}
           className="w-full h-full object-cover"
         />
@@ -56,8 +56,7 @@ const CreateTransactionStep = ({
             </span>
             <span className="flex items-center gap-1 text-sm">
               <Star className="h-3.5 w-3.5 fill-current text-yellow-400" />{" "}
-              {property.ratings}
-              <span className="opacity-75">({property.reviews})</span>
+              {property.room.transaction.review.ratings}
             </span>
           </div>
         </div>

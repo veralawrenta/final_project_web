@@ -129,11 +129,11 @@ export interface TenantProperty {
   name: string;
   city: string;
   category?: string;
-  propertyType: 'HOTEL' | 'HOUSE' | 'APARTMENT' | 'VILLA';
+  propertyType: "HOTEL" | "HOUSE" | "APARTMENT" | "VILLA";
   lowestPrice: number | null;
   totalRooms: number;
-  status: 'PUBLISHED' | 'DRAFT';
-  propertyImages: PropertyImage[]
+  status: "PUBLISHED" | "DRAFT";
+  propertyImages: PropertyImage[];
 }
 
 //for property id dashboard
@@ -190,7 +190,7 @@ export interface TenantPropertyId {
       startDate: Date;
       endDate: Date;
     }>;
-    seasonalRates:Array<{
+    seasonalRates: Array<{
       id: number;
       name: string;
       startDate: Date;
@@ -205,16 +205,26 @@ export interface TenantPropertyId {
   }>;
 }
 
-export type EditPropertyTypes ={
-  name : string
-}
+export type EditPropertyTypes = {
+  name: string;
+};
 
 export interface PropertyInfo {
-  roomName: string;
-  basePrice: number;
   name: string;
-  address: string
-  propertyImage: string;
-  ratings: number;
-  reviews: number;
+  address: string;
+  city: {
+    name: string;
+  }
+  propertyImage: {
+    urlImage: string;
+  };
+  room: {
+    id: number;
+    basePrice: number;
+    transaction: {
+      review: {
+        ratings: number;
+      };
+    };
+  };
 }

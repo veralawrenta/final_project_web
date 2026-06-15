@@ -46,7 +46,7 @@ const ReviewManagement = () => {
     filter,
     sortBy,
     sortOrder,
-  });
+  });    
   const reviews = reviewData?.data;
 
   const onChangePage = (newPage: number) => {

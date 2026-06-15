@@ -13,8 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCancelTransactionByUser } from "@/hooks/useTransactions";
 import { formatCurrency } from "@/lib/price/currency";
-import { STATUS_CONFIG } from "@/lib/transaction-config";
-import { Transactions, TransactionStatus } from "@/types/transaction";
+import { DisplayStatus, TransactionManagementPayload, Transactions, TransactionStatus, transactionStatusConfig } from "@/types/transaction";
 import { formatDate } from "date-fns";
 import {
   AlertTriangle,
@@ -30,6 +29,16 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+const statusToDisplayStatus: Record<TransactionStatus, DisplayStatus> = {
+  [TransactionStatus.WAITING_FOR_PAYMENT]:      "PENDING",
+  [TransactionStatus.WAITING_FOR_CONFIRMATION]: "PENDING",
+  [TransactionStatus.CONFIRMED]:                "ONGOING",
+  [TransactionStatus.COMPLETED]:                "COMPLETED",
+  [TransactionStatus.CANCELLED_BY_USER]:        "CANCELLED",
+  [TransactionStatus.CANCELLED_BY_TENANT]:      "CANCELLED",
+  [TransactionStatus.EXPIRED]:                  "CANCELLED",
+  [TransactionStatus.ALL]:                      "PENDING",
+};
 interface TransactionCardProps {
   transaction: Transactions;
 }
@@ -38,7 +47,8 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
 
-  const statusConfig = STATUS_CONFIG[transaction.status] ?? {
+  const displayStatus = statusToDisplayStatus[transaction.status];
+  const statusConfig = transactionStatusConfig[displayStatus] ?? {
     label: transaction.status,
     className: "bg-muted text-muted-foreground border-border",
     icon: Clock,
@@ -77,7 +87,7 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
               className="h-full w-full object-cover"
             />
             <Badge
-              className={`absolute left-3 top-3 rounded-lg border px-2.5 py-1 text-xs font-semibold gap-1 ${statusConfig.className}`}
+              className={`absolute left-3 top-3 rounded-lg border px-2.5 py-1 text-xs font-semibold gap-1 ${statusConfig.color} ${statusConfig.bgColor}`}
             >
               <StatusIcon className="h-3 w-3" />
               {statusConfig.label}

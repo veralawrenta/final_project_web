@@ -15,7 +15,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetMonthlyRevenueForTenant } from "@/hooks/useTransactions";
+import { useGetMonthlyRevenueForTenant } from "@/hooks/useTenantTransactions";
 import { TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 

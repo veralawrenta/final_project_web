@@ -66,7 +66,7 @@ const PropertyReviewCard = ({ propertyId }: PropertyReviewCardProps) => {
           <div className="flex items-center gap-2">
             <Star className="h-5 w-5 fill-[hsl(var(--gold))] text-[hsl(var(--gold))]" />
             <span className="text-2xl font-heading font-bold">
-              {reviews.meta.averageRating}
+              {reviews.summary.averageRating}
             </span>
           </div>
           <div className="h-8 w-px bg-border" />

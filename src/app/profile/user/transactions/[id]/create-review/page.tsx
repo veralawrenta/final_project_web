@@ -1,8 +1,10 @@
-import React from 'react'
+import CreateReviewComponent from "@/components/profile-user/reviews/CreateReview"
 
 const CreateReviewPage = () => {
   return (
-    <div>CreateReviewPage</div>
+    <div>
+      <CreateReviewComponent />
+    </div>
   )
 }
 

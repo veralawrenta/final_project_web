@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatCurrency } from "@/lib/price/currency";
-import { Transactions, transactionStatusConfig } from "@/types/transaction";
+import { TransactionManagementPayload, Transactions, transactionStatusConfig } from "@/types/transaction";
 import { formatDate } from "date-fns";
 import { CheckCircle, Eye, MoreHorizontal, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface TransactionListProps {
-  transactions : Transactions[];
+  transactions : TransactionManagementPayload[];
   onViewTransaction? : (transactions : Transactions) => void;
   onCancelRequest: (transactions : Transactions) => void;
 };
@@ -42,7 +42,7 @@ const TransactionList = ({transactions, onViewTransaction, onCancelRequest} : Tr
  
       <div className="divide-y divide-border">
         {transactions.map((t) => {
-          const status = transactionStatusConfig[t.status];
+          const status = transactionStatusConfig[t.displayStatus];
           const StatusIcon = status.icon;
           const nights = Math.ceil(
             (new Date(t.checkOut).getTime() - new Date(t.checkIn).getTime()) /
@@ -105,12 +105,12 @@ const TransactionList = ({transactions, onViewTransaction, onCancelRequest} : Tr
                     <DropdownMenuItem onClick={() => onViewTransaction?.(t)}>
                       <Eye className="h-4 w-4 mr-2" /> View Details
                     </DropdownMenuItem>
-                    {t.status === "pending" && (
+                    {t.displayStatus === "PENDING" && (
                       <DropdownMenuItem onClick={() => toast.success(`Transaction no. ${t.transactionId} confirmed!`)}>
                         <CheckCircle className="h-4 w-4 mr-2" /> Confirm
                       </DropdownMenuItem>
                     )}
-                    {(t.status === 'pending' || t.status === 'confirmed') && (
+                    {(t.displayStatus === 'PENDING') && (
                       <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => onCancelRequest(t)}

@@ -1,3 +1,5 @@
+import { PageableResponse } from "./pagination";
+
 export interface Reviews {
   id: number;
   user: {
@@ -31,6 +33,17 @@ export interface Reviews {
       };
     };
   };
+}
+
+export interface ReviewSummary {
+  pending: number;
+  reviewed: number;
+  averageRating?: number;
+  totalCount?: number
+}
+
+export interface ReviewResponse extends PageableResponse<Reviews> {
+  summary : ReviewSummary;
 }
 
 

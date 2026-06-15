@@ -13,7 +13,7 @@ export const createTransactionSchema = z.object({
     checkOut: z.string().min(1, "Check-out date is required"),
     totalGuests: z.number().min(1, "Total guests must be at least 1"),
     bookedUnits: z.number().min(1, "Booked units must be at least 1"),
-    paymentMethod: z.enum(Object.values(PaymentMethodEnum), "Invalid payment method")
+    paymentMethod: z.enum(PaymentMethodEnum)
 })
  .superRefine((data, ctx) => {
     const checkInDate = new Date(data.checkIn);
@@ -71,4 +71,4 @@ export const createTransactionSchema = z.object({
   
   export type CreateTransactionValues = z.infer<typeof createTransactionSchema>;
   export type CardDetailsFormValues = z.infer<typeof cardDetailsSchema>;
-  export type CreateTransactionFormValues = CreateTransactionValues & CardDetailsFormValues;
+  export type CreateTransactionFormValues = CreateTransactionValues & Partial<CardDetailsFormValues>;

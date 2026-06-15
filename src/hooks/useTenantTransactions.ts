@@ -1,6 +1,7 @@
 import { axiosInstance } from "@/lib/axios";
-import { PaginationQueryParams, TenantTransactionResponse } from "@/types/pagination";
-import { CalendarTransaction, TenantActivityResponse, TransactionStatusFilter } from "@/types/transaction";
+import { TenantActivityResponse } from "@/types/dashboard";
+import { PaginationQueryParams } from "@/types/pagination";
+import { CalendarTransaction, MonthlyRevenue, TenantTransactionResponse, TransactionManagementPayload, Transactions, TransactionStatusFilter } from "@/types/transaction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
@@ -36,15 +37,42 @@ export const useGetAllTenantTransactions = (
   });
 };
 
+export const useGetTransactionIdByTenant = (transactionId: string) => {
+  const session = useSession();
+
+  return useQuery({
+    queryKey: ["tenant-transaction", transactionId],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<TransactionManagementPayload>(
+        `transactions/${transactionId}/tenant`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        },
+      );
+      return data;
+    },
+    enabled: !!session.data?.user.accessToken && !!transactionId,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
 export const useCancelTransactionByTenant = () => {
   const queryClient = useQueryClient();
   const session = useSession();
 
   return useMutation({
-    mutationFn: async (transactionId: string) => {
+    mutationFn: async ({
+      transactionId,
+      reason,
+    }: {
+      transactionId: string;
+      reason: string;
+    }) => {
       const { data } = await axiosInstance.post(
         `transactions/${transactionId}/tenant/cancel`,
-        {},
+        {reason},
         {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
@@ -171,6 +199,27 @@ export const useTransactionForCalendar = (
             startDate,
             endDate,
           },
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
+        },
+      );
+      return data;
+    },
+    enabled: !!session.data?.user.accessToken,
+  });
+};
+
+export const useGetMonthlyRevenueForTenant = () => {
+  const session = useSession();
+
+  return useQuery({
+    queryKey: ["tenantMonthlyRevenue"],
+    queryFn: async () => {
+      const year = new Date().getFullYear();
+      const { data } = await axiosInstance.get<MonthlyRevenue[]>(
+        `dashboard/me/revenue/monthly/${year}`,
+        {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
