@@ -8,7 +8,7 @@ import {
   PageableResponse,
   PaginationQueryParams,
 } from "@/types/pagination";
-import { Reviews } from "@/types/reviews";
+import { ReviewResponse, Reviews } from "@/types/reviews";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
@@ -32,7 +32,7 @@ export const useGetAllPropertyReviews = (propertyId: number, queries: Pagination
   return useQuery({
     queryKey: ["propertyReviews", propertyId, queries],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<PageableResponse<Reviews>>(
+      const { data } = await axiosInstance.get<ReviewResponse>(
        `reviews/property/${propertyId}`,
         {
           params: queries,
@@ -48,7 +48,7 @@ export const useGetAllUserReviews = (queries?: GetAllUserReviewsQuery) => {
   return useQuery({
     queryKey: ["userReviews", queries],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<PageableResponse<Reviews>>(
+      const { data } = await axiosInstance.get<ReviewResponse>(
         "reviews/user",
         {
           params: queries,
@@ -97,7 +97,7 @@ export const useGetAllTenantReviews = (queries?: GetAllTenantReviewsQuery) => {
   return useQuery({
     queryKey: ["tenantReviews", queries],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<PageableResponse<Reviews>>(
+      const { data } = await axiosInstance.get<ReviewResponse>(
         "reviews/tenant",
         {
           params: queries,

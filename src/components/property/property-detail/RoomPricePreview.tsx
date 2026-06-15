@@ -11,6 +11,7 @@ interface Props {
   checkOut: Date;
   guests: number;
   displayPrice: number;
+  onContinue: () => void;
 }
 
 const RoomPricePreview = ({
@@ -19,6 +20,7 @@ const RoomPricePreview = ({
   checkIn,
   checkOut,
   guests,
+  onContinue,
 }: Props) => {
   if (!room) {
     return (
@@ -99,7 +101,11 @@ const RoomPricePreview = ({
         </div>
       </div>
 
-      <Button disabled={!room.isAvailable} className="w-full">
+      <Button
+        disabled={!room.isAvailable || nights <= 0}
+        className="w-full"
+        onClick={onContinue}
+      >
         {room.isAvailable ? "Continue" : "Unavailable"}
       </Button>
 

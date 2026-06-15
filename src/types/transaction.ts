@@ -1,4 +1,6 @@
 import { Calendar, CheckCircle, Clock, ClockAlert, XCircle } from "lucide-react";
+import { PageableResponse } from "./pagination";
+import { PaymentMethodEnum } from "@/lib/validator/profile.transaction.schema";
 
 export enum TransactionStatus {
   ALL = "ALL",
@@ -39,10 +41,7 @@ export const Transaction_Steps = [
 
 export type TransactionSteps = (typeof Transaction_Steps)[number];
 
-export type TransactionPaymentMethod =
-  | "BANK_TRANSFER"
-  | "CREDIT_CARD"
-  | "SHOPEEPAY";
+export type TransactionPaymentMethod = PaymentMethodEnum;
 
 export interface Transactions {
   transactionId: string;
@@ -50,6 +49,7 @@ export interface Transactions {
     roomName: string;
     roomId: number;
     property: {
+      propertyId: number;
       propertyName: string;
       address: string;
       city: string;
@@ -71,7 +71,7 @@ export interface Transactions {
   };
   checkIn: string;
   checkOut: string;
-  status: string;
+  status: TransactionStatus;
   totalPrice: number;
   totalGuests: number;
   paymentDate: string;
@@ -80,8 +80,9 @@ export interface Transactions {
   createdAt?: string;
 }
 
+export type DisplayStatus = "PENDING" | "UPCOMING" | "ONGOING" | "COMPLETED" | "CANCELLED";
 export interface TransactionManagementPayload extends Transactions {
-    displayStatus: string;
+    displayStatus: DisplayStatus;
 }
 
 export interface CreateTransactionPayload {
@@ -116,58 +117,6 @@ export type MonthlyRevenue = {
   revenue: number;
 };
 
-export type RecentTransaction = {
-  totalPrice: number;
-  status: TransactionStatus;
-  room: {
-    name: string;
-    property: {
-      name: string;
-    };
-  };
-  user: {
-    firstName: string;
-    lastName: string;
-    avatar: string;
-  };
-};
-
-export type RecentMaintenance = {
-  startDate: string;
-  endDate: string;
-  reason: string;
-  room: {
-    name: string;
-    property: {
-      name: string;
-    };
-  };
-};
-
-export type RecentReviews = {
-  ratings: number;
-  comment: string;
-  transaction: {
-    user: {
-      firstName: string;
-      lastName: string;
-      avatar: string;
-    };
-    room: {
-      name: string;
-      property: {
-        name: string;
-      };
-    };
-  };
-};
-
-export type TenantActivityResponse = {
-  recentTransactions: RecentTransaction[];
-  recentMaintenances: RecentMaintenance[];
-  recentReviews: RecentReviews[];
-}
-
 export type CalendarTransaction= {
   id: string;
   checkIn: string;
@@ -186,7 +135,7 @@ export type CalendarTransaction= {
 }
 
 export const transactionStatusConfig: Record<
-  string,
+  DisplayStatus,
   { label: string; color: string; bgColor: string; icon: typeof Clock }
 > = {
   PENDING: {
@@ -220,3 +169,22 @@ export const transactionStatusConfig: Record<
     icon: XCircle,
   },
 };
+
+export interface TenantTransactionResponse extends PageableResponse<TransactionManagementPayload> {
+  summary: TransactionSummary;
+}
+
+export interface UserTransactionResponse extends PageableResponse<Transactions> {
+  summary?: TransactionSummary;
+}
+
+export const filterToDisplayStatus: Record<Exclude<TransactionStatusFilter, "all">,
+  DisplayStatus
+> = {
+  pending:   "PENDING",
+  upcoming:  "UPCOMING",
+  ongoing:   "ONGOING",
+  completed: "COMPLETED",
+  cancelled: "CANCELLED",
+};
+

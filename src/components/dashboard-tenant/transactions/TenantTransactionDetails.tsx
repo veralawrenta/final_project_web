@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useGetTransactionIdByTenant } from "@/hooks/useTransactions";
-import { transactionStatusConfig } from "@/types/transaction";
+import { TransactionStatus, transactionStatusConfig } from "@/types/transaction";
 import { formatCurrency } from "@/lib/price/currency";
 import {
   AlertTriangle,
   ArrowLeft,
+  Ban,
   Building2,
   Calendar,
   CheckCircle,
@@ -30,25 +30,32 @@ import {
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { formatDate } from "date-fns";
+import { useCancelTransactionByTenant, useConfirmTransaction, useGetTransactionIdByTenant, useRejectTransaction } from "@/hooks/useTenantTransactions";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface TenantTransactionDetailsProps {
   onBack: () => void;
-  onConfirm?: () => void;
-  onCancel?: () => void;
 }
 
 const TenantTransactionDetails = ({
   onBack,
-  onConfirm,
-  onCancel,
 }: TenantTransactionDetailsProps) => {
   const { transactionId } = useParams<{ transactionId: string }>();
+  const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showProofModal, setShowProofModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [rejectReason, setRejectReason] = useState("");
 
   const { data: t, isPending } = useGetTransactionIdByTenant(
     Array.isArray(transactionId) ? transactionId[0] : transactionId,
   );
+
+  const confirmMutation = useConfirmTransaction();
+  const rejectMutation = useRejectTransaction();
+  const cancelMutation = useCancelTransactionByTenant();
 
   if (isPending) {
     return (
@@ -68,7 +75,7 @@ const TenantTransactionDetails = ({
     );
   }
 
-  const status = transactionStatusConfig[t.status];
+  const status = transactionStatusConfig[t.displayStatus];
   const StatusIcon = status.icon;
 
   const nights = Math.ceil(
@@ -77,20 +84,28 @@ const TenantTransactionDetails = ({
   );
 
   const isBankTransfer = t.paymentMethod === "BANK_TRANSFER";
-  const canCancel = t.status === "pending" || t.status === "confirmed";
+  const canCancel = t.status === TransactionStatus.WAITING_FOR_PAYMENT;
+  const canReject = t.status === TransactionStatus.WAITING_FOR_CONFIRMATION;
+  const canConfirm = t.status === TransactionStatus.WAITING_FOR_CONFIRMATION;
 
   const handleConfirm = () => {
-    onConfirm?.();
+    confirmMutation.mutate(transactionId)
+  };
+
+  const handleReject = () => {
+    setShowRejectDialog(false);
+    rejectMutation.mutate({transactionId, reason: ""});
+    setRejectReason("");
   };
 
   const handleCancel = () => {
-    setShowCancelDialog(false);
-    onCancel?.();
+    setShowCancelDialog(false)
+    cancelMutation.mutate({transactionId, reason: ""})
+    setCancelReason("");
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"
@@ -115,9 +130,7 @@ const TenantTransactionDetails = ({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left: Property & Booking Info */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Property Card */}
           <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <div className="aspect-video w-full bg-muted relative">
               <img
@@ -235,7 +248,7 @@ const TenantTransactionDetails = ({
                       No payment proof uploaded yet
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      The guest has not submitted proof of payment.
+                     The guest selected Bank Transfer but has not submitted proof of payment. You may cancel this booking until payment is uploaded.
                     </p>
                   </div>
                 </div>
@@ -304,10 +317,10 @@ const TenantTransactionDetails = ({
           </div>
 
           {/* Actions */}
-          {(t.status === "pending" || t.status === "confirmed") && (
+          {(canConfirm || canCancel || canReject) && (
             <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
               <h3 className="font-heading font-semibold text-sm">Actions</h3>
-              {t.status === "pending" && (
+              {canConfirm && (
                 <Button
                   className="w-full gap-2 rounded-xl"
                   onClick={handleConfirm}
@@ -315,7 +328,14 @@ const TenantTransactionDetails = ({
                   <CheckCircle className="h-4 w-4" /> Confirm Booking
                 </Button>
               )}
-              {canCancel ? (
+              {canReject && (
+                <Button
+                variant={"outline"}
+                className="w-full gap-2 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10" >
+                <Ban className="h-4 w-4" /> Reject Transaction
+                </Button>
+              )}
+              {canCancel && (
                 <Button
                   variant="outline"
                   className="w-full gap-2 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
@@ -323,43 +343,82 @@ const TenantTransactionDetails = ({
                 >
                   <XCircle className="h-4 w-4" /> Cancel Booking
                 </Button>
-              ) : !isBankTransfer ? (
-                <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-xl">
-                  <AlertTriangle className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <p className="text-xs text-muted-foreground">
-                    Cancellation is not available for {t.paymentMethod}{" "}
-                    payments. Please contact support for assistance.
-                  </p>
-                </div>
-              ) : null}
+              )}
             </div>
           )}
         </div>
       </div>
 
       {/* Cancel Dialog */}
-      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel this booking?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will cancel {t.user.firstName} {t.user.lastName}'s
-              reservation for {t.room.property.propertyName} ({t.room.roomName}
-              ). The guest will be notified and any payment will need to be
-              refunded.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep Booking</AlertDialogCancel>
-            <AlertDialogAction
+      <Dialog open={showCancelDialog} onOpenChange={(o) => { setShowCancelDialog(o); if (!o) setCancelReason(''); }}>
+        <DialogContent className="rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Cancel this booking?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to cancel {`${t.user.firstName} ${t.user.lastName}`}'s reservation for {t.room.property.propertyName} ({t.room.roomName})?
+              The guest has not uploaded their payment proof yet. They will be notified with the reason below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="cancel-reason">Reason for cancellation <span className="text-destructive">*</span></Label>
+            <Textarea
+              id="cancel-reason"
+              placeholder="e.g. Room unavailable for selected dates, property closed for maintenance..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              maxLength={500}
+              rows={4}
+              className="rounded-xl"
+            />
+            <p className="text-xs text-muted-foreground text-right">{cancelReason.length}/500</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl" onClick={() => setShowCancelDialog(false)}>Keep Booking</Button>
+            <Button
               onClick={handleCancel}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Cancel Booking
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showRejectDialog} onOpenChange={(o) => { setShowRejectDialog(o); if (!o) setRejectReason(''); }}>
+        <DialogContent className="rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Reject this booking?</DialogTitle>
+            <DialogDescription>
+              Reject {`${t.user.firstName} ${t.user.lastName}`}'s payment for {t.room.property.propertyName} ({t.room.roomName}).
+              {isBankTransfer
+                ? ' If the payment proof is invalid or insufficient, provide a reason so the guest can resubmit or request a refund.'
+                : ' The Xendit payment will need to be refunded. The guest will be notified with the reason below.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="reject-reason">Reason for rejection <span className="text-destructive">*</span></Label>
+            <Textarea
+              id="reject-reason"
+              placeholder="e.g. Payment proof unclear, amount mismatch, suspicious transaction..."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              maxLength={500}
+              rows={4}
+              className="rounded-xl"
+            />
+            <p className="text-xs text-muted-foreground text-right">{rejectReason.length}/500</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="rounded-xl" onClick={() => setShowRejectDialog(false)}>Keep Booking</Button>
+            <Button
+              onClick={handleReject}
+              className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Reject Booking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Payment Proof Modal */}
       {showProofModal && t.paymentProof && (

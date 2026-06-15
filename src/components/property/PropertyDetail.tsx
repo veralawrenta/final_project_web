@@ -12,7 +12,7 @@ import RoomCard from "./property-detail/RoomCard";
 import { useGetPropertyWithAvailability } from "@/hooks/useProperty";
 import { RoomIdPublic } from "@/types/room";
 import RoomPricePreview from "./property-detail/RoomPricePreview";
-import { differenceInCalendarDays, parse } from "date-fns";
+import { differenceInCalendarDays, format, parse } from "date-fns";
 import PropertyReviewCard from "./PropertyReviewCard";
 
 const mapRoomToCard = (room: any): RoomIdPublic => ({
@@ -27,6 +27,7 @@ const mapRoomToCard = (room: any): RoomIdPublic => ({
     isCover: img.isCover,
   })),
 });
+
 export default function PropertyDetail() {
   const params = useParams();
   const router = useRouter();
@@ -63,6 +64,8 @@ export default function PropertyDetail() {
     Boolean(propertyId),
   );
 
+  const rooms: RoomIdPublic[] = property?.rooms.map(mapRoomToCard) ?? [];
+
   useEffect(() => {
     if (property && !selectedRoom) {
       const firstAvailable = rooms.find((r) => r.isAvailable);
@@ -96,7 +99,6 @@ export default function PropertyDetail() {
     );
   }
 
-  const rooms: RoomIdPublic[] = property.rooms.map(mapRoomToCard);
   const availableRooms = rooms.filter((r) => r.isAvailable);
 
   const lowestPrice =
@@ -110,6 +112,18 @@ export default function PropertyDetail() {
     property.propertyImages.length > 0
       ? property.propertyImages.map((img) => img.urlImages)
       : ["/placeholder-property.jpg"];
+
+  const handleContinue = () => {
+    if (!selectedRoom) return;
+    const qs = new URLSearchParams({
+      checkIn: format(checkIn, "dd-MM-yyyy"),
+      checkOut: format(checkOut, "dd-MM-yyyy"),
+      guests: String(guests),
+    });
+    router.push(
+      `/property/${propertyId}/rooms/${selectedRoom.id}/transaction?${qs.toString()}`,
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -190,9 +204,6 @@ export default function PropertyDetail() {
                     nights={nights}
                     isSelected={selectedRoom?.id === room.id}
                     onSelect={() => room.isAvailable && setSelectedRoom(room)}
-                    onBook={() => {
-                      router.refresh();
-                    }}
                   />
                 ))}
               </div>
@@ -208,6 +219,7 @@ export default function PropertyDetail() {
             checkOut={checkOut}
             guests={guests}
             displayPrice={displayPrice}
+            onContinue={handleContinue}
           />
         </div>
       </main>

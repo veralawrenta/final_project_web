@@ -1,5 +1,8 @@
-"use client"
-import { useGetAllTenantTransactions } from "@/hooks/useTenantTransactions";
+"use client";
+import {
+  useCancelTransactionByTenant,
+  useGetAllTenantTransactions,
+} from "@/hooks/useTenantTransactions";
 import { formatCurrency } from "@/lib/price/currency";
 import { SortOrder, TransactionSortBy } from "@/types/pagination";
 import { Transactions, TransactionStatusFilter } from "@/types/transaction";
@@ -43,6 +46,7 @@ import {
 } from "../ui/select";
 import TransactionCalendar from "./transactions/TransactionCalendar";
 import TransactionList from "./transactions/TransactionList";
+import PaginationSection from "../PaginationSection";
 
 type ViewModeType = "calendar" | "list";
 
@@ -54,7 +58,7 @@ const TransactionManagement = ({
   initialFilter?: string;
 }) => {
   const [activeStatus, setActiveStatus] = useState<TransactionStatusFilter>(
-    ["pending", "ongoing", "confirmed", "completed", "cancelled"].includes(
+    ["pending", "ongoing", "upcoming", "completed", "cancelled"].includes(
       initialFilter ?? "",
     )
       ? (initialFilter as TransactionStatusFilter)
@@ -82,6 +86,7 @@ const TransactionManagement = ({
   );
   const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [cancelTarget, setCancelTarget] = useState<Transactions | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
 
   const [debounceSearch] = useDebounceValue(searchQuery, 500);
 
@@ -94,21 +99,7 @@ const TransactionManagement = ({
     sortOrder,
   });
 
-  const filteredTransactions = transactionData?.data
-    .filter((t) => {
-      const matchesStatus = activeStatus === "all" || t.status === activeStatus;
-      const matchesSearch =
-        !searchQuery ||
-        t.user.firstName.includes(searchQuery) ||
-        t.room.property.propertyName.includes(searchQuery) ||
-        t.transactionId.includes(searchQuery);
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
-      const diff =
-        new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime();
-      return sortBy === "paymentDate" ? -diff : diff;
-    });
+  const cancelTransaction = useCancelTransactionByTenant();
 
   const statusOptions: {
     key: TransactionStatusFilter;
@@ -151,6 +142,25 @@ const TransactionManagement = ({
 
   const pendingCount = transactionData?.summary?.pending ?? 0;
 
+  const onChangePage = (page: number) => {
+    setPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const handleCancelTransaction = () => {
+    if (!cancelTarget) return;
+    cancelTransaction.mutate(
+      {
+        transactionId: cancelTarget.transactionId,
+        reason: cancelReason.trim(),
+      },
+      {
+        onSuccess: () => {
+          setCancelTarget(null);
+          setCancelReason("");
+        },
+      },
+    );
+  };
 
   if (isPending) {
     return (
@@ -164,7 +174,10 @@ const TransactionManagement = ({
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={`stat-sk-${i}`} className="bg-card rounded-2xl border border-border p-4">
+            <div
+              key={`stat-sk-${i}`}
+              className="bg-card rounded-2xl border border-border p-4"
+            >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-muted/60 shrink-0" />
                 <div className="space-y-2 flex-1">
@@ -193,7 +206,10 @@ const TransactionManagement = ({
             </div>
             <div className="bg-card border border-border rounded-2xl overflow-hidden divide-y divide-border">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={`row-sk-${i}`} className="p-4 flex items-center justify-between gap-4">
+                <div
+                  key={`row-sk-${i}`}
+                  className="p-4 flex items-center justify-between gap-4"
+                >
                   <div className="flex items-center gap-3 flex-1">
                     <div className="h-10 w-10 bg-muted/60 rounded-xl shrink-0" />
                     <div className="space-y-2 flex-1">
@@ -409,7 +425,7 @@ const TransactionManagement = ({
       {/* ── Sub-components ── */}
       {viewMode === "list" ? (
         <TransactionList
-          transactions={filteredTransactions ?? []}
+          transactions={transactionData?.data ?? []}
           onViewTransaction={onViewTransaction}
           onCancelRequest={setCancelTarget}
         />
@@ -421,11 +437,24 @@ const TransactionManagement = ({
           setCalendarMonth={setCalendarMonth}
         />
       )}
+      <div>
+        {transactionData?.meta && (
+          <PaginationSection
+            onChangePage={onChangePage}
+            meta={transactionData.meta}
+          />
+        )}
+      </div>
 
       {/* ── Cancel Dialog ── */}
       <AlertDialog
         open={!!cancelTarget}
-        onOpenChange={(open) => !open && setCancelTarget(null)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setCancelTarget(null);
+            setCancelReason("");
+          }
+        }}
       >
         <AlertDialogContent className="rounded-2xl max-w-md">
           <AlertDialogHeader>
@@ -454,20 +483,30 @@ const TransactionManagement = ({
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          <div className="mt-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              Reason for cancellation
+            </label>
+            <textarea
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="e.g. Property unavailable due to maintenance..."
+              rows={3}
+              className="w-full mt-2 px-3 py-2.5 bg-secondary border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none placeholder:text-muted-foreground/60"
+            />
+          </div>
+
           <AlertDialogFooter>
             <AlertDialogCancel className="rounded-xl">
               Keep Booking
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => {
-                toast.success(
-                  `Booking ${cancelTarget?.transactionId} has been cancelled.`,
-                );
-                setCancelTarget(null);
-              }}
-              className="rounded-xl bg-[hsl(var(--status-cancelled))] text-white hover:bg-[hsl(var(--status-cancelled))]/90"
+              onClick={handleCancelTransaction}
+              disabled={!cancelReason.trim() || cancelTransaction.isPending}
+              className="rounded-xl bg-[hsl(var(--status-cancelled))] text-white hover:bg-[hsl(var(--status-cancelled))]/90 disabled:opacity-50"
             >
-              Yes, Cancel Booking
+              {cancelTransaction.isPending ? "Cancelling..." : "Yes, Cancel Booking"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

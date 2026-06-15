@@ -3,11 +3,12 @@ import {
   CreateTransactionFormValues,
   uploadPaymentProofSchema,
 } from "@/lib/validator/profile.transaction.schema";
-import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
+import { PaginationQueryParams } from "@/types/pagination";
 import {
-  MonthlyRevenue,
+  TransactionManagementPayload,
   Transactions,
-  TransactionStatus
+  TransactionStatus,
+  UserTransactionResponse
 } from "@/types/transaction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -36,7 +37,7 @@ export const useGetAllUserTransaction = (queries?: TransactionQueryParams) => {
   return useQuery({
     queryKey: ["userTransactions", queries],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<PageableResponse<Transactions>>(
+      const { data } = await axiosInstance.get<UserTransactionResponse>(
         `transactions/user`,
         {
           params: queries,
@@ -86,28 +87,8 @@ export const useGetTransactionIdByUser = (transactionId: string) => {
   return useQuery({
     queryKey: ["user-transaction", transactionId],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<Transactions>(
+      const { data } = await axiosInstance.get<TransactionManagementPayload>(
         `transactions/${transactionId}/user`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.data?.user.accessToken}`,
-          },
-        },
-      );
-      return data;
-    },
-    enabled: !!session.data?.user.accessToken && !!transactionId,
-    staleTime: 5 * 60 * 1000,
-  });
-};
-export const useGetTransactionIdByTenant = (transactionId: string) => {
-  const session = useSession();
-
-  return useQuery({
-    queryKey: ["tenant-transaction", transactionId],
-    queryFn: async () => {
-      const { data } = await axiosInstance.get<Transactions>(
-        `transactions/${transactionId}/tenant`,
         {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
@@ -161,7 +142,7 @@ export const useUploadPaymentProof = () => {
     mutationFn: async (body: z.infer<typeof uploadPaymentProofSchema>) => {
       const form = new FormData();
       form.append("transactionId", body.transactionId);
-      form.append("paymentProof", body.paymentProof);
+      form.append("urlImage", body.paymentProof);
 
       const { data } = await axiosInstance.post<{ paymentProof: string }>(
         `transactions/${body.transactionId}/payment-proof`,
@@ -192,24 +173,5 @@ export const useUploadPaymentProof = () => {
   });
 };
 
-export const useGetMonthlyRevenueForTenant = () => {
-  const session = useSession();
 
-  return useQuery({
-    queryKey: ["tenantMonthlyRevenue"],
-    queryFn: async () => {
-      const year = new Date().getFullYear();
-      const { data } = await axiosInstance.get<MonthlyRevenue[]>(
-        `dashboard/me/revenue/monthly/${year}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.data?.user.accessToken}`,
-          },
-        },
-      );
-      return data;
-    },
-    enabled: !!session.data?.user.accessToken,
-  });
-};
 

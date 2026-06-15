@@ -80,9 +80,9 @@ const MyReviews = () => {
     });
   };
 
-  const totalReviews = userReviews?.meta.total ?? 0;
-  const pendingReviews = userReviews?.meta.pending ?? 0;
-  const reviewedReviews = totalReviews - pendingReviews;
+  const totalReviews = userReviews?.summary.totalCount ?? 0;
+  const pendingReviews = userReviews?.summary.pending ?? 0;
+  const reviewedReviews = userReviews?.summary.reviewed ?? 0;
 
   return (
     <div className="flex-1 px-4 py-6 pb-10 sm:px-6 md:px-8">

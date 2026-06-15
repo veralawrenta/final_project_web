@@ -24,10 +24,10 @@ const ITEMS_PER_PAGE = 4;
 const FILTER_TABS: {
   key: TransactionStatusFilter;
   label: string;
-  summaryKey?: "upcoming" | "ongoing" | "completed";
+  summaryKey?: "upcoming" | "activeGuests" | "completed";
 }[] = [
   { key: "all", label: "All Bookings" },
-  { key: "ongoing", label: "Ongoing", summaryKey: "ongoing" },
+  { key: "ongoing", label: "Ongoing", summaryKey: "activeGuests" },
   { key: "upcoming", label: "Upcoming", summaryKey: "upcoming" },
   { key: "completed", label: "Completed", summaryKey: "completed" },
 ];
@@ -84,10 +84,10 @@ const MyTransactions = () => {
 
   const transactions = userTransactions?.data ?? [];
   const meta = userTransactions?.meta;
-  const summary = userTransactions?.data;
+  const summary = userTransactions?.summary;
 
   const tabCount = (tab: (typeof FILTER_TABS)[number]): number => {
-    if (tab.key === "all") return summary?.all ?? 0;
+    if (tab.key === "all") return  summary?.totalTransactions ?? 0;
     if (tab.key === "upcoming") return 0;
     if (!tab.summaryKey) return 0;
     return summary?.[tab.summaryKey] ?? 0;
@@ -112,7 +112,7 @@ const MyTransactions = () => {
               My Bookings
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Manage your reservations — {summary?.all ?? 0} total
+              Manage your reservations — {summary?.totalTransactions ?? 0} total
             </p>
           </div>
         </div>
@@ -223,7 +223,7 @@ const MyTransactions = () => {
                 transaction={t}
               />
             ))
-          )}
+          )}c
         </div>
         {!!userTransactions?.meta && (
           <PaginationSection

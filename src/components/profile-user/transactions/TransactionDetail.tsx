@@ -7,8 +7,7 @@ import {
     useUploadPaymentProof,
 } from "@/hooks/useTransactions";
 import { formatCurrency } from "@/lib/price/currency";
-import { STATUS_CONFIG } from "@/lib/transaction-config";
-import { BANK, TransactionStatus } from "@/types/transaction";
+import { BANK, TransactionStatus, transactionStatusConfig } from "@/types/transaction";
 import { differenceInCalendarDays, formatDate, startOfDay } from "date-fns";
 import { ArrowLeft, Badge, CalendarDays, Check, CheckCircle, Copy, CreditCard, Eye, FileImage, Link, MapPin, Shield, Star, Upload, Users, X, XCircle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -46,7 +45,7 @@ const TransactionDetail = () => {
     : 0;
 
   const statusConfig = transaction
-    ? (STATUS_CONFIG[transaction.status] ?? {
+    ? (transactionStatusConfig[transaction.displayStatus] ?? {
         label: transaction.status,
         className: "bg-muted text-muted-foreground border-border",
         icon: Check,
@@ -166,7 +165,7 @@ const TransactionDetail = () => {
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-2xl font-heading font-bold">Booking Details</h1>
-                <Badge className={`rounded-lg border px-3 py-1 text-xs font-semibold gap-1.5 ${statusConfig!.className}`}>
+                <Badge className={`rounded-lg border px-3 py-1 text-xs font-semibold gap-1.5 ${statusConfig!.bgColor} ${statusConfig!.color}`}>
                   <GrStatusInfo className="h-3.5 w-3.5" />
                   {statusConfig!.label}
                 </Badge>
@@ -373,7 +372,7 @@ const TransactionDetail = () => {
                 <h3 className="font-heading font-bold text-base mb-3">Quick Actions</h3>
 
                 <Button asChild variant="outline" size="sm" className="w-full rounded-xl gap-1.5 justify-start">
-                  <Link href={`/property/${transaction.room.roomId}`}>
+                  <Link href={`/properties/${transaction.room.property.propertyId}`}>
                     <Eye className="h-3.5 w-3.5" /> View Property
                   </Link>
                 </Button>
@@ -381,7 +380,7 @@ const TransactionDetail = () => {
                 {transaction.status === TransactionStatus.CONFIRMED &&
                   new Date(transaction.checkOut) < new Date() && (
                     <Button asChild size="sm" className="w-full rounded-xl gap-1.5 justify-start bg-primary hover:bg-primary/90">
-                      <Link href={`/bookings/${transactionId}/review`}>
+                      <Link href={`/profile/user/transaction/${transactionId}/create-review`}>
                         <Star className="h-3.5 w-3.5" /> Leave Review
                       </Link>
                     </Button>

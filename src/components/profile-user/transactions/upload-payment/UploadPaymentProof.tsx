@@ -8,12 +8,14 @@ import { Building2, CheckCircle, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import UploadBox from "./UploadBox";
+import { useUploadPaymentProof } from "@/hooks/useTransactions";
 
 interface UploadPaymentProofProps {
   checkIn: string;
   checkOut: string;
   bookedUnits: number;
   basePrice: number;
+  transactionId: string;
   onSubmitted: () => void;
   onSkip: () => void;
 }
@@ -23,6 +25,7 @@ const UploadPaymentProof = ({
   checkOut,
   bookedUnits,
   basePrice,
+  transactionId,
   onSubmitted,
   onSkip,
 }: UploadPaymentProofProps) => {
@@ -39,6 +42,7 @@ const UploadPaymentProof = ({
     Math.round(subTotalPrice * 0.1) +
     Math.round(subTotalPrice * 0.05);
 
+  const uploadProof = useUploadPaymentProof();
 
   const handleSubmit = async () => {
     if (!proofFile) {
@@ -47,11 +51,12 @@ const UploadPaymentProof = ({
     }
     setIsUploading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      toast.success("Payment proof uploaded successfully");
+      await uploadProof.mutateAsync({
+        transactionId,
+        paymentProof: proofFile,
+      });
       onSubmitted();
-    } catch (error) {
-      toast.error("Failed to upload payment proof");
+    } catch {
     } finally {
       setIsUploading(false);
     }

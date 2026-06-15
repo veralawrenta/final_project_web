@@ -1,4 +1,4 @@
-import { cardDetailsSchema } from "@/lib/validator/profile.transaction.schema";
+import { cardDetailsSchema, PaymentMethodEnum } from "@/lib/validator/profile.transaction.schema";
 import { BANK, TransactionPaymentMethod } from "@/types/transaction";
 import { formatDate } from "date-fns";
 import { Building2, Clock, CreditCard, Lock, Shield, Wallet } from "lucide-react";
@@ -26,9 +26,9 @@ const paymentMethods : {
     icon: React.ElementType;
     description: string;
 }[] = [
-    { key: "BANK_TRANSFER", label: "Bank Transfer", icon: Building2, description: "Manual transfer and upload proof of payment." },
-    { key: "CREDIT_CARD", label: "Credit Card", icon: CreditCard, description: "Visa, MasterCard, and JCB." },
-    { key: "SHOPEEPAY", label: "ShopeePay", icon: Wallet, description: "Use your ShopeePay balance for a quick checkout." },
+    { key: PaymentMethodEnum.BANK_TRANSFER, label: "Bank Transfer", icon: Building2, description: "Manual transfer and upload proof of payment." },
+    { key: PaymentMethodEnum.CREDIT_CARD, label: "Credit Card", icon: CreditCard, description: "Visa, MasterCard, and JCB." },
+    { key: PaymentMethodEnum.SHOPEEPAY, label: "ShopeePay", icon: Wallet, description: "Use your ShopeePay balance for a quick checkout." },
 ];
 
 const PaymentMethodStep = ({

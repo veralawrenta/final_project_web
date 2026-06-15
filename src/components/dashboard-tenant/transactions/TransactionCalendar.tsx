@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Transactions, transactionStatusConfig, TransactionStatusFilter } from "@/types/transaction";
+import { filterToDisplayStatus, TransactionManagementPayload, transactionStatusConfig, TransactionStatusFilter } from "@/types/transaction";
 import { getDaysInMonth } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface TransactionCalendarProps {
-  transactions: Transactions[];
+  transactions: TransactionManagementPayload[];
   activeStatus: TransactionStatusFilter;
   calendarMonth: Date,
   setCalendarMonth: (date: Date) => void;
@@ -19,7 +19,7 @@ const TransactionCalendar = ({transactions, activeStatus, calendarMonth, setCale
     return transactions.filter((b) => 
     dateStr >= b.checkIn &&
     dateStr < b.checkOut &&
-    (activeStatus === "all" || b.status === activeStatus),
+    (activeStatus === "all" || b.displayStatus === filterToDisplayStatus[activeStatus]),
     );
   };
 
@@ -91,7 +91,7 @@ const TransactionCalendar = ({transactions, activeStatus, calendarMonth, setCale
                 {dayBookings.slice(0, 2).map((b) => (
                   <div
                     key={b.transactionId}
-                    className={`text-[10px] px-1.5 py-0.5 rounded-md truncate font-medium ${transactionStatusConfig[b.status].bgColor} ${transactionStatusConfig[b.status].color}`}
+                    className={`text-[10px] px-1.5 py-0.5 rounded-md truncate font-medium ${transactionStatusConfig[b.displayStatus].bgColor} ${transactionStatusConfig[b.displayStatus].color}`}
                     title={`${b.user.firstName} - ${b.room.property.propertyName}`}
                   >
                     {`${b.user.firstName} ${b.user.lastName}`}

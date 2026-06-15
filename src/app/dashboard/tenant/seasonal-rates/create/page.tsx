@@ -16,8 +16,7 @@ export default function CreateSeasonalRatePage() {
   const { mutateAsync, isPending } = useCreateSeasonalRates();
   const { data: propertiesData } = useGetTenantProperties({ take: 500 });
   const { data: roomsData } = useGetTenantRooms({ take: 500 });
-  
-  // Transform properties data
+ 
   const properties = useMemo(
     () =>
       (propertiesData?.data ?? []).map((p: any) => ({
@@ -44,8 +43,7 @@ export default function CreateSeasonalRatePage() {
   const form = useForm<z.infer<typeof createSeasonalRatesSchema>>({
     resolver: zodResolver(createSeasonalRatesSchema),
     defaultValues: {
-      roomId: null,
-      propertyId: null,
+      propertyId: 0,
       name: "",
       startDate: undefined,
       endDate: undefined,
@@ -72,7 +70,6 @@ export default function CreateSeasonalRatePage() {
         startDate: "startDate",
         endDate: "endDate",
         fixedPrice: "fixedPrice",
-        roomId: "roomId",
         propertyId: "propertyId",
       }}
     />

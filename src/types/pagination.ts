@@ -1,30 +1,14 @@
-import {
-  TransactionManagementPayload,
-  Transactions,
-  TransactionSummary,
-} from "./transaction";
 
 export interface PaginationMeta {
   page: number;
   take: number;
   total: number;
   totalPages?: number;
-  pending?: number;
-  reviewed?: number;
-  averageRating?: number;
 }
 
 export interface PageableResponse<T> {
   data: T[];
   meta: PaginationMeta;
-}
-
-export interface TenantTransactionResponse extends PageableResponse<TransactionManagementPayload> {
-  summary: TransactionSummary;
-}
-
-export interface UserTransactionResponse extends PageableResponse<Transactions> {
-  summary?: TransactionSummary;
 }
 
 export interface PaginationQueryParams {

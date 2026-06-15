@@ -1,9 +1,21 @@
-import React from 'react'
+"use client"
+import TenantTransactionDetails from "@/components/dashboard-tenant/transactions/TenantTransactionDetails";
+import { useRouter } from "next/navigation";
 
 const TransactionIdPage = () => {
-  return (
-    <div>TransactionIdPage</div>
-  )
-}
+  const router = useRouter();
 
-export default TransactionIdPage
+  const handleOnBack = () => {
+    router.back();
+  };
+
+  return (
+    <div>
+      <TenantTransactionDetails
+        onBack={handleOnBack}
+      />
+    </div>
+  );
+};
+
+export default TransactionIdPage;
