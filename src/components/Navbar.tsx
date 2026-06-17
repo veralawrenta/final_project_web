@@ -44,7 +44,7 @@ const Navbar = () => {
     >
       <div className="container mx-auto max-w-full flex items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="relative h-9 w-9 transition-transform group-hover:scale-105 ml-12">
+          <div className="relative h-9 w-9 transition-transform group-hover:scale-105 md:ml-12 ml-0">
             <Image
               src="/images/nuit-logo.png"
               fill
@@ -106,7 +106,7 @@ const Navbar = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/profile/user/bookings"
+                        href="/profile/user/transactions"
                         className="cursor-pointer font-medium"
                       >
                         My Bookings

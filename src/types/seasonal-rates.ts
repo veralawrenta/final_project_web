@@ -1,11 +1,11 @@
+import { PropertyImage } from "./property";
 export interface SeasonalRates {
   id: number;
   name?: string;
   startDate: string;
   endDate: string;
   fixedPrice: number;
-  propertyId?: number | null;
-  property?: {
+  property: {
     id: number;
     name: string;
     category?: {
@@ -16,25 +16,13 @@ export interface SeasonalRates {
       id: number;
       name: string;
     };
-  } | null;
-  roomId: number | null;
-  room?: {
-    id: number;
-    name: string;
-    property: {
+    propertyImages : PropertyImage[];
+    room: {
       id: number;
-      name: string;
-      category: {
-        id: number;
-        name: string;
-      };
-      city: {
-        id: number;
-        name: string;
-      };
-    };
-  } | null;
+      name: number;
+      basePrice: number;
+    }
+  }
   createdAt?: string;
   updatedAt?: string;
-  deletedAt?: string | null;
 }

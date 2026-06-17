@@ -1,5 +1,6 @@
-import { PropertyInfo } from "@/types/property";
-import { formatDate } from "date-fns";
+import { Property, PropertyRoomDetail } from "@/types/property";
+import { RoomIdPublic } from "@/types/room";
+import { format } from "date-fns";
 import {
   Building2,
   Calendar,
@@ -12,9 +13,10 @@ import {
 } from "lucide-react";
 
 interface DetailStepProps {
-  property: PropertyInfo;
-  checkIn: string;
-  checkOut: string;
+  property: PropertyRoomDetail;
+  selectedRoom: RoomIdPublic;
+  checkIn: string;   // "yyyy-MM-dd" — matches <input type="date">
+  checkOut: string;  // "yyyy-MM-dd"
   totalGuests: number;
   bookedUnits: number;
   specialRequest: string;
@@ -25,8 +27,10 @@ interface DetailStepProps {
   onBookedUnitsChange: (units: number) => void;
   onSpecialRequestChange: (request: string) => void;
 }
+
 const CreateTransactionStep = ({
   property,
+  selectedRoom,
   checkIn,
   checkOut,
   totalGuests,
@@ -39,11 +43,15 @@ const CreateTransactionStep = ({
   onBookedUnitsChange,
   onSpecialRequestChange,
 }: DetailStepProps) => (
+  
   <>
     <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm">
       <div className="relative h-48">
         <img
-          src={property.propertyImage.urlImage}
+          src={
+            property.propertyImages.find((img) => img.isCover)?.urlImages ??
+            property.propertyImages[0]?.urlImages
+          }
           alt={property.name}
           className="w-full h-full object-cover"
         />
@@ -56,12 +64,13 @@ const CreateTransactionStep = ({
             </span>
             <span className="flex items-center gap-1 text-sm">
               <Star className="h-3.5 w-3.5 fill-current text-yellow-400" />{" "}
-              {property.room.transaction.review.ratings}
+              {property.averageRating ?? "-"} 
             </span>
           </div>
         </div>
       </div>
     </div>
+
     <div className="bg-card rounded-3xl border border-border p-6 shadow-sm">
       <h3 className="font-bold text-lg mb-5 flex items-center gap-2">
         <Calendar className="h-5 w-5 text-primary" /> Your Trip
@@ -145,13 +154,14 @@ const CreateTransactionStep = ({
         </div>
       </div>
 
-      {nights > 0 && (
+      {nights > 0 && checkIn && checkOut && (
         <div className="mt-4 p-3 bg-primary/5 rounded-2xl border border-primary/10">
           <div className="flex items-center gap-2 text-sm text-primary font-medium">
             <Clock className="h-4 w-4" />
             {nights} night{nights > 1 ? "s" : ""} ·{" "}
-            {formatDate(checkIn, "dd MM yyyy")} →{" "}
-            {formatDate(checkOut, "dd MM yyyy")}
+            {/* checkIn/checkOut are "yyyy-MM-dd" so new Date() is safe here */}
+            {format(new Date(checkIn), "dd-MM-yyyy")} →{" "}
+            {format(new Date(checkOut), "dd-MM-yyyy")}
           </div>
         </div>
       )}

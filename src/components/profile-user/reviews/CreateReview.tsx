@@ -149,20 +149,20 @@ const CreateReviewComponent = () => {
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
           <div className="flex items-center gap-4 p-5">
             <img
-              src={userTransaction?.room?.property?.propertyImages?.urlImages}
-              alt={userTransaction?.room.property.propertyName}
+              src={userTransaction?.room?.property?.propertyImages?.[0].urlImages}
+              alt={userTransaction?.room.property.name}
               className="h-20 w-20 rounded-2xl object-cover shrink-0"
             />
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-lg font-heading font-bold">
-                {userTransaction?.room.property.propertyName}
+                {userTransaction?.room.property.name}
               </h2>
               <p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
                 <MapPin className="h-3.5 w-3.5" />{" "}
                 {userTransaction?.room.property.address}
               </p>
               <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-                <span>{userTransaction?.room.roomName}</span>
+                <span>{userTransaction?.room.name}</span>
                 <span>·</span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />

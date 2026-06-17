@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useDeleteProperty, useGetTenantProperties } from "@/hooks/useProperty";
 import { formatCurrency } from "@/lib/price/currency";
-import { PropertyType, TenantProperty } from "@/types/property";
+import { PropertyType, TenantProperties } from "@/types/property";
 import {
   Edit,
   Eye,
@@ -129,9 +129,9 @@ export default function PropertyManagementTab({
     setPage(1);
   };
 
-  const deletingProperty: TenantProperty | undefined =
+  const deletingProperty: TenantProperties | undefined =
     tenantProperties?.data.find(
-      (p: TenantProperty) => p.id === isDeletingProperty
+      (p: TenantProperties) => p.id === isDeletingProperty
     );
   const hasActiveFilters =
     search.trim() !== "" ||
@@ -260,7 +260,7 @@ export default function PropertyManagementTab({
           ) : (
             <>
               <div className="grid gap-4">
-                {tenantProperties.data.map((property: TenantProperty) => (
+                {tenantProperties.data.map((property: TenantProperties) => (
                   <div
                     key={property.id}
                     className="bg-card rounded-2xl border border-border overflow-hidden hover:shadow-md transition-shadow"
@@ -288,7 +288,7 @@ export default function PropertyManagementTab({
                             <div className="flex gap-2 mb-1 flex-wrap">
                               {property.category && (
                                 <span className="px-2 py-0.5 bg-accent/10 text-primary rounded text-xs font-medium">
-                                  {property.category}
+                                  {property.category.name}
                                 </span>
                               )}
                               <span className="px-2 py-0.5 bg-secondary rounded text-xs font-medium capitalize">
@@ -302,7 +302,7 @@ export default function PropertyManagementTab({
 
                             <div className="flex items-center gap-1 text-muted-foreground mt-1">
                               <MapPin className="h-3.5 w-3.5" />
-                              <span className="text-sm">{property.city}</span>
+                              <span className="text-sm">{property.city.name}</span>
                             </div>
                             {property.lowestPrice !== null && (
                               <p className="text-lg font-bold mt-2">

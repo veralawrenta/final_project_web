@@ -24,7 +24,7 @@ const ProcessingPayment = ({
   }, [paymentUrl, onComplete]);
 
   const methodLabel =
-    selectedPaymentMethod === "CREDIT_CARD" ? "card" : "ShopeePay";
+    selectedPaymentMethod === "CREDIT_CARD" ? "card" : "SHOPEEPAY";
 
   return (
     <div className="bg-card rounded-3xl border border-border p-10 shadow-sm text-center space-y-6">

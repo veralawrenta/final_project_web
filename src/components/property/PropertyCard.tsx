@@ -7,19 +7,26 @@ import Link from "next/link";
 
 interface Props {
   property: PropertyCard;
+  checkIn : string | null;
+  checkOut: string | null;
+  guests: string | null;
 }
 
-const PropertyCardForm = ({ property }: Props) => {
+const PropertyCardForm = ({ property, checkIn, checkOut, guests }: Props) => {
   const coverImage =
     property.propertyImages.find((img) => img.isCover)?.urlImages ??
     property.propertyImages[0]?.urlImages ??
     "/placeholder.jpg";
 
-  const price = property.displayPrice ?? (property.rooms?.length ? Math.min(...property.rooms.map((r) => r.basePrice)) : 0);
+  const price = property.displayPrice ?? (property.availableRooms?.length ? Math.min(...property.availableRooms.map((r) => r.basePrice)) : 0);
+  const qs = new URLSearchParams();
+  if (checkIn) qs.set("checkIn", checkIn);
+  if (checkOut) qs.set("checkOut", checkOut);
+  if (guests) qs.set("guests", guests);
 
   return (
     <Link
-      href={`/properties/${property.id}`}
+      href={`/properties/${property.id}?${qs.toString()}`}
       className="group block bg-card rounded-2xl overflow-hidden border border-border hover:shadow-lg transition"
     >
       <div className="relative aspect-4/3 overflow-hidden">

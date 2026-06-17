@@ -232,14 +232,13 @@ const SeasonalRateManagementTab = ({
                   >
                     <Hotel className="h-3 w-3 mr-1.5 opacity-60" />
                     {rate.property?.name ??
-                      rate.room?.property?.name ??
                       "Global"}
                   </Badge>
                   <h3 className="font-bold text-lg leading-snug group-hover:text-primary transition-colors line-clamp-1">
                     {rate.name}
                   </h3>
                   <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider mt-1">
-                    {rate.room?.name ?? rate.property?.name}
+                    {rate.property?.name}
                   </p>
                 </div>
 

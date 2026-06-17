@@ -1,6 +1,7 @@
+import { formatCurrency } from "@/lib/price/currency";
 import { cardDetailsSchema, PaymentMethodEnum } from "@/lib/validator/profile.transaction.schema";
 import { BANK, TransactionPaymentMethod } from "@/types/transaction";
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
 import { Building2, Clock, CreditCard, Lock, Shield, Wallet } from "lucide-react";
 import { FieldErrors, UseFormRegister } from "react-hook-form";
 import z from "zod";
@@ -159,7 +160,7 @@ const PaymentMethodStep = ({
               <hr className="border-border" />
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Amount to Transfer</span>
-                <span className="font-bold text-primary text-lg">{nights > 0 ? `Rp ${total.toLocaleString("id-ID")}` : "—"}</span>
+                <span className="font-bold text-primary text-lg">{nights > 0 ? formatCurrency(total) : "—"}</span>
               </div>
             </div>
           </div>
@@ -183,7 +184,7 @@ const PaymentMethodStep = ({
       <div className="space-y-3 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Dates</span>
-          <span className="font-medium">{formatDate(checkIn, "dd MM yyyy")} → {formatDate(checkOut, "dd MM yyyy")}</span>
+          <span className="font-medium">{format(new Date(checkIn), "dd-MM-yyyy")} → {format(new Date(checkOut), "dd-MM-yyyy")}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Guests</span>

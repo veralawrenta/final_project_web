@@ -24,39 +24,50 @@ const ITEMS_PER_PAGE = 4;
 const FILTER_TABS: {
   key: TransactionStatusFilter;
   label: string;
-  summaryKey?: "upcoming" | "activeGuests" | "completed";
+  summaryKey?: "upcoming" | "activeGuests" | "completed" | "pending" | "cancelled";
 }[] = [
-  { key: "all", label: "All Bookings" },
-  { key: "ongoing", label: "Ongoing", summaryKey: "activeGuests" },
-  { key: "upcoming", label: "Upcoming", summaryKey: "upcoming" },
-  { key: "completed", label: "Completed", summaryKey: "completed" },
+  { key: "ALL", label: "All Bookings" },
+  { key: "ONGOING", label: "Ongoing", summaryKey: "activeGuests" },
+  { key: "UPCOMING", label: "Upcoming", summaryKey: "upcoming" },
+  { key: "COMPLETED", label: "Completed", summaryKey: "completed" },
+  { key: "PENDING", label: "Pending", summaryKey: "pending" },
+  { key: "CANCELLED", label: "Cancelled", summaryKey: "cancelled" }
 ];
 
-// ✅ Fixed: arrays instead of || (|| always returns the first truthy value)
 const TAB_TO_STATUS: Partial<Record<TransactionStatusFilter, TransactionStatus[]>> = {
-  ongoing:   [TransactionStatus.CONFIRMED],
-  upcoming:  [
+  ONGOING:   [TransactionStatus.CONFIRMED],
+  UPCOMING:  [
     TransactionStatus.CONFIRMED,
     TransactionStatus.WAITING_FOR_PAYMENT,
     TransactionStatus.WAITING_FOR_CONFIRMATION,
   ],
-  completed: [
+  COMPLETED: [
     TransactionStatus.COMPLETED,
     TransactionStatus.CANCELLED_BY_USER,
     TransactionStatus.CANCELLED_BY_TENANT,
     TransactionStatus.EXPIRED,
   ],
+  PENDING: [
+    TransactionStatus.WAITING_FOR_PAYMENT,
+    TransactionStatus.WAITING_FOR_CONFIRMATION,
+  ],
+  CANCELLED: [  
+    TransactionStatus.CANCELLED_BY_USER,
+    TransactionStatus.CANCELLED_BY_TENANT,
+    TransactionStatus.EXPIRED,
+  ]
 };
 
 const MyTransactions = () => {
   const [activeTab, setActiveTab] = useQueryState(
     "activeTab",
     parseAsStringEnum<TransactionStatusFilter>([
-      "all",
-      "upcoming",
-      "ongoing",
-      "completed",
-    ]).withDefault("all"),
+      "ALL",
+      "UPCOMING",
+      "ONGOING",
+      "COMPLETED",
+      "PENDING",
+    ]).withDefault("ALL"),
   );
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [sortBy, setSortBy] = useQueryState(
@@ -71,7 +82,7 @@ const MyTransactions = () => {
   const [debounceSearch] = useDebounceValue(search, 500);
 
   const tabConfig = FILTER_TABS.find((t) => t.key === activeTab)!;
-  const statusParams = tabConfig.key === "all" ? undefined : TAB_TO_STATUS[tabConfig.key];
+  const statusParams = tabConfig.key === "ALL" ? undefined : TAB_TO_STATUS[tabConfig.key];
 
   const { data: userTransactions, isPending } = useGetAllUserTransaction({
     search: debounceSearch || undefined,
@@ -87,8 +98,8 @@ const MyTransactions = () => {
   const summary = userTransactions?.summary;
 
   const tabCount = (tab: (typeof FILTER_TABS)[number]): number => {
-    if (tab.key === "all") return  summary?.totalTransactions ?? 0;
-    if (tab.key === "upcoming") return 0;
+    if (tab.key === "ALL") return  summary?.totalTransactions ?? 0;
+    if (tab.key === "UPCOMING") return 0;
     if (!tab.summaryKey) return 0;
     return summary?.[tab.summaryKey] ?? 0;
   };
@@ -144,13 +155,6 @@ const MyTransactions = () => {
             })}
           </div>
         </div>
-
-        {/* ── Search + Sort bar ──
-            KEY FIX: stacked on mobile/tablet (flex-col), row only on lg+.
-            Search gets min-w-0 + w-full so it never collapses.
-            Sort controls are shrink-0 with fixed widths so they never
-            squeeze the search box out of existence.
-        ── */}
         <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:gap-4">
           <div className="relative w-full min-w-0 lg:flex-1">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
@@ -219,11 +223,11 @@ const MyTransactions = () => {
           ) : (
             transactions.map((t) => (
               <TransactionCard
-                key={t.transactionId}
+                key={t.id}
                 transaction={t}
               />
             ))
-          )}c
+          )}
         </div>
         {!!userTransactions?.meta && (
           <PaginationSection

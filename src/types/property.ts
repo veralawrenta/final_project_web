@@ -1,5 +1,5 @@
 import { MasterAmenity } from "./amenity";
-import { NewImageData } from "./images";
+import { RoomIdPublic, RoomImage } from "./room";
 
 export enum PropertyType {
   APARTMENT = "APARTMENT",
@@ -13,51 +13,44 @@ export enum PropertyStatus {
   DRAFT = "DRAFT",
 }
 
+//for one property
 export interface Property {
   id: number;
   name: string;
   description: string;
   address: string;
   propertyType: PropertyType;
-  propertyStatus: string;
+  propertyStatus: PropertyStatus;
+  latitude?: string;
+  longitude?: string;
   displayPrice?: number;
   propertyImages: Array<{ id: number; urlImages: string; isCover: boolean }>;
   city: { id: number; name: string };
   category: { id: number; name: string } | null;
   amenities: MasterAmenity[];
-  availableRooms?: Array<{
-    room: {
-      id: number;
-      name: string;
-      totalGuests: number;
-      basePrice: number;
-    };
-    price: number;
-    useSeasonalRate: boolean;
-  }>;
   rooms?: Array<{
+    id: number;
+    name: string;
     basePrice: number;
+    totalGuests: number;
+    description: string;
+    isAvailable: boolean;
+    displayPrice?: number;
+    useSeasonalRate: boolean;
+    roomImages: RoomImage[];
+    transactions?: Array<{
+      id: string;
+      reviews?: {
+        comments: string;
+        ratings: number;
+      };
+    }>;
   }>;
 }
 
-export interface PropertyDetail extends Property {
-  rooms: Array<{
-    id: number;
-    name: string;
-    description: string;
-    totalGuests: number;
-    totalUnits: number;
-    basePrice: number;
-    isAvailable: boolean;
-    displayPrice: number;
-    useSeasonalRate: boolean;
-    roomImages: Array<{
-      id: number;
-      roomId: number;
-      urlImages: string;
-      isCover: boolean;
-    }>;
-  }>;
+export interface PropertyRoomDetail extends Omit<Property, "rooms">  {
+  rooms: RoomIdPublic[],
+  averageRating: number | null;
   searchContext: {
     checkIn: string;
     checkOut: string;
@@ -69,7 +62,6 @@ export interface PropertyDetail extends Property {
   };
   createdAt: string;
   updatedAt: string;
-  deletedAt?: string | null;
 }
 
 export interface CalendarDay {
@@ -84,23 +76,14 @@ export interface CalendarDay {
   }>;
 }
 
-export interface PropertyCard {
-  id: number;
-  name: string;
-  city: {
+export interface PropertyCard extends Property {
+  availableRooms?: {
     id: number;
     name: string;
-  };
-  propertyType: PropertyType;
-  propertyImages: {
-    urlImages: string;
-    isCover: boolean;
-  }[];
-  displayPrice?: number;
-  rooms?: {
+    description: string;
+    totalGuests: number;
+    totalUnits: number;
     basePrice: number;
-  }[];
-  availableRooms?: {
     price: number;
     useSeasonalRate: boolean;
   }[];
@@ -116,62 +99,18 @@ export interface CalendarResponse {
 
 export interface PropertyImage {
   id: number;
-  propertyId: number;
+  propertyId?: number;
   urlImages: string;
   isCover: boolean;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
+  createdAt?: string;
 }
-
-export interface TenantProperty {
-  id: number;
-  name: string;
-  city: string;
-  category?: string;
-  propertyType: "HOTEL" | "HOUSE" | "APARTMENT" | "VILLA";
-  lowestPrice: number | null;
-  totalRooms: number;
-  status: "PUBLISHED" | "DRAFT";
-  propertyImages: PropertyImage[];
-}
-
-//for property id dashboard
-export interface PropertyIdImages {
-  id: number;
-  urlImages: string;
-  isCover: boolean;
-}
-
-export interface PropertyRoom {
-  id: string;
-  name: string;
-  description: string;
-  basePrice: number;
-  totalGuests: number;
-  totalUnits: number;
-  imageFiles: File[];
-  imagePreviews: NewImageData[];
-}
+[];
 
 //for dashboard property Id tenant
-export interface TenantPropertyId {
-  id: number;
-  name: string;
-  description: string;
-  propertyType: PropertyType;
-  address: string;
-  city: string;
-  cityId: number;
-  category: string | null;
-  categoryId: number | null;
+export interface TenantProperty extends Omit<Property, "amenities" | "rooms" | "latitude" | "longitude">{
   latitude?: number;
   longitude?: number;
   status: PropertyStatus;
-  hasMaintenance: boolean;
-  hasPropertyImages: boolean;
-  hasSeasonalRate: boolean;
-  hasPublishableRoom: boolean;
   amenities: string[];
   rooms: Array<{
     id: number;
@@ -180,10 +119,7 @@ export interface TenantPropertyId {
     basePrice: number;
     totalUnits: number;
     totalGuests: number;
-    roomImages: Array<{
-      id: number;
-      urlImages: string;
-    }>;
+    roomImages: RoomImage[];
     roomNonAvailability: Array<{
       id: number;
       reason: string;
@@ -198,33 +134,16 @@ export interface TenantPropertyId {
       fixedPrice: number;
     }>;
   }>;
-  images: Array<{
-    id: number;
-    urlImages: string;
-    isCover: boolean;
-  }>;
+}
+export interface TenantProperties extends TenantProperty {
+  hasMaintenance: boolean;
+  hasPropertyImages: boolean;
+  hasSeasonalRate: boolean;
+  hasPublishableRoom: boolean;
+  lowestPrice: number | null;
+  totalRooms: number;
 }
 
 export type EditPropertyTypes = {
   name: string;
 };
-
-export interface PropertyInfo {
-  name: string;
-  address: string;
-  city: {
-    name: string;
-  }
-  propertyImage: {
-    urlImage: string;
-  };
-  room: {
-    id: number;
-    basePrice: number;
-    transaction: {
-      review: {
-        ratings: number;
-      };
-    };
-  };
-}

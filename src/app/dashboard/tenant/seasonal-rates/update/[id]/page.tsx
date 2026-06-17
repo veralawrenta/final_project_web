@@ -75,11 +75,9 @@ export default function UpdateSeasonalRatePage() {
     });
   };
 
-  const appliedTo = seasonalRate.propertyId
+  const appliedTo = seasonalRate.property.id
     ? `${seasonalRate.property?.name} (All rooms)`
-    : seasonalRate.room?.name
-    ? `${seasonalRate.room.name} (${seasonalRate.room.property?.name})`
-    : "Unknown";
+    : seasonalRate.property.room.name;
 
   return (
     <div className="space-y-6">

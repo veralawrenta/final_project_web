@@ -1,24 +1,49 @@
 "use client";
+
+import { InteractiveMap } from "@/components/dashboard-tenant/property/property-forms/maps/InteractiveMaps";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
-    useCancelTransactionByUser,
-    useGetTransactionIdByUser,
-    useUploadPaymentProof,
+  useCancelTransactionByUser,
+  useGetTransactionIdByUser,
+  useUploadPaymentProof,
 } from "@/hooks/useTransactions";
 import { formatCurrency } from "@/lib/price/currency";
-import { BANK, TransactionStatus, transactionStatusConfig } from "@/types/transaction";
+import {
+  BANK,
+  TransactionStatus,
+  transactionStatusConfig,
+} from "@/types/transaction";
 import { differenceInCalendarDays, formatDate, startOfDay } from "date-fns";
-import { ArrowLeft, Badge, CalendarDays, Check, CheckCircle, Copy, CreditCard, Eye, FileImage, Link, MapPin, Shield, Star, Upload, Users, X, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  Check,
+  CheckCircle,
+  Copy,
+  CreditCard,
+  Eye,
+  FileImage,
+  Loader2,
+  MapPin,
+  Shield,
+  Star,
+  Upload,
+  Users,
+  X,
+  XCircle,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { GrStatusInfo } from "react-icons/gr";
 import { toast } from "sonner";
-import UploadBox from "./upload-payment/UploadBox";
 
 const TransactionDetail = () => {
   const params = useParams();
-  const transactionId = params.transactionId as string;
+  const transactionId = params.id as string;
   const router = useRouter();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,15 +80,25 @@ const TransactionDetail = () => {
   const canCancel =
     transaction?.status === TransactionStatus.WAITING_FOR_PAYMENT &&
     !transaction.paymentDate;
+
   const needUploadPaymentProof =
     transaction?.status === TransactionStatus.WAITING_FOR_PAYMENT &&
     transaction.paymentMethod === "BANK_TRANSFER" &&
     !transaction.paymentProof &&
     !transaction.paymentDate;
+
   const alreadyUploadedProof =
     transaction?.status === TransactionStatus.WAITING_FOR_CONFIRMATION &&
     !!transaction.paymentProof &&
     !!transaction.paymentDate;
+
+  const InteractiveMap = dynamic(
+    () =>
+      import("@/components/dashboard-tenant/property/property-forms/maps/InteractiveMaps").then(
+        (mod) => mod.InteractiveMap,
+      ),
+    { ssr: false },
+  );
 
   const fileTypes = ["image/jpeg", "image/png", "image/jpg", "image/gif"];
 
@@ -71,25 +106,22 @@ const TransactionDetail = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 1 * 1024 * 1024) {
-      toast.error("File size exceeds 1MB. Please choose a smaller file.");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size exceeds 5MB. Please choose a smaller file.");
       return;
     }
 
-    if (file.type !== fileTypes.find((type) => type === file.type)) {
+    if (!fileTypes.includes(file.type)) {
       toast.error(
-        "Invalid file type. Please upload a JPEG, PNG, JPG, or GIF image.",
+        "Invalid file type. Please upload a JPEG, PNG, or GIF image.",
       );
       return;
     }
+
     setPaymentProof(file);
-    if (file.type !== fileTypes.find((type) => type === file.type)) {
-      const reader = new FileReader();
-      reader.onloadend = () => setIsPreviewing(reader.result as string);
-      reader.readAsDataURL(file);
-    } else {
-      setIsPreviewing(null);
-    }
+    const reader = new FileReader();
+    reader.onloadend = () => setIsPreviewing(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleSubmitPaymentProof = () => {
@@ -98,18 +130,17 @@ const TransactionDetail = () => {
       return;
     }
     uploadPaymentProof(
-      {
-        paymentProof,
-        transactionId,
-      },
+      { paymentProof, transactionId },
       {
         onSuccess: () => {
           setPaymentProof(null);
           setIsPreviewing(null);
+          toast.success("Payment proof uploaded successfully");
         },
       },
     );
   };
+
   const handleCopy = () => {
     navigator.clipboard.writeText(transactionId);
     setCopying(true);
@@ -119,31 +150,42 @@ const TransactionDetail = () => {
 
   if (isPending) {
     return (
-      <main className="flex-1 p-8">
-        <div className="mx-auto max-w-4xl space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-36 rounded-2xl border border-border bg-card animate-pulse"
-            />
-          ))}
+      <main className="flex-1 p-4 md:p-8">
+        <div className="mx-auto max-w-5xl space-y-6">
+          <div className="h-5 w-28 bg-muted animate-pulse rounded-md" />
+          <div className="h-24 bg-muted animate-pulse rounded-2xl" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="h-72 bg-muted animate-pulse rounded-2xl" />
+              <div className="h-36 bg-muted animate-pulse rounded-2xl" />
+            </div>
+            <div className="h-56 bg-muted animate-pulse rounded-2xl" />
+          </div>
         </div>
       </main>
     );
   }
+
   if (isError || !transaction) {
     return (
-      <main className="flex-1 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto">
-            <CalendarDays className="h-10 w-10 text-muted-foreground" />
+      <main className="flex-1 flex items-center justify-center p-6">
+        <div className="text-center space-y-4 max-w-sm">
+          <div className="w-14 h-14 bg-muted rounded-full flex items-center justify-center mx-auto">
+            <CalendarDays className="h-6 w-6 text-muted-foreground" />
           </div>
-          <h1 className="text-2xl font-heading font-bold">Booking Not Found</h1>
-          <p className="text-muted-foreground">
-            The booking you're looking for doesn't exist.
+          <h1 className="text-xl font-heading font-bold tracking-tight">
+            Booking Not Found
+          </h1>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            The booking parameters are invalid, or this transaction ID does not
+            exist.
           </p>
-          <Button asChild variant="outline" className="rounded-xl">
-            <Link href="/profile/user/booking">Back to My Bookings</Link>
+          <Button
+            asChild
+            variant="outline"
+            className="rounded-xl w-full text-xs font-semibold"
+          >
+            <Link href="/profile/user/transactions">Back to My Bookings</Link>
           </Button>
         </div>
       </main>
@@ -151,269 +193,465 @@ const TransactionDetail = () => {
   }
 
   return (
-    <main className="flex-1 px-4 py-6 pb-10 md:px-8">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <button
-            onClick={() => router.push("/profile/user/booking")}
-            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
-          >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
-            Back to My Bookings
-          </button>
+    <main className="flex-1 px-4 py-6 pb-16 md:px-8 bg-slate-50/30">
+      <div className="mx-auto max-w-5xl space-y-6">
+        {/* Navigation Breadcrumb */}
+        <button
+          onClick={() => router.push("/profile/user/transactions")}
+          className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          Back to My Bookings
+        </button>
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-heading font-bold">Booking Details</h1>
-                <Badge className={`rounded-lg border px-3 py-1 text-xs font-semibold gap-1.5 ${statusConfig!.bgColor} ${statusConfig!.color}`}>
-                  <GrStatusInfo className="h-3.5 w-3.5" />
-                  {statusConfig!.label}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Booking ID:</span>
-                <button
-                  onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 font-mono text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
-                >
-                  {transactionId}
-                  {copying ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-                </button>
-              </div>
+        {/* Heading Header Row */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/60 pb-5">
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-xl font-heading font-bold tracking-tight sm:text-2xl md:text-3xl">
+                Booking Details
+              </h1>
+              <Badge
+                className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold gap-1.5 shadow-none tracking-wide ${statusConfig!.className}`}
+              >
+                <GrStatusInfo className="h-3 w-3" />
+                {statusConfig!.label}
+              </Badge>
             </div>
-            <div className="rounded-xl bg-primary/5 border border-primary/10 px-5 py-3 text-center">
-              <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-medium">Total Amount</p>
-              <p className="mt-0.5 text-3xl font-heading font-bold text-primary">
-                {formatCurrency(transaction.totalPrice)}
-              </p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="font-medium">Booking ID:</span>
+              <button
+                onClick={handleCopy}
+                className="inline-flex items-center gap-1.5 font-mono font-bold text-primary hover:opacity-80 transition-opacity bg-muted/60 px-2 py-0.5 rounded"
+              >
+                {transactionId.toUpperCase()}
+                {copying ? (
+                  <Check className="h-3 w-3 text-emerald-600" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+              </button>
             </div>
           </div>
+          <div className="rounded-xl bg-white border border-border px-5 py-3 sm:text-right shrink-0 self-start sm:self-auto min-w-[160px] shadow-xs">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
+              Total Amount
+            </p>
+            <p className="mt-0.5 text-xl sm:text-2xl font-heading font-bold text-slate-900">
+              {formatCurrency(transaction.totalPrice)}
+            </p>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-sm">
-                <div className="relative h-48 bg-muted">
-                  {transaction.room.property.propertyImages?.urlImages ? (
-                    <img
-                      src={transaction.room.property.propertyImages.urlImages}
-                      alt={transaction.room.property.propertyName}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <CalendarDays className="h-10 w-10 text-muted-foreground/30" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h2 className="font-heading font-bold text-xl">{transaction.room.property.propertyName}</h2>
-                    <p className="flex items-center gap-1.5 text-sm opacity-90 mt-1">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {transaction.room.property.city}, {transaction.room.property.address}
+        {/* Main Content Layout Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Column Left: Core Details */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Property Display Meta Card */}
+            <div className="rounded-2xl border border-border bg-white overflow-hidden shadow-xs">
+              <div className="relative h-44 sm:h-56 bg-muted">
+                {transaction.room.property.propertyImages?.[0]?.urlImages ? (
+                  <img
+                    src={transaction.room.property.propertyImages[0].urlImages}
+                    alt={transaction.room.property.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <CalendarDays className="h-8 w-8 text-muted-foreground/30" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950/85 via-slate-950/30 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4 text-white space-y-1">
+                  <h2 className="font-heading font-bold text-base sm:text-xl line-clamp-1 tracking-tight">
+                    {transaction.room.property.name}
+                  </h2>
+                  <p className="flex items-center gap-1.5 text-xs opacity-90 truncate font-medium">
+                    <MapPin className="h-3.5 w-3.5 shrink-0 text-white/80" />
+                    {transaction.room.property.city.name},{" "}
+                    {transaction.room.property.address}
+                  </p>
+                </div>
+              </div>
+              <div className="p-4 sm:p-5 bg-white border-t border-border/30">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+                      Room Type
+                    </p>
+                    <p className="mt-1 text-xs sm:text-sm font-bold text-slate-800 truncate">
+                      {transaction.room.name}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+                      Guests
+                    </p>
+                    <p className="mt-1 text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1">
+                      <Users className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span>
+                        {transaction.totalGuests} guest
+                        {transaction.totalGuests !== 1 ? "s" : ""}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+                      Duration
+                    </p>
+                    <p className="mt-1 text-xs sm:text-sm font-bold text-slate-800">
+                      {nights} night{nights !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+                      Booked on
+                    </p>
+                    <p className="mt-1 text-xs sm:text-sm font-bold text-slate-800">
+                      {transaction.createdAt
+                        ? formatDate(
+                            new Date(transaction.createdAt),
+                            "dd-MM-yyyy",
+                          )
+                        : "—"}
                     </p>
                   </div>
                 </div>
-                <div className="p-5">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">Room</p>
-                      <p className="mt-1 text-sm font-semibold">{transaction.room.roomName}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">Guests</p>
-                      <p className="mt-1 text-sm font-semibold flex items-center gap-1">
-                        <Users className="h-3.5 w-3.5 text-primary" />
-                        {transaction.totalGuests} guest{transaction.totalGuests !== 1 ? "s" : ""}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">Duration</p>
-                      <p className="mt-1 text-sm font-semibold">{nights} night{nights !== 1 ? "s" : ""}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">Booked on</p>
-                      <p className="mt-1 text-sm font-semibold">{transaction.createdAt ? formatDate(transaction.createdAt, "dd MMM yyyy") : "—"}</p>
-                    </div>
-                  </div>
-                </div>
               </div>
-              <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-                <h3 className="font-heading font-bold text-base mb-4 flex items-center gap-2">
-                  <CalendarDays className="h-5 w-5 text-primary" /> Trip Schedule
-                </h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="rounded-xl bg-muted/40 border border-border p-4">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">Check-in</p>
-                    <p className="mt-1 text-sm font-bold">{formatDate(transaction.checkIn, "dd MMM yyyy")}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">From 2:00 PM</p>
-                  </div>
-                  <div className="rounded-xl bg-muted/40 border border-border p-4">
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">Check-out</p>
-                    <p className="mt-1 text-sm font-bold">{formatDate(transaction.checkOut, "dd MMM yyyy")}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Before 12:00 PM</p>
-                  </div>
-                </div>
-              </div>
-              {paymentProof && (
-                <div className="rounded-2xl border-2 border-[hsl(var(--status-pending))]/30 bg-[hsl(var(--status-pending))]/5 p-6 shadow-sm">
-                  <div className="flex items-center gap-3 mb-5">
-                    <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--status-pending))]/10 flex items-center justify-center">
-                      <Upload className="h-6 w-6 text-[hsl(var(--status-pending))]" />
-                    </div>
-                    <div>
-                      <h3 className="font-heading font-bold text-lg">Upload Payment Proof</h3>
-                      <p className="text-xs text-muted-foreground">Transfer to the account below, then upload your receipt</p>
-                    </div>
-                  </div>
-                  <div className="p-4 bg-card rounded-2xl border border-border space-y-2.5 text-sm mb-5">
-                    <div className="flex justify-between"><span className="text-muted-foreground">Bank</span><span className="font-semibold">{BANK.name}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Account Number</span><span className="font-mono font-semibold">{BANK.number}</span></div>
-                    <div className="flex justify-between"><span className="text-muted-foreground">Account Holder</span><span className="font-semibold">{BANK.holder}</span></div>
-                    <Separator />
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Amount to Transfer</span>
-                      <span className="font-heading font-bold text-primary text-lg">
-                        {transaction.totalPrice.toLocaleString("id-ID", { style: "currency", currency: "IDR" })}
-                      </span>
-                    </div>
-                  </div>
-
-                  <input ref={fileInputRef} type="file" accept="image/*,.pdf" onChange={handleFileChange} className="hidden" />
-
-                  {!paymentProof ? (
-                    <button onClick={() => fileInputRef.current?.click()}
-                      className="w-full border-2 border-dashed border-border rounded-2xl p-8 text-center hover:border-primary/50 hover:bg-primary/5 transition-all group cursor-pointer"
-                    >
-                      <div className="w-14 h-14 mx-auto rounded-2xl bg-secondary flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
-                        <FileImage className="h-7 w-7 text-muted-foreground group-hover:text-primary transition-colors" />
-                      </div>
-                      <p className="font-semibold text-sm mb-1">Click to upload</p>
-                      <p className="text-xs text-muted-foreground">JPG, PNG, or PDF (max 5MB)</p>
-                    </button>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="relative rounded-2xl overflow-hidden border border-border bg-card">
-                        {isPreviewing
-                          ? <img src={isPreviewing} alt="Payment proof" className="w-full max-h-48 object-contain" />
-                          : (
-                            <div className="flex items-center gap-3 p-4">
-                              <FileImage className="h-8 w-8 text-primary" />
-                              <div>
-                                <p className="text-sm font-semibold">{paymentProof.name}</p>
-                                <p className="text-xs text-muted-foreground">{(paymentProof.size / 1024).toFixed(0)} KB</p>
-                              </div>
-                            </div>
-                          )
-                        }
-                        <button onClick={() => { setPaymentProof(null); setIsPreviewing(null); }}
-                          className="absolute top-3 right-3 w-8 h-8 bg-background/80 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-2 p-3 bg-[hsl(var(--status-confirmed))]/10 rounded-xl border border-[hsl(var(--status-confirmed))]/20">
-                        <CheckCircle className="h-4 w-4 text-[hsl(var(--status-confirmed))] shrink-0" />
-                        <span className="text-xs text-[hsl(var(--status-confirmed))] font-medium">File ready to upload</span>
-                      </div>
-                    </div>
-                  )}
-
-                  <Button variant="default" size="lg" className="w-full mt-5 rounded-2xl"
-                    onClick={handleSubmitPaymentProof} disabled={!paymentProof || isUploading}
-                  >
-                    {isUploading
-                      ? <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />Uploading...</span>
-                      : <span className="flex items-center gap-2"><Upload className="h-4 w-4" />Submit Payment Proof</span>
-                    }
-                  </Button>
-                </div>
-              )}
-              {alreadyUploadedProof && (
-                <div className="rounded-2xl border border-[hsl(var(--status-confirmed))]/30 bg-[hsl(var(--status-confirmed))]/5 p-5">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-6 w-6 text-[hsl(var(--status-confirmed))]" />
-                    <div>
-                      <p className="font-semibold text-sm">Payment proof submitted</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Your booking is being verified. This usually takes 1-2 hours.</p>
-                    </div>
-                  </div>
-                  {/* Show the uploaded image if available */}
-                  {transaction.paymentProof && (
-                    <img src={transaction.paymentProof} alt="Submitted proof" className="mt-4 w-full max-h-48 object-contain rounded-xl border border-border" />
-                  )}
-                </div>
-              )}
             </div>
 
-            <div className="space-y-5">
-              <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-                <h3 className="font-heading font-bold text-base mb-4 flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-primary" /> Payment
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Method</span>
-                    <span className="font-semibold">{transaction.paymentMethod?.replace("_", " ") ?? "—"}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Date</span>
-                    <span className="font-semibold">{transaction.paymentDate ? formatDate(transaction.paymentDate, "dd MMM yyyy") : "—"}</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total</span>
-                    <span className="font-heading font-bold text-primary text-lg">
-                      {formatCurrency(transaction.totalPrice)}
-                    </span>
-                  </div>
+            {/* Trip Schedule Dates Layout */}
+            <div className="rounded-2xl border border-border bg-white p-4 sm:p-5 shadow-xs">
+              <h3 className="font-heading font-bold text-sm sm:text-base mb-4 flex items-center gap-2 text-slate-900">
+                <CalendarDays className="h-4 sm:h-5 w-4 sm:w-5 text-primary" />{" "}
+                Trip Schedule
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div className="rounded-xl bg-slate-50 border border-border/50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+                    Check-in
+                  </p>
+                  <p className="mt-0.5 text-sm sm:text-base font-bold text-slate-900">
+                    {formatDate(new Date(transaction.checkIn), "dd-MM-yyyy")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
+                    From 2:00 PM
+                  </p>
                 </div>
-              </div>
-              <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-2.5">
-                <h3 className="font-heading font-bold text-base mb-3">Quick Actions</h3>
-
-                <Button asChild variant="outline" size="sm" className="w-full rounded-xl gap-1.5 justify-start">
-                  <Link href={`/properties/${transaction.room.property.propertyId}`}>
-                    <Eye className="h-3.5 w-3.5" /> View Property
-                  </Link>
-                </Button>
-
-                {transaction.status === TransactionStatus.CONFIRMED &&
-                  new Date(transaction.checkOut) < new Date() && (
-                    <Button asChild size="sm" className="w-full rounded-xl gap-1.5 justify-start bg-primary hover:bg-primary/90">
-                      <Link href={`/profile/user/transaction/${transactionId}/create-review`}>
-                        <Star className="h-3.5 w-3.5" /> Leave Review
-                      </Link>
-                    </Button>
-                  )
-                }
-
-                {canCancel && (
-                  <Button variant="outline" size="sm" disabled={isCancelling}
-                    onClick={() => cancelBooking(transactionId)}
-                    className="w-full rounded-xl gap-1.5 justify-start text-[hsl(var(--status-cancelled))] hover:text-[hsl(var(--status-cancelled))] hover:bg-[hsl(var(--status-cancelled))]/5"
-                  >
-                    <XCircle className="h-3.5 w-3.5" />
-                    {isCancelling ? "Cancelling…" : "Cancel Booking"}
-                  </Button>
-                )}
-              </div>
-
-              {needUploadPaymentProof && (
-                <UploadBox file={paymentProof} onFileSelect={setPaymentProof} />
-              )}
-
-              <div className="rounded-2xl border border-border bg-muted/30 p-4">
-                <div className="flex items-center gap-2.5">
-                  <Shield className="h-4 w-4 text-primary shrink-0" />
-                  <p className="text-xs text-muted-foreground">
-                    Your booking is protected by Staynuit's Secure Booking Guarantee.
+                <div className="rounded-xl bg-slate-50 border border-border/50 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold">
+                    Check-out
+                  </p>
+                  <p className="mt-0.5 text-sm sm:text-base font-bold text-slate-900">
+                    {formatDate(new Date(transaction.checkOut), "dd-MM-yyyy")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
+                    Before 12:00 PM
                   </p>
                 </div>
               </div>
             </div>
+
+            {/* Property Location Map Module */}
+            {transaction.room.property.latitude &&
+              transaction.room.property.longitude && (
+                <div className="rounded-2xl border border-border bg-white p-4 sm:p-5 shadow-xs space-y-3.5">
+                  <h3 className="font-heading font-bold text-sm sm:text-base flex items-center gap-2 text-slate-900">
+                    <MapPin className="h-4 sm:h-5 w-4 sm:w-5 text-primary" />{" "}
+                    Property Location
+                  </h3>
+                  <div className="relative rounded-xl overflow-hidden border border-border/70 z-0 shadow-inner">
+                    <InteractiveMap
+                      latitude={parseFloat(transaction.room.property.latitude)}
+                      longitude={parseFloat(
+                        transaction.room.property.longitude,
+                      )}
+                      onLocationChange={() => {}}
+                      height="240px"
+                      className="w-full h-full"
+                    />
+                  </div>
+                  <div className="flex items-start gap-2 bg-slate-50 p-3 rounded-xl border border-border/40 text-xs text-muted-foreground font-medium">
+                    <MapPin className="h-4 w-4 shrink-0 text-primary/70 mt-0.5" />
+                    <span>
+                      {transaction.room.property.address},{" "}
+                      {transaction.room.property.city.name}
+                    </span>
+                  </div>
+                </div>
+              )}
+          </div>
+
+          {/* Column Right: Billing & Actions Side Control */}
+          <div className="space-y-5">
+            {/* Upload Wire / Verification Interface Area - Positioned contextually over billing on desktop layout steps */}
+            {needUploadPaymentProof && (
+              <div className="rounded-2xl border border-[hsl(var(--status-pending))]/30 bg-white p-4 sm:p-5 shadow-xs space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[hsl(var(--status-pending))]/10 flex items-center justify-center shrink-0">
+                    <Upload className="h-4 w-4 text-[hsl(var(--status-pending))]" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-bold text-sm sm:text-base text-slate-950">
+                      Upload Payment
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground">
+                      Transfer exact funds to proceed.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3.5 bg-slate-50/80 rounded-xl border border-border/70 space-y-2.5 text-xs shadow-none">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground font-medium">
+                      Bank
+                    </span>
+                    <span className="font-bold text-slate-800">
+                      {BANK.name}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground font-medium">
+                      Account No.
+                    </span>
+                    <span className="font-mono font-bold text-slate-900 bg-white px-1.5 py-0.5 border border-border rounded">
+                      {BANK.number}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground font-medium">
+                      Holder
+                    </span>
+                    <span className="font-semibold text-slate-800">
+                      {BANK.holder}
+                    </span>
+                  </div>
+                  <Separator className="bg-border/50" />
+                  <div className="flex justify-between items-center pt-0.5">
+                    <span className="text-muted-foreground font-semibold">
+                      Amount Due
+                    </span>
+                    <span className="font-heading font-bold text-primary text-base">
+                      {formatCurrency(transaction.totalPrice)}
+                    </span>
+                  </div>
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+
+                {!paymentProof ? (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full border border-dashed border-border hover:border-primary/40 hover:bg-slate-50 rounded-xl p-5 text-center transition-all group cursor-pointer"
+                  >
+                    <FileImage className="h-5 w-5 mx-auto text-muted-foreground/80 group-hover:text-primary transition-colors mb-2" />
+                    <p className="font-bold text-xs mb-0.5 text-slate-700">
+                      Attach Receipt Image
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      JPG, PNG, GIF up to 5MB
+                    </p>
+                  </button>
+                ) : (
+                  <div className="space-y-2.5">
+                    <div className="relative rounded-xl overflow-hidden border border-border bg-slate-50 p-1.5">
+                      {isPreviewing ? (
+                        <img
+                          src={isPreviewing}
+                          alt="Preview receipt snapshot"
+                          className="w-full max-h-40 object-contain rounded-lg"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2.5 p-2 bg-white rounded-lg border">
+                          <FileImage className="h-6 w-6 text-primary shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold truncate text-slate-800">
+                              {paymentProof.name}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {(paymentProof.size / 1024).toFixed(0)} KB
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => {
+                          setPaymentProof(null);
+                          setIsPreviewing(null);
+                        }}
+                        className="absolute top-2.5 right-2.5 w-6 h-6 bg-slate-900/90 shadow text-white rounded-md flex items-center justify-center hover:bg-destructive transition-colors"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1.5 p-2 bg-emerald-50 rounded-lg border border-emerald-100 text-[11px] text-emerald-800 font-medium">
+                      <CheckCircle className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <span>File attached and ready</span>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="w-full rounded-xl text-xs font-semibold h-9 shadow-sm"
+                  onClick={handleSubmitPaymentProof}
+                  disabled={!paymentProof || isUploading}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-3.5 w-3.5" />
+                      Submit Verification
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {/* Proof Snapshot Existing State Block */}
+            {alreadyUploadedProof && (
+              <div className="rounded-2xl border border-[hsl(var(--status-confirmed))]/20 bg-white p-4 sm:p-5 shadow-xs space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle className="h-4 w-4 text-[hsl(var(--status-confirmed))] mt-0.5 shrink-0" />
+                  <div className="space-y-0.5">
+                    <p className="font-bold text-xs text-slate-900">
+                      Payment Proof Submitted
+                    </p>
+                    <p className="text-[11px] text-muted-foreground leading-normal">
+                      Verification parameters are processing and typically take
+                      1-2 hours.
+                    </p>
+                  </div>
+                </div>
+                {transaction.paymentProof && (
+                  <div className="rounded-xl overflow-hidden border border-border/80 p-1 bg-slate-50">
+                    <img
+                      src={transaction.paymentProof}
+                      alt="Submitted confirmation receipt"
+                      className="w-full max-h-40 object-contain rounded-lg"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Financial Invoice Breakdown Component */}
+            <div className="rounded-2xl border border-border bg-white p-4 sm:p-5 shadow-xs">
+              <h3 className="font-heading font-bold text-sm mb-4 flex items-center gap-2 text-slate-900">
+                <CreditCard className="h-4 w-4 text-primary" /> Payment Summary
+              </h3>
+              <div className="space-y-3 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground font-medium">
+                    Method
+                  </span>
+                  <span className="font-bold text-slate-800 capitalize">
+                    {transaction.paymentMethod
+                      ?.replace("_", " ")
+                      .toLowerCase() ?? "—"}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground font-medium">
+                    Payment Date
+                  </span>
+                  <span className="font-bold text-slate-800">
+                    {transaction.paymentDate
+                      ? formatDate(
+                          new Date(transaction.paymentDate),
+                          "dd-MM-yyyy",
+                        )
+                      : "—"}
+                  </span>
+                </div>
+                <Separator className="bg-border/60" />
+                <div className="flex justify-between items-center pt-0.5">
+                  <span className="text-muted-foreground font-semibold">
+                    Total Price
+                  </span>
+                  <span className="font-heading font-bold text-primary text-base">
+                    {formatCurrency(transaction.totalPrice)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* User Quick Actions Panel */}
+            <div className="rounded-2xl border border-border bg-white p-4 sm:p-5 shadow-xs space-y-2">
+              <h3 className="font-heading font-bold text-[10px] uppercase tracking-wider text-muted-foreground/90 mb-1">
+                Quick Actions
+              </h3>
+
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="w-full rounded-xl gap-2 justify-start h-9 text-xs font-semibold"
+              >
+                <Link href={`/properties/${transaction.room.property.id}`}>
+                  <Eye className="h-3.5 w-3.5 text-muted-foreground" /> View
+                  Property Listing
+                </Link>
+              </Button>
+
+              {transaction.status === TransactionStatus.CONFIRMED &&
+                new Date(transaction.checkOut) < new Date() && (
+                  <Button
+                    asChild
+                    size="sm"
+                    className="w-full rounded-xl gap-2 justify-start h-9 text-xs font-semibold bg-primary hover:bg-primary/90 text-white"
+                  >
+                    <Link
+                      href={`/profile/user/transaction/${transactionId}/create-review`}
+                    >
+                      <Star className="h-3.5 w-3.5" /> Leave Property Review
+                    </Link>
+                  </Button>
+                )}
+
+              {canCancel && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isCancelling}
+                  onClick={() => cancelBooking(transactionId)}
+                  className="w-full rounded-xl gap-2 justify-start h-9 text-xs font-semibold text-[hsl(var(--status-cancelled))] border-[hsl(var(--status-cancelled))]/20 hover:text-[hsl(var(--status-cancelled))] hover:bg-[hsl(var(--status-cancelled))]/5 bg-white"
+                >
+                  {isCancelling ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5" />
+                  )}
+                  {isCancelling ? "Cancelling..." : "Cancel Booking"}
+                </Button>
+              )}
+            </div>
+
+            {/* Secure Guarantee Tag Footer line */}
+            <div className="rounded-2xl border border-border/60 bg-slate-50 p-4">
+              <div className="flex items-start gap-2.5">
+                <Shield className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
+                  Your transaction parameters are safe. Secure processing is
+                  encrypted under Staynuit's End-to-End Protection Guarantee.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
+    </main>
   );
 };
 

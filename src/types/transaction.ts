@@ -1,6 +1,54 @@
-import { Calendar, CheckCircle, Clock, ClockAlert, XCircle } from "lucide-react";
+import {
+  Calendar,
+  CheckCircle,
+  Clock,
+  ClockAlert,
+  XCircle,
+} from "lucide-react";
 import { PageableResponse } from "./pagination";
 import { PaymentMethodEnum } from "@/lib/validator/profile.transaction.schema";
+
+export interface Transactions {
+  id: string;
+  checkIn: string;
+  checkOut: string;
+  status: TransactionStatus;
+  totalPrice: number;
+  totalGuests: number;
+  paymentDate: string;
+  paymentMethod?: TransactionPaymentMethod;
+  paymentProof?: string;
+  createdAt?: string;
+  room: {
+    name: string;
+    id: number;
+    property: {
+      id: number;
+      name: string;
+      address: string;
+      latitude: string;
+      longitude: string
+      city: {
+        name: string;
+      };
+      propertyImages: {
+        urlImages: string;
+      }[];
+    };
+  };
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatar: string;
+  };
+  review?: {
+    ratings?: number;
+    comments?: string;
+    images?: string;
+    reply?: string;
+  };
+}
 
 export enum TransactionStatus {
   ALL = "ALL",
@@ -14,12 +62,12 @@ export enum TransactionStatus {
 }
 
 export type TransactionStatusFilter =
-  | "all"
-  | "upcoming"
-  | "ongoing"
-  | "completed"
-  | "cancelled"
-  | "pending";
+  | "ALL"
+  | "PENDING"
+  | "UPCOMING"
+  | "ONGOING"
+  | "COMPLETED"
+  | "CANCELLED";
 
 export interface TransactionSummary {
   totalTransactions: number;
@@ -29,7 +77,7 @@ export interface TransactionSummary {
   activeGuests: number;
   completed: number;
   cancelled: number;
-};
+}
 
 export const Transaction_Steps = [
   "details",
@@ -43,46 +91,8 @@ export type TransactionSteps = (typeof Transaction_Steps)[number];
 
 export type TransactionPaymentMethod = PaymentMethodEnum;
 
-export interface Transactions {
-  transactionId: string;
-  room: {
-    roomName: string;
-    roomId: number;
-    property: {
-      propertyId: number;
-      propertyName: string;
-      address: string;
-      city: string;
-      propertyImages: {
-        urlImages: string;
-      };
-    };
-  };
-  user: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    avatar: string;
-  };
-  review?: {
-    rating?: number;
-    comment?: string;
-    reply?: string;
-  };
-  checkIn: string;
-  checkOut: string;
-  status: TransactionStatus;
-  totalPrice: number;
-  totalGuests: number;
-  paymentDate: string;
-  paymentMethod?: TransactionPaymentMethod;
-  paymentProof?: string;
-  createdAt?: string;
-}
-
-export type DisplayStatus = "PENDING" | "UPCOMING" | "ONGOING" | "COMPLETED" | "CANCELLED";
 export interface TransactionManagementPayload extends Transactions {
-    displayStatus: DisplayStatus;
+  displayStatus: Partial<TransactionStatusFilter>;
 }
 
 export interface CreateTransactionPayload {
@@ -117,7 +127,7 @@ export type MonthlyRevenue = {
   revenue: number;
 };
 
-export type CalendarTransaction= {
+export type CalendarTransaction = {
   id: string;
   checkIn: string;
   checkOut: string;
@@ -132,42 +142,50 @@ export type CalendarTransaction= {
     firstName: string | null;
     lastName: string | null;
   };
-}
+};
 
-export const transactionStatusConfig: Record<
-  DisplayStatus,
-  { label: string; color: string; bgColor: string; icon: typeof Clock }
+export const transactionStatusConfig: Partial<
+  Record<
+    TransactionStatusFilter,
+    { label: string; className: string; icon: typeof Clock }
+  >
 > = {
   PENDING: {
     label: "Pending",
-    color: "text-amber-800",
-    bgColor: "bg-amber-100",
+    className: "text-amber-800 bg-amber-100",
     icon: ClockAlert,
   },
   UPCOMING: {
     label: "Upcoming",
-    color: "text-blue-800",
-    bgColor: "bg-blue-100",
+    className: "text-blue-800 bg-blue-100",
     icon: Calendar,
   },
   ONGOING: {
     label: "Ongoing",
-    color: "text-emerald-800",
-    bgColor: "bg-emerald-100",
+    className: "text-emerald-800 bg-emerald-100",
     icon: Clock,
   },
   COMPLETED: {
     label: "Completed",
-    color: "text-zinc-800",
-    bgColor: "bg-zinc-100",
+    className: "text-zinc-800 bg-zinc-100",
     icon: CheckCircle,
   },
   CANCELLED: {
     label: "Cancelled",
-    color: "text-red-900",
-    bgColor: "text-red-100",
+    className: "text-red-900 bg-red-100",
     icon: XCircle,
   },
+};
+
+export const statusToDisplayStatus: Record<TransactionStatus, TransactionStatusFilter> = {
+  [TransactionStatus.WAITING_FOR_PAYMENT]:      "PENDING",
+  [TransactionStatus.WAITING_FOR_CONFIRMATION]: "PENDING",
+  [TransactionStatus.CONFIRMED]:                "ONGOING",
+  [TransactionStatus.COMPLETED]:                "COMPLETED",
+  [TransactionStatus.CANCELLED_BY_USER]:        "CANCELLED",
+  [TransactionStatus.CANCELLED_BY_TENANT]:      "CANCELLED",
+  [TransactionStatus.EXPIRED]:                  "CANCELLED",
+  [TransactionStatus.ALL]:                      "ALL",
 };
 
 export interface TenantTransactionResponse extends PageableResponse<TransactionManagementPayload> {
@@ -177,14 +195,3 @@ export interface TenantTransactionResponse extends PageableResponse<TransactionM
 export interface UserTransactionResponse extends PageableResponse<Transactions> {
   summary?: TransactionSummary;
 }
-
-export const filterToDisplayStatus: Record<Exclude<TransactionStatusFilter, "all">,
-  DisplayStatus
-> = {
-  pending:   "PENDING",
-  upcoming:  "UPCOMING",
-  ongoing:   "ONGOING",
-  completed: "COMPLETED",
-  cancelled: "CANCELLED",
-};
-

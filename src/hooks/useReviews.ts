@@ -120,7 +120,7 @@ export const useReplyReview = () => {
   return useMutation({
     mutationFn: async (payload: z.infer<typeof createReplyReviewSchema>) => {
       const { data } = await axiosInstance.patch(
-        "/review/tenant/reply",
+        "reviews/tenant/reply",
         payload,
         {
           headers: {

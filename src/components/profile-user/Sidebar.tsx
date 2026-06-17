@@ -42,7 +42,7 @@ export default function Sidebar({
     },
     {
       label: "My Bookings",
-      href: "/profile/user/bookings",
+      href: "/profile/user/transactions",
       icon: <FaCalendarCheck size={20} />,
     },
     {

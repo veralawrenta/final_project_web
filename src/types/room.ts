@@ -1,72 +1,5 @@
+import { NewImageData } from "./images";
 import { PropertyStatus, PropertyType } from "./property";
-
-export interface Room {
-  id: number;
-  propertyId: number;
-  property?: {
-    name: string;
-    propertyStatus?: PropertyStatus;
-    propertyType?: PropertyType
-    category: {
-      id: number;
-      name: string;
-      createdAt: string;
-      updatedAt: string;
-      deletedAt: string | null;
-    };
-    city: {
-      id: number;
-      name: string;
-      createdAt: string;
-      updatedAt: string;
-      deletedAt: string | null;
-    };
-  };
-  name: string;
-  totalGuests: number;
-  totalUnits: number;
-  basePrice: number;
-  description: string;
-  roomImages: RoomImage[];
-  seasonalRates?: {
-    id: number;
-    name: string;
-    fixedPrice: string;
-    startDate: Date | string;
-    endDate: Date | string;
-  }[];
-  roomNonAvailability?: RoomNonAvailability[];
-  createdAt?: string;
-  updatedAt?: string;
-  deletedAt?: string | null;
-}
-
-//for roomcard property ID
-export interface RoomPropertyCard {
-  id: number;
-  name: string;
-  basePrice?: number;
-  totalGuests: number;
-  totalUnits: number;
-  roomImages: {
-    id: number;
-    urlImages: string;
-    isCover?: boolean;
-  }[];
-  roomNonAvailability: {
-    id: number;
-    startDate: Date | string;
-    endDate: Date | string;
-    reason?: string;
-  }[];
-  seasonalRates: {
-    id: number;
-    name: string;
-    fixedPrice: number;
-    startDate: Date | string;
-    endDate: Date | string;
-  }[];
-}
 
 export interface RoomImage {
   id: number;
@@ -89,32 +22,64 @@ export interface RoomNonAvailability {
     };
   };
 }
-
+export interface Room {
+  id: number;
+  name: string;
+  totalGuests: number;
+  totalUnits: number;
+  basePrice: number;
+  description: string;
+  property?: {
+    id: number;
+    name: string;
+    propertyStatus?: PropertyStatus;
+    propertyType?: PropertyType;
+    category: {
+      id: number;
+      name: string;
+    };
+    city: {
+      id: number;
+      name: string;
+    };
+  };
+  roomImages: Array<{ id: number; urlImages: string; isCover?: boolean }>;
+  seasonalRates?: Array<{
+    id: number;
+    name: string;
+    startDate: Date;
+    endDate: Date;
+    fixedPrice: number;
+  }>;
+  roomNonAvailability?: Array<{
+    id: number;
+    reason: string;
+    startDate: Date;
+    endDate: Date;
+  }>;
+  createdAt?: string;
+  updatedAt?: string;
+}
 export interface RoomIdPublic {
   id: number;
   name: string;
-  basePrice: number;
-  totalUnits?: number;
   totalGuests: number;
+  description: string;
+  basePrice: number;
+  roomImages: RoomImage[];
   displayPrice: number;
-  description?: string;
   isAvailable: boolean;
-  roomImages: {
-    id?: number;
-    urlImages: string;
-    isCover: boolean;
-  }[];
-  seasonalRates?: {
-    id: number;
-    name: string;
-    fixedPrice: number;
-    startDate: Date | string;
-    endDate: Date | string;
-  }[];
-  roomNonAvailability?: {
-    id: number;
-    startDate: Date | string;
-    endDate: Date | string;
-    reason?: string;
-  }[];
+  price?: number;
+  useSeasonalRate: boolean;
+  transactions?: {
+    reviews?: {
+      ratings: number;
+      comments: string;
+    };
+  };
+}
+
+export interface PropertyRoom extends Room {
+  imageFiles: File[];
+  imagePreviews: NewImageData[];
 }

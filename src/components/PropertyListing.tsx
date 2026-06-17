@@ -12,15 +12,15 @@ import {
 import { useGetAllProperties, useSearchProperties } from "@/hooks/useProperty";
 import { cn } from "@/lib/utils";
 import { PropertyType } from "@/types/property";
-import { Building2, Home, Hotel, LayoutGrid, Palmtree, SlidersHorizontal, X } from "lucide-react";
-import { useState } from "react";
-import PropertyCardForm from "./property/PropertyCard";
+import { parse } from "date-fns";
+import { SlidersHorizontal, X } from "lucide-react";
 import {
   parseAsInteger,
   parseAsStringEnum,
   useQueryState,
 } from "nuqs";
-import { parse } from "date-fns";
+import { useState } from "react";
+import PropertyCardForm from "./property/PropertyCard";
 
 type PropertyTypeFilter = "all" | PropertyType;
 type SortBy = "name" | "price";
@@ -249,7 +249,7 @@ const PropertyListingComponent = () => {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   {data.data.map((property) => (
-                    <PropertyCardForm key={property.id} property={property} />
+                    <PropertyCardForm key={property.id} property={property} checkIn={checkIn} checkOut={checkOut} guests={guests.toString()}/>
                   ))}
                 </div>
 

@@ -25,7 +25,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { useDebounceValue } from "usehooks-ts";
-import { SortSelect } from "../SortSelect";
+import { SortSelect } from "../ui/SortSelect";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,11 +58,11 @@ const TransactionManagement = ({
   initialFilter?: string;
 }) => {
   const [activeStatus, setActiveStatus] = useState<TransactionStatusFilter>(
-    ["pending", "ongoing", "upcoming", "completed", "cancelled"].includes(
+    ["ALL", "PENDING", "ONGOING", "UPCOMING", "COMPLETED", "CANCELLED"].includes(
       initialFilter ?? "",
     )
       ? (initialFilter as TransactionStatusFilter)
-      : "all",
+      : "ALL",
   );
   const [viewMode, setViewMode] = useQueryState(
     "viewMode",
@@ -107,32 +107,32 @@ const TransactionManagement = ({
     count: number;
   }[] = [
     {
-      key: "all",
+      key: "ALL",
       label: "All Transactions",
       count: transactionData?.summary?.totalTransactions ?? 0,
     },
     {
-      key: "pending",
+      key: "PENDING",
       label: "Pending",
       count: transactionData?.summary?.pending ?? 0,
     },
     {
-      key: "ongoing",
+      key: "ONGOING",
       label: "Ongoing",
       count: transactionData?.summary?.activeGuests ?? 0,
     },
     {
-      key: "completed",
+      key: "COMPLETED",
       label: "Completed",
       count: transactionData?.summary?.completed ?? 0,
     },
     {
-      key: "cancelled",
+      key: "CANCELLED",
       label: "Cancelled",
       count: transactionData?.summary?.cancelled ?? 0,
     },
     {
-      key: "upcoming",
+      key: "UPCOMING",
       label: "Upcoming",
       count: transactionData?.summary?.upcoming ?? 0,
     },
@@ -150,7 +150,7 @@ const TransactionManagement = ({
     if (!cancelTarget) return;
     cancelTransaction.mutate(
       {
-        transactionId: cancelTarget.transactionId,
+        transactionId: cancelTarget.id,
         reason: cancelReason.trim(),
       },
       {
@@ -369,7 +369,7 @@ const TransactionManagement = ({
             size="sm"
             variant="outline"
             className="border-status-pending/50 text-status-pending hover:bg-status-pending/10 shrink-0"
-            onClick={() => setActiveStatus("pending")}
+            onClick={() => setActiveStatus("PENDING")}
           >
             Review Now
           </Button>
@@ -475,9 +475,9 @@ const TransactionManagement = ({
                   </span>{" "}
                   reservation for{" "}
                   <span className="font-semibold text-foreground">
-                    {cancelTarget.room.property.propertyName}
+                    {cancelTarget.room.property.name}
                   </span>{" "}
-                  ({cancelTarget.room.roomName}). The guest will be notified and
+                  ({cancelTarget.room.name}). The guest will be notified and
                   any payment will need to be refunded.
                 </>
               )}

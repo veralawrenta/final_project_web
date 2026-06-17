@@ -82,8 +82,8 @@ export default function UpdateMaintenanceBlockPage() {
       const room = allRooms.find((r) => r.id === blockData.room?.id);
       if (!room) return;
 
-      if (room.propertyId !== undefined) {
-        setSelectedPropertyId(String(room.propertyId));
+      if (room.property?.id !== undefined) {
+        setSelectedPropertyId(String(room.property?.id));
       }
       setSelectedRoomId(String(blockData.room?.id));
 
@@ -105,7 +105,7 @@ export default function UpdateMaintenanceBlockPage() {
   }, [blockData, allRooms, form]);
 
   const filteredRooms = selectedPropertyId
-    ? allRooms.filter((room) => room.propertyId === Number(selectedPropertyId))
+    ? allRooms.filter((room) => room.property?.id === Number(selectedPropertyId))
     : [];
 
   const selectedRoom = allRooms.find((r) => r.id === Number(selectedRoomId));

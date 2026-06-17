@@ -62,7 +62,7 @@ const CreateMaintenanceBlockForm = () => {
     },
   });
   const filteredRooms = selectedPropertyId
-    ? allRooms.filter((room) => room.propertyId === Number(selectedPropertyId))
+    ? allRooms.filter((room) => room.property?.id === Number(selectedPropertyId))
     : [];
 
   const watchedRoomId = form.watch("roomId");

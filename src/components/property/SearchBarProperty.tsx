@@ -12,15 +12,18 @@ import { DatePicker } from "../DatePicker";
 interface Props {
   propertyId: number;
   maxGuests?: number;
+  defaultCheckIn? : Date;
+  defaultCheckOut?: Date;
+  defaultGuests?: number;
 }
 
-export function PropertyDetailSearchBar({ propertyId, maxGuests = 10 }: Props) {
+export function PropertyDetailSearchBar({ propertyId, maxGuests = 10, defaultCheckIn, defaultCheckOut, defaultGuests }: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [checkIn, setCheckIn] = useState<Date>();
-  const [checkOut, setCheckOut] = useState<Date>();
-  const [guests, setGuests] = useState(1);
+  const [checkIn, setCheckIn] = useState<Date | undefined>(defaultCheckIn);
+  const [checkOut, setCheckOut] = useState<Date | undefined>(defaultCheckOut);
+  const [guests, setGuests] = useState(defaultGuests);
   const [openCheckIn, setOpenCheckIn] = useState(false);
   const [openCheckOut, setOpenCheckOut] = useState(false);
 
@@ -42,7 +45,7 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10 }: Props) {
     const params = new URLSearchParams({
       checkIn: format(checkIn, "dd-MM-yyyy"),
       checkOut: format(checkOut, "dd-MM-yyyy"),
-      guests: guests.toString(),
+      guests: String(guests ?? 1),
     });
 
     router.push(`${pathname}?${params.toString()}`);

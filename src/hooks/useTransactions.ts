@@ -5,10 +5,10 @@ import {
 } from "@/lib/validator/profile.transaction.schema";
 import { PaginationQueryParams } from "@/types/pagination";
 import {
+  statusToDisplayStatus,
   TransactionManagementPayload,
-  Transactions,
   TransactionStatus,
-  UserTransactionResponse
+  UserTransactionResponse,
 } from "@/types/transaction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -20,16 +20,15 @@ import z from "zod";
 interface TransactionQueryParams extends PaginationQueryParams {
   search?: string;
   propertyName?: string;
-  transactionId?: string;
+  id?: string;
   status?: TransactionStatus[];
 }
 
 interface TransactionResponse {
-  transactionId: string;
+  id: string;
   paymentUrl: string;
   status: TransactionStatus;
 }
-
 
 export const useGetAllUserTransaction = (queries?: TransactionQueryParams) => {
   const session = useSession();
@@ -60,11 +59,22 @@ export const useCreateTransaction = () => {
     mutationFn: async (
       values: CreateTransactionFormValues,
     ): Promise<TransactionResponse> => {
-      const { data } = await axiosInstance.post("transactions", values, {
-        headers: {
-          Authorization: `Bearer ${session.data?.user.accessToken}`,
+      console.log("🔑 Token:", session.data?.user.accessToken);
+      console.log("🔑 Session:", session.data);
+
+      console.log("🚀 Transaction payload:", JSON.stringify(values, null, 2));
+      const { data } = await axiosInstance.post(
+        "/transactions",
+        
+          values,
+          //checkIn: format(new Date(values.checkIn), "dd-MM-yyyy"),
+          //checkOut: format(new Date(values.checkOut), "dd-MM-yyyy"),
+        {
+          headers: {
+            Authorization: `Bearer ${session.data?.user.accessToken}`,
+          },
         },
-      });
+      );
       return data;
     },
     onSuccess: () => {
@@ -95,7 +105,10 @@ export const useGetTransactionIdByUser = (transactionId: string) => {
           },
         },
       );
-      return data;
+      return {
+        ...data,
+        displayStatus: statusToDisplayStatus[data.status],
+      } as TransactionManagementPayload;
     },
     enabled: !!session.data?.user.accessToken && !!transactionId,
     staleTime: 5 * 60 * 1000,
@@ -141,8 +154,7 @@ export const useUploadPaymentProof = () => {
   return useMutation({
     mutationFn: async (body: z.infer<typeof uploadPaymentProofSchema>) => {
       const form = new FormData();
-      form.append("transactionId", body.transactionId);
-      form.append("urlImage", body.paymentProof);
+      form.append("paymentProof", body.paymentProof);
 
       const { data } = await axiosInstance.post<{ paymentProof: string }>(
         `transactions/${body.transactionId}/payment-proof`,
@@ -172,6 +184,3 @@ export const useUploadPaymentProof = () => {
     },
   });
 };
-
-
-
