@@ -129,8 +129,8 @@ const PropertyReviewCard = ({ propertyId }: PropertyReviewCardProps) => {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {review.transaction.room?.name} ·{" "}
-                    {formatDate(review.transaction.checkIn, "dd MMM yyyy")} –{" "}
-                    {formatDate(review.transaction.checkOut, "dd MMM yyyy")}
+                    {formatDate(review.transaction.checkIn, "dd-MM-yyyy")} –{" "}
+                    {formatDate(review.transaction.checkOut, "dd-MM-yyyy")}
                   </p>
                 </div>
               </div>
@@ -149,7 +149,7 @@ const PropertyReviewCard = ({ propertyId }: PropertyReviewCardProps) => {
                   ))}
                 </div>
                 <Badge variant="outline" className="rounded-full">
-                  {formatDate(review.createdAt, "dd MMM yyyy")}
+                  {formatDate(review.createdAt, "dd-MM-yyyy")}
                 </Badge>
               </div>
             </div>

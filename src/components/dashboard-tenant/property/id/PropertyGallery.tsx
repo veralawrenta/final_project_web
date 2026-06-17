@@ -3,10 +3,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PropertyIdImages } from "@/types/property";
+import { PropertyImage } from "@/types/property";
 
 interface PropertyGalleryProps {
-  images: PropertyIdImages[];
+  images: PropertyImage[];
   propertyName: string;
 }
 

@@ -11,8 +11,8 @@ export const createTransactionSchema = z.object({
     roomId : z.number().min(1, "Room ID is required"),
     checkIn: z.string().min(1, "Check-in date is required"),
     checkOut: z.string().min(1, "Check-out date is required"),
-    totalGuests: z.number().min(1, "Total guests must be at least 1"),
     bookedUnits: z.number().min(1, "Booked units must be at least 1"),
+    totalGuests: z.number().min(1, "Total guest must at least 1"),
     paymentMethod: z.enum(PaymentMethodEnum)
 })
  .superRefine((data, ctx) => {
@@ -71,4 +71,4 @@ export const createTransactionSchema = z.object({
   
   export type CreateTransactionValues = z.infer<typeof createTransactionSchema>;
   export type CardDetailsFormValues = z.infer<typeof cardDetailsSchema>;
-  export type CreateTransactionFormValues = CreateTransactionValues & Partial<CardDetailsFormValues>;
+  export type CreateTransactionFormValues = CreateTransactionValues & Partial<CardDetailsFormValues> & {tokenId?: string};

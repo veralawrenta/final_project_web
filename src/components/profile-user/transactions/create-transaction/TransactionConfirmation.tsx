@@ -2,16 +2,16 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/lib/price/currency";
-import { PropertyInfo } from "@/types/property";
+import { PropertyRoomDetail } from "@/types/property";
 import { TransactionPaymentMethod } from "@/types/transaction";
 import { differenceInCalendarDays, format } from "date-fns";
 import { Check, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
 
 interface TransactionConfirmationProps {
-  property: PropertyInfo;
-  checkIn: string;
-  checkOut: string;
+  property: PropertyRoomDetail;
+  checkIn: string;   // "yyyy-MM-dd"
+  checkOut: string;  // "yyyy-MM-dd"
   totalGuests: number;
   bookedUnits: number;
   selectedPaymentMethod: TransactionPaymentMethod;
@@ -35,26 +35,22 @@ const TransactionConfirmation = ({
   confirmationNumber,
   basePrice,
 }: TransactionConfirmationProps) => {
+  // Both values are "yyyy-MM-dd" so new Date() parses them correctly
   const nights = differenceInCalendarDays(new Date(checkOut), new Date(checkIn));
   const subtotal = nights * Math.max(bookedUnits, 1) * basePrice;
   const serviceFee = Math.round(subtotal * 0.1);
   const taxes = Math.round(subtotal * 0.05);
   const total = subtotal + serviceFee + taxes;
 
-  const formatDate = (d: string) =>
-    format(new Date(d), "EEE, MMM d, yyyy");
-
   return (
     <div className="space-y-6">
-      {/* Success Banner */}
       <div className="bg-linear-to-br from-primary/5 via-card to-primary/5 rounded-3xl border border-primary/20 p-8 text-center">
         <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-5 animate-bounce">
           <Check className="h-10 w-10 text-primary" />
         </div>
         <h2 className="text-3xl font-bold mb-2">You're all set!</h2>
         <p className="text-muted-foreground max-w-md mx-auto">
-          Your reservation at{" "}
-          <strong>{property.name}</strong> has been{" "}
+          Your reservation at <strong>{property.name}</strong> has been{" "}
           {selectedPaymentMethod === "BANK_TRANSFER"
             ? "submitted for verification"
             : "confirmed"}
@@ -67,17 +63,13 @@ const TransactionConfirmation = ({
         )}
       </div>
 
-      {/* Confirmation Details */}
       <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm">
         <div className="p-6 bg-muted/30 border-b border-border">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
               Confirmation number
             </span>
-            <Badge
-              variant="outline"
-              className="font-mono text-sm px-3 py-1"
-            >
+            <Badge variant="outline" className="font-mono text-sm px-3 py-1">
               {confirmationNumber}
             </Badge>
           </div>
@@ -87,7 +79,10 @@ const TransactionConfirmation = ({
           {/* Property */}
           <div className="flex gap-4">
             <img
-              src={property.propertyImage.urlImage}
+              src={
+                property.propertyImages.find((img) => img.isCover)?.urlImages ??
+                property.propertyImages[0]?.urlImages
+              }
               alt={property.name}
               className="w-20 h-20 rounded-2xl object-cover shrink-0"
             />
@@ -102,15 +97,15 @@ const TransactionConfirmation = ({
 
           <Separator />
 
-          {/* Booking details grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground text-xs mb-1">Check-in</p>
-              <p className="font-semibold">{formatDate(checkIn)}</p>
+              {/* format() is safe because checkIn is "yyyy-MM-dd" */}
+              <p className="font-semibold">{format(new Date(checkIn), "dd MMM yyyy")}</p>
             </div>
             <div>
               <p className="text-muted-foreground text-xs mb-1">Check-out</p>
-              <p className="font-semibold">{formatDate(checkOut)}</p>
+              <p className="font-semibold">{format(new Date(checkOut), "dd MMM yyyy")}</p>
             </div>
             <div>
               <p className="text-muted-foreground text-xs mb-1">Guests</p>

@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import Script from "next/script";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -46,6 +47,7 @@ export default function RootLayout({
           </ReactQueryProvider>
           <Toaster position="top-right" richColors />
         </SessionProvider>
+        <Script src="https://js.xendit.co/v1/xendit.min.js" strategy="beforeInteractive"/>
       </body>
     </html>
   );

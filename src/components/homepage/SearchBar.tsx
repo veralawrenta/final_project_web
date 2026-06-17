@@ -203,7 +203,7 @@ export function SearchBar() {
               selected={checkInDate}
               onChange={handleCheckInChange}
               minDate={today}
-              dateFormat="dd MMM yyyy"
+              dateFormat="dd-MM-yyyy"
               placeholderText="Select date"
               className="w-full px-4 py-3 bg-secondary rounded-xl text-sm"
             />

@@ -25,12 +25,12 @@ import {
   UpdatePropertFormValues,
   updatePropertySchema,
 } from "@/lib/validator/dashboard.update-property.schema";
-import { RichTextEditor } from "@/components/RichTextEditor";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { useGetMasterAmenities } from "@/hooks/useAmenities";
 import { useGetCategories } from "@/hooks/useCategory";
 import { useGetCities } from "@/hooks/useGetCities";
 import { ExistingImageData, NewImageData } from "@/types/images";
-import { PropertyType, type TenantPropertyId } from "@/types/property";
+import { PropertyType, TenantProperty } from "@/types/property";
 import { InteractiveMap } from "./maps/InteractiveMaps";
 import EditImageUploader from "../image-uploader/EditImageUploader";
 
@@ -43,7 +43,7 @@ const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
   [PropertyType.HOTEL]: "Hotel",
 };
 interface EditPropertyFormProps {
-  property: TenantPropertyId;
+  property: TenantProperty;
   onSave: (
     propertyData: UpdatePropertFormValues,
     imagesToAdd: File[],
@@ -64,8 +64,8 @@ export function EditPropertyForm({
     name: property.name,
     description: property.description ?? "",
     address: property.address ?? "",
-    cityId: property.cityId,
-    categoryId: property.categoryId ?? undefined,
+    cityId: property.city.id,
+    categoryId: property.category?.id ?? undefined,
     latitude: property.latitude,
     longitude: property.longitude,
     propertyType: property.propertyType,
@@ -84,13 +84,13 @@ export function EditPropertyForm({
 
   useEffect(() => {
     setExistingImages(
-      property.images.map((img) => ({
+      property.propertyImages.map((img) => ({
         id: img.id,
         url: img.urlImages,
         isCover: img.isCover,
       }))
     );
-  }, [property.images]);
+  }, [property.propertyImages]);
 
   const selectedAmenities = form.watch("amenities") ?? [];
   const toggleAmenity = (code: string) => {

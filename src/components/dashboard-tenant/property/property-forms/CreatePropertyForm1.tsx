@@ -1,5 +1,5 @@
 "use client";
-import { RichTextEditor } from "@/components/RichTextEditor";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

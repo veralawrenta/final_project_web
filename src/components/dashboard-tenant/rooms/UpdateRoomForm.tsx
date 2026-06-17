@@ -42,7 +42,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import RoomImageUploader from "./RoomImageUploader";
-import { RichTextEditor } from "@/components/RichTextEditor";
+import { RichTextEditor } from "@/components/ui/RichTextEditor";
 const UpdateRoomForm = () => {
   const router = useRouter();
   const params = useParams();
@@ -78,7 +78,7 @@ const UpdateRoomForm = () => {
   useEffect(() => {
     if (roomData) {
       form.reset({
-        propertyId: roomData.propertyId,
+        propertyId: roomData.property?.id,
         name: roomData.name,
         description: roomData.description || "",
         basePrice: roomData.basePrice,

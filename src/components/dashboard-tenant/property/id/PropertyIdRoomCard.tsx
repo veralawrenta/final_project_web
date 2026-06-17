@@ -3,14 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/price/currency";
-import { RoomPropertyCard } from "@/types/room";
+import { Room } from "@/types/room";
 import { format } from "date-fns";
 import { AlertCircle, Home, TrendingUp, Users } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
 interface RoomCardProps {
-  room: RoomPropertyCard;
+  room: Room
 }
 
 export default function RoomCard({ room }: RoomCardProps) {
@@ -96,7 +96,7 @@ export default function RoomCard({ room }: RoomCardProps) {
                       Maintenance Blocks
                     </p>
                     <ul className="text-xs text-muted-foreground space-y-1 ml-6">
-                      {room.roomNonAvailability.map((block) => (
+                      {room.roomNonAvailability?.map((block) => (
                         <li key={block.id}>
                           {formatDate(block.startDate)} to{" "}
                           {formatDate(block.endDate)}
@@ -112,7 +112,7 @@ export default function RoomCard({ room }: RoomCardProps) {
                       Seasonal Rates
                     </p>
                     <ul className="text-xs text-muted-foreground space-y-1 ml-6">
-                      {room.seasonalRates.map((rate) => (
+                      {room.seasonalRates?.map((rate) => (
                         <li key={rate.id}>
                           <span className="font-medium text-foreground">
                             {rate.name}:

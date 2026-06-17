@@ -1,12 +1,12 @@
 "use client";
 
-import { MapPin, Home, Zap, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { TenantPropertyId } from "@/types/property";
+import { TenantProperties } from "@/types/property";
+import { AlertCircle, CheckCircle2, Home, MapPin, Zap } from "lucide-react";
 
 interface PropertyDetailsProps {
-  property: TenantPropertyId;
+  property: TenantProperties;
 }
 
 export default function PropertyDetails({ property }: PropertyDetailsProps) {
@@ -30,7 +30,7 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
 
             <div className="flex items-center gap-2 mt-1 text-muted-foreground">
               <Home className="w-4 h-4" />
-              <span>{property.city}</span>
+              <span>{property.city.name}</span>
             </div>
           </div>
 
@@ -87,7 +87,7 @@ export default function PropertyDetails({ property }: PropertyDetailsProps) {
         <Card className="p-6">
           <h3 className="font-semibold mb-3">Category</h3>
           <p className="text-2xl font-bold capitalize">
-            {property.category || "Not specified"}
+            {property.category?.name || "Not specified"}
           </p>
         </Card>
 

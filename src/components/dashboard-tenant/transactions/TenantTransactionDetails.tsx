@@ -1,18 +1,13 @@
 "use client";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TransactionStatus, transactionStatusConfig } from "@/types/transaction";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useCancelTransactionByTenant, useConfirmTransaction, useGetTransactionIdByTenant, useRejectTransaction } from "@/hooks/useTenantTransactions";
 import { formatCurrency } from "@/lib/price/currency";
+import { TransactionStatus, transactionStatusConfig } from "@/types/transaction";
+import { formatDate } from "date-fns";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -29,11 +24,6 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { formatDate } from "date-fns";
-import { useCancelTransactionByTenant, useConfirmTransaction, useGetTransactionIdByTenant, useRejectTransaction } from "@/hooks/useTenantTransactions";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 
 interface TenantTransactionDetailsProps {
   onBack: () => void;
@@ -76,7 +66,7 @@ const TenantTransactionDetails = ({
   }
 
   const status = transactionStatusConfig[t.displayStatus];
-  const StatusIcon = status.icon;
+  const StatusIcon = status?.icon;
 
   const nights = Math.ceil(
     (new Date(t.checkOut).getTime() - new Date(t.checkIn).getTime()) /
@@ -118,14 +108,14 @@ const TenantTransactionDetails = ({
         <div className="flex-1">
           <h1 className="text-2xl font-heading font-bold">Booking Details</h1>
           <p className="text-sm text-muted-foreground font-mono">
-            {t.transactionId}
+            {t.id}
           </p>
         </div>
         <div
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold ${status.bgColor} ${status.color}`}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold ${status?.className}`}
         >
-          <StatusIcon className="h-4 w-4" />
-          {status.label}
+          {StatusIcon && <StatusIcon className="h-4 w-4" />}
+          {status?.label}
         </div>
       </div>
 
@@ -135,15 +125,15 @@ const TenantTransactionDetails = ({
             <div className="aspect-video w-full bg-muted relative">
               <img
                 src={
-                  t.room.property.propertyImages?.urlImages ||
+                  t.room.property.propertyImages[0]?.urlImages ||
                   "/placeholder.svg"
                 }
-                alt={t.room.property.propertyName}
+                alt={t.room.property.name}
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-3 left-3 bg-background/90 backdrop-blur-sm rounded-xl px-3 py-1.5">
                 <p className="text-sm font-semibold">
-                  {t.room.property.propertyName}
+                  {t.room.property.name}
                 </p>
               </div>
             </div>
@@ -155,7 +145,7 @@ const TenantTransactionDetails = ({
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Room</p>
-                    <p className="text-sm font-semibold">{t.room.roomName}</p>
+                    <p className="text-sm font-semibold">{t.room.name}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -179,7 +169,7 @@ const TenantTransactionDetails = ({
                   <div>
                     <p className="text-xs text-muted-foreground">Check-in</p>
                     <p className="text-sm font-semibold">
-                      {formatDate(t.checkIn, "dd MMM yyyy")}
+                      {formatDate(t.checkIn, "dd-MM-yyyy")}
                     </p>
                   </div>
                 </div>
@@ -190,7 +180,7 @@ const TenantTransactionDetails = ({
                   <div>
                     <p className="text-xs text-muted-foreground">Check-out</p>
                     <p className="text-sm font-semibold">
-                      {formatDate(t.checkOut, "dd MMM yyyy")}
+                      {formatDate(t.checkOut, "dd-MM-yyyy")}
                     </p>
                   </div>
                 </div>
@@ -295,7 +285,7 @@ const TenantTransactionDetails = ({
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Payment Date</span>
                   <span className="font-medium">
-                    {formatDate(t.paymentDate, "dd MMM yyyy")}
+                    {formatDate(t.paymentDate, "dd-MM-yyyy")}
                   </span>
                 </div>
               )}
@@ -303,7 +293,7 @@ const TenantTransactionDetails = ({
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Booking Date</span>
                   <span className="font-medium">
-                    {formatDate(t.createdAt, "dd MMM yyyy")}
+                    {formatDate(t.createdAt, "dd-MM-yyyy")}
                   </span>
                 </div>
               )}
@@ -355,7 +345,7 @@ const TenantTransactionDetails = ({
           <DialogHeader>
             <DialogTitle>Cancel this booking?</DialogTitle>
             <DialogDescription>
-              Are you sure you want to cancel {`${t.user.firstName} ${t.user.lastName}`}'s reservation for {t.room.property.propertyName} ({t.room.roomName})?
+              Are you sure you want to cancel {`${t.user.firstName} ${t.user.lastName}`}'s reservation for {t.room.property.name} ({t.room.name})?
               The guest has not uploaded their payment proof yet. They will be notified with the reason below.
             </DialogDescription>
           </DialogHeader>
@@ -389,7 +379,7 @@ const TenantTransactionDetails = ({
           <DialogHeader>
             <DialogTitle>Reject this booking?</DialogTitle>
             <DialogDescription>
-              Reject {`${t.user.firstName} ${t.user.lastName}`}'s payment for {t.room.property.propertyName} ({t.room.roomName}).
+              Reject {`${t.user.firstName} ${t.user.lastName}`}'s payment for {t.room.property.name} ({t.room.name}).
               {isBankTransfer
                 ? ' If the payment proof is invalid or insufficient, provide a reason so the guest can resubmit or request a refund.'
                 : ' The Xendit payment will need to be refunded. The guest will be notified with the reason below.'}

@@ -1,39 +1,73 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import z from "zod";
-import { useCreateTransaction } from "@/hooks/useTransactions";
-import { cardDetailsSchema, PaymentMethodEnum } from "@/lib/validator/profile.transaction.schema";
-import { TransactionPaymentMethod, TransactionSteps } from "@/types/transaction";
-import { PropertyInfo } from "@/types/property";
-import { differenceInCalendarDays } from "date-fns";
-import StepsHeader from "@/components/profile-user/transactions/create-transaction/StepsHeader";
 import CreateTransactionStep from "@/components/profile-user/transactions/create-transaction/CreateTransactionStep";
 import PaymentMethodStep from "@/components/profile-user/transactions/create-transaction/PaymentMethodStep";
-import ProcessingPayment from "@/components/profile-user/transactions/create-transaction/ProcessingPayment";
-import UploadPaymentProof from "@/components/profile-user/transactions/upload-payment/UploadPaymentProof";
-import TransactionConfirmation from "@/components/profile-user/transactions/create-transaction/TransactionConfirmation";
 import PriceSummary from "@/components/profile-user/transactions/create-transaction/PriceSummary";
+import ProcessingPayment from "@/components/profile-user/transactions/create-transaction/ProcessingPayment";
+import StepsHeader from "@/components/profile-user/transactions/create-transaction/StepsHeader";
+import TransactionConfirmation from "@/components/profile-user/transactions/create-transaction/TransactionConfirmation";
+import UploadPaymentProof from "@/components/profile-user/transactions/upload-payment/UploadPaymentProof";
+import { useCreateTransaction } from "@/hooks/useTransactions";
+import {
+  cardDetailsSchema,
+  PaymentMethodEnum,
+} from "@/lib/validator/profile.transaction.schema";
+import { Property, PropertyRoomDetail } from "@/types/property";
+import {
+  TransactionPaymentMethod,
+  TransactionSteps,
+} from "@/types/transaction";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { differenceInCalendarDays, format, parse } from "date-fns";
+import { ArrowLeft } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import z from "zod";
 
 type CardFormValues = z.infer<typeof cardDetailsSchema>;
+declare const Xendit: any;
 
-interface CreateTransactionPageProps {
-  property: PropertyInfo;
+interface CreateTransactionComponentProps {
+  property: PropertyRoomDetail;
 }
 
-const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
+function toInputFormat(ddMMYYYY: string): string {
+  if (!ddMMYYYY) return "";
+  try {
+    return format(parse(ddMMYYYY, "dd-MM-yyyy", new Date()), "yyyy-MM-dd");
+  } catch {
+    return "";
+  }
+}
+
+function toApiFormat(yyyyMMDD: string): string {
+  if (!yyyyMMDD) return "";
+  try {
+    return format(new Date(yyyyMMDD), "dd-MM-yyyy");
+  } catch {
+    return "";
+  }
+}
+
+const CreateTransactionComponent = ({
+  property,
+}: CreateTransactionComponentProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const roomId = Number(searchParams.get("roomId"));
+const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms[0];
 
   const [step, setStep] = useState<TransactionSteps>("details");
 
-  const [checkIn, setCheckIn] = useState(searchParams.get("checkIn") ?? "");
-  const [checkOut, setCheckOut] = useState(searchParams.get("checkOut") ?? "");
+  // Normalise URL params ("dd-MM-yyyy") → "yyyy-MM-dd" for native date inputs
+  const [checkIn, setCheckIn] = useState(
+    toInputFormat(searchParams.get("checkIn") ?? ""),
+  );
+  const [checkOut, setCheckOut] = useState(
+    toInputFormat(searchParams.get("checkOut") ?? ""),
+  );
   const [totalGuests, setTotalGuests] = useState(
     Number(searchParams.get("guests")) || 1,
   );
@@ -51,13 +85,14 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
     [],
   );
 
+  // Safe night count — both values are now "yyyy-MM-dd" so new Date() works correctly
   const nights =
     checkIn && checkOut
       ? differenceInCalendarDays(new Date(checkOut), new Date(checkIn))
       : 0;
 
   const total = (() => {
-    const sub = nights * Math.max(bookedUnits, 1) * property.room.basePrice;
+    const sub = nights * Math.max(bookedUnits, 1) * (selectedRoom.basePrice ?? 0);
     return sub + Math.round(sub * 0.1) + Math.round(sub * 0.05);
   })();
 
@@ -93,14 +128,15 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
     setIsProcessing(true);
     try {
       const result = await createTransaction.mutateAsync({
-        roomId: property.room.id,
-        checkIn,
-        checkOut,
+        roomId: selectedRoom.id,
+        checkIn: toApiFormat(checkIn),
+        checkOut: toApiFormat(checkOut),
         bookedUnits,
         totalGuests,
         paymentMethod: selectedPaymentMethod,
       });
-      setTransactionId(result.transactionId);
+      console.log("transaction result:", result);
+      setTransactionId(result.id);
       if (selectedPaymentMethod === "BANK_TRANSFER") {
         setStep("upload_proof");
       } else {
@@ -117,26 +153,83 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
   const handleCreditCardContinue = handleCardSubmit(async (cardValues) => {
     setIsProcessing(true);
     try {
+      Xendit.setPublishableKey(process.env.NEXT_PUBLIC_XENDIT_PUBLIC_KEY!);
+      console.log(
+        "💳 Card number being sent to Xendit:",
+        cardValues.cardNumber.replace(/\s/g, ""),
+      );
+      const tokenId = await new Promise<string>((resolve, reject) => {
+        Xendit.card.createToken(
+          {
+            amount: total,
+            card_holder_first_name: cardValues.cardHolderFirstName,
+            card_holder_last_name: cardValues.cardHolderLastName,
+            card_number: cardValues.cardNumber.replace(/\s/g, ""),
+            card_exp_month: cardValues.expiredMonth,
+            card_exp_year: cardValues.expiredYear,
+            card_cvn: cardValues.cvv,
+            card_holder_email: cardValues.cardholderEmail,
+            is_multiple_use: false,
+            skip_three_d_secure: true,
+          },
+          (err: any, token: any) => {
+            console.log("Xendit token:", JSON.stringify(token, null, 2)); // ← add this
+            if (err) return reject(err);
+            if (token.status === "VERIFIED") {
+              return resolve(token.id);
+            }
+
+            if (token.status === "IN_REVIEW") {
+              // 3DS required — open the authentication URL in a popup
+              const authWindow = window.open(
+                token.payer_authentication_url,
+                "xendit-3ds",
+                "width=500,height=600",
+              );
+              const handler = (event: MessageEvent) => {
+                if (event.data?.status === "VERIFIED") {
+                  window.removeEventListener("message", handler);
+                  authWindow?.close();
+                  resolve(event.data.id ?? token.id);
+                } else if (event.data?.status === "FAILED") {
+                  window.removeEventListener("message", handler);
+                  authWindow?.close();
+                  reject(new Error("3DS authentication failed"));
+                }
+              };
+              window.addEventListener("message", handler);
+              return;
+            }
+
+            reject(
+              new Error(`Card verification failed - status: ${token.status}`),
+            );
+          },
+        );
+      });
+      console.log("checkIn:", checkIn, "checkOut:", checkOut);
+      console.log(
+        "toApiFormat result:",
+        toApiFormat(checkIn),
+        toApiFormat(checkOut),
+      );
       const result = await createTransaction.mutateAsync({
-        roomId: property.room.id,
-        checkIn,
-        checkOut,
+        roomId: selectedRoom.id,
+        checkIn: toApiFormat(checkIn),
+        checkOut: toApiFormat(checkOut),
         bookedUnits,
         totalGuests,
         paymentMethod: PaymentMethodEnum.CREDIT_CARD,
-        cardHolderFirstName: cardValues.cardHolderFirstName,
-        cardHolderLastName: cardValues.cardHolderLastName,
-        cardNumber: cardValues.cardNumber,
-        expiredMonth: cardValues.expiredMonth,
-        expiredYear: cardValues.expiredYear,
-        cvv: cardValues.cvv,
-        cardholderEmail: cardValues.cardholderEmail,
+        tokenId,
       });
-      setTransactionId(result.transactionId);
+      console.log("transaction result:", result);
+      console.log("✅ Card form valid, proceeding...");
+      setTransactionId(result.id);
       setPaymentUrl(result.paymentUrl ?? null);
       setStep("processing_payment" as TransactionSteps);
-    } catch {
-      // handled in mutation
+    } catch (err: any) {
+      console.error("❌ Full error:", err);
+      toast.error(err?.message || "Payment failed");
     } finally {
       setIsProcessing(false);
     }
@@ -145,7 +238,8 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
   const handleContinue = () => {
     if (step === "details") return handleDetailsContinue();
     if (step === "payment") {
-      if (selectedPaymentMethod === "CREDIT_CARD") return handleCreditCardContinue();
+      if (selectedPaymentMethod === "CREDIT_CARD")
+        return handleCreditCardContinue();
       return handleBankTransferOrShopeePay();
     }
   };
@@ -176,7 +270,9 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
           ) : (
             <div className="w-16" />
           )}
-          <h1 className="font-bold text-lg flex-1 text-center">{headerTitle}</h1>
+          <h1 className="font-bold text-lg flex-1 text-center">
+            {headerTitle}
+          </h1>
           <div className="w-16" />
         </div>
       </header>
@@ -192,6 +288,7 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
               {step === "details" && (
                 <CreateTransactionStep
                   property={property}
+                  selectedRoom={selectedRoom}
                   checkIn={checkIn}
                   checkOut={checkOut}
                   totalGuests={totalGuests}
@@ -234,7 +331,7 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
                   checkIn={checkIn}
                   checkOut={checkOut}
                   bookedUnits={bookedUnits}
-                  basePrice={property.room.basePrice}
+                  basePrice={selectedRoom.basePrice}
                   transactionId={transactionId}
                   onSubmitted={() => setStep("confirmation")}
                   onSkip={() => setStep("confirmation")}
@@ -250,7 +347,7 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
                   bookedUnits={bookedUnits}
                   selectedPaymentMethod={selectedPaymentMethod}
                   confirmationNumber={confirmationNumber}
-                  basePrice={property.room.basePrice}
+                  basePrice={selectedRoom.basePrice}
                 />
               )}
             </div>
@@ -259,6 +356,7 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
               <div className="lg:col-span-2">
                 <PriceSummary
                   property={property}
+                  selectedRoom={selectedRoom}
                   nights={nights}
                   bookedUnits={bookedUnits}
                   step={step}
@@ -275,4 +373,4 @@ const CreateTransactionPage = ({ property }: CreateTransactionPageProps) => {
   );
 };
 
-export default CreateTransactionPage;
+export default CreateTransactionComponent;

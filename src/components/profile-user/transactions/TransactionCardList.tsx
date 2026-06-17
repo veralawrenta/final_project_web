@@ -1,4 +1,5 @@
 "use client";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,32 +14,28 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCancelTransactionByUser } from "@/hooks/useTransactions";
 import { formatCurrency } from "@/lib/price/currency";
-import { DisplayStatus, TransactionManagementPayload, Transactions, TransactionStatus, transactionStatusConfig } from "@/types/transaction";
+import {
+  statusToDisplayStatus,
+  Transactions,
+  TransactionStatus,
+  transactionStatusConfig
+} from "@/types/transaction";
 import { formatDate } from "date-fns";
 import {
   AlertTriangle,
   CalendarDays,
   Clock,
   Eye,
-  Link,
+  Loader2,
   MapPin,
   Star,
   Upload,
   Users,
   XCircle,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
-const statusToDisplayStatus: Record<TransactionStatus, DisplayStatus> = {
-  [TransactionStatus.WAITING_FOR_PAYMENT]:      "PENDING",
-  [TransactionStatus.WAITING_FOR_CONFIRMATION]: "PENDING",
-  [TransactionStatus.CONFIRMED]:                "ONGOING",
-  [TransactionStatus.COMPLETED]:                "COMPLETED",
-  [TransactionStatus.CANCELLED_BY_USER]:        "CANCELLED",
-  [TransactionStatus.CANCELLED_BY_TENANT]:      "CANCELLED",
-  [TransactionStatus.EXPIRED]:                  "CANCELLED",
-  [TransactionStatus.ALL]:                      "PENDING",
-};
 interface TransactionCardProps {
   transaction: Transactions;
 }
@@ -56,12 +53,14 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
 
   const StatusIcon = statusConfig.icon;
   const image =
-    transaction.room.property.propertyImages?.urlImages ||
+    transaction.room.property.propertyImages?.[0]?.urlImages ||
     "/placeholder-image.png";
 
   const canCancel =
     transaction.status === TransactionStatus.WAITING_FOR_PAYMENT &&
-    !transaction.paymentDate;
+    !transaction.paymentDate &&
+    !isCancelled;
+
   const isCompleted =
     transaction.status === TransactionStatus.COMPLETED &&
     new Date(transaction.checkOut) < new Date();
@@ -69,139 +68,158 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
   const { mutate: cancelTransaction, isPending: isCancelling } =
     useCancelTransactionByUser();
 
-  const handleCancelBooking = async () => {
-    cancelTransaction(transaction.transactionId);
-    setShowCancelDialog(false);
-    setIsCancelled(true);
+  const handleCancelBooking = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent accidental dual submissions
+    cancelTransaction(transaction.id, {
+      onSuccess: () => {
+        setShowCancelDialog(false);
+        setIsCancelled(true);
+      },
+    });
   };
 
   return (
     <div>
-      <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5">
+      <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:shadow-md">
         <div className="flex flex-col lg:flex-row">
-          {/* Image */}
-          <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-secondary lg:h-auto lg:w-56 xl:w-64 shrink-0">
+          {/* Image Banner */}
+          <div className="relative h-48 sm:h-56 w-full overflow-hidden bg-secondary lg:h-auto lg:w-60 xl:w-72 shrink-0">
             <img
               src={image}
-              alt={transaction.room.property.propertyName}
-              className="h-full w-full object-cover"
+              alt={transaction.room.property.name}
+              className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
             />
             <Badge
-              className={`absolute left-3 top-3 rounded-lg border px-2.5 py-1 text-xs font-semibold gap-1 ${statusConfig.color} ${statusConfig.bgColor}`}
+              className={`absolute left-3 top-3 rounded-lg border px-2.5 py-1 text-xs font-semibold gap-1.5 shadow-sm backdrop-blur-md ${statusConfig.className} `}
             >
-              <StatusIcon className="h-3 w-3" />
+              <StatusIcon className="h-3.5 w-3.5" />
               {statusConfig.label}
             </Badge>
           </div>
 
-          {/* Content */}
-          <div className="flex flex-1 flex-col p-4 sm:p-5">
-            {/* Title row */}
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-              <div className="space-y-1.5 min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Link
-                    to={`/my-bookings/${transaction.transactionId}`}
-                    className="text-base sm:text-lg font-heading font-bold hover:text-primary transition-colors truncate"
-                  >
-                    {transaction.room.property.propertyName}
-                  </Link>
-                  <Link to={`/my-bookings/${transaction.transactionId}`}>
-                    <Badge
-                      variant="outline"
-                      className="rounded-lg font-mono text-[11px] px-2 py-0.5 hover:bg-primary/10 hover:border-primary/30 transition-colors cursor-pointer shrink-0"
+          {/* Content Body */}
+          <div className="flex flex-1 flex-col p-4 sm:p-6 justify-between">
+            <div>
+              {/* Title row */}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="space-y-1.5 min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href={`/profile/user/transactions/${transaction.id}`}
+                      className="text-base sm:text-xl font-heading font-bold hover:text-primary transition-colors line-clamp-1"
                     >
-                      {transaction.transactionId.toUpperCase()}
+                      {transaction.room.property.name}
+                    </Link>
+                    <Link href={`/my-bookings/${transaction.id}`}>
+                      <Badge
+                        variant="outline"
+                        className="rounded-lg font-mono text-[10px] px-2 py-0.5 hover:bg-primary/10 hover:border-primary/30 transition-colors cursor-pointer shrink-0"
+                      >
+                        {transaction.id.toUpperCase()}
+                      </Badge>
+                    </Link>
+                  </div>
+                  <p className="flex items-start gap-1.5 text-xs sm:text-sm text-muted-foreground max-w-full">
+                    <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5 text-muted-foreground/70" />
+                    <span className="line-clamp-2 wrap-break-words">
+                      {transaction.room.property.address},{" "}
+                      {transaction.room.property.city.name}
+                    </span>
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    <Badge
+                      variant="secondary"
+                      className="rounded-md px-2 py-0.5 text-xs font-medium"
+                    >
+                      {transaction.room.name}
                     </Badge>
-                  </Link>
+                  </div>
                 </div>
-                <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5 shrink-0" />
-                  {transaction.room.property.address},{" "}
-                  {transaction.room.property.city}
-                </p>
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  <Badge
-                    variant="secondary"
-                    className="rounded-lg px-2.5 py-1 text-xs"
-                  >
-                    {transaction.room.roomName}
-                  </Badge>
+
+                {/* Pricing Widget */}
+                <div className="rounded-xl bg-primary/3 border border-primary/10 px-4 py-2 sm:text-right shrink-0 min-w-[140px] self-start sm:self-auto">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-medium">
+                    Total Paid
+                  </p>
+                  <p className="mt-0.5 text-lg sm:text-xl font-heading font-bold text-primary">
+                    {formatCurrency(transaction.totalPrice)}
+                  </p>
                 </div>
               </div>
 
-              {/* Price */}
-              <div className="rounded-xl bg-primary/5 border border-primary/10 px-4 py-2.5 sm:py-3 xl:min-w-36 text-right xl:text-left shrink-0">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-medium">
-                  Total
-                </p>
-                <p className="mt-0.5 text-xl sm:text-2xl font-heading font-bold text-primary">
-                  {formatCurrency(transaction.totalPrice)}
-                </p>
+              {/* Information Meta Grid */}
+              <div className="mt-5 grid gap-3 rounded-xl border border-border/60 bg-muted/20 p-3 sm:p-4 grid-cols-2 md:grid-cols-3">
+                <div className="col-span-1">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">
+                    Check-in
+                  </p>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                    <CalendarDays className="h-4 w-4 text-primary shrink-0" />
+                    {formatDate(transaction.checkIn, "dd-MM-yyyy")}
+                  </p>
+                </div>
+                <div className="col-span-1">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">
+                    Check-out
+                  </p>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                    <CalendarDays className="h-4 w-4 text-primary shrink-0" />
+                    {formatDate(transaction.checkOut, "dd-MM-yyyy")}
+                  </p>
+                </div>
+                <div className="col-span-2 md:col-span-1 border-t md:border-t-0 md:border-l border-border/80 pt-2.5 md:pt-0 md:pl-4">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">
+                    Guests
+                  </p>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
+                    <Users className="h-4 w-4 text-primary shrink-0" />
+                    {transaction.totalGuests} guest
+                    {transaction.totalGuests > 1 ? "s" : ""}
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Date grid */}
-            <div className="mt-4 grid gap-3 rounded-xl border border-border bg-muted/30 p-3 sm:p-3.5 grid-cols-1 sm:grid-cols-3">
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">
-                  Check-in
-                </p>
-                <p className="mt-0.5 flex items-center gap-1.5 text-sm font-medium">
-                  <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
-                  {formatDate(transaction.checkIn, "dd MMM yyyy")}
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">
-                  Check-out
-                </p>
-                <p className="mt-0.5 flex items-center gap-1.5 text-sm font-medium">
-                  <CalendarDays className="h-3.5 w-3.5 text-primary shrink-0" />
-                  {formatDate(transaction.checkOut, "dd MMM yyyy")}
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium">
-                  Guests
-                </p>
-                <p className="mt-0.5 flex items-center gap-1.5 text-sm font-medium">
-                  <Users className="h-3.5 w-3.5 text-primary shrink-0" />
-                  {transaction.totalGuests} guest
-                  {transaction.totalGuests > 1 ? "s" : ""}
-                </p>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            {/* Actions Panel */}
+            <div className="mt-5 flex flex-col gap-3 border-t border-border/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                {isCompleted && transaction.review?.comment && (
-                  <span className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--status-pending))]/10 px-2.5 py-1 text-xs font-medium">
-                    <Star className="h-3.5 w-3.5 fill-[hsl(var(--status-pending))] text-[hsl(var(--status-pending))]" />
-                    Rated {transaction.review?.rating}/5
+                {isCompleted && transaction.review?.comments && (
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--status-pending))]/10 px-2.5 py-1 text-xs font-semibold text-[hsl(var(--status-pending))]">
+                    <Star className="h-3.5 w-3.5 fill-current" />
+                    Rated {transaction.review?.ratings}/5
                   </span>
                 )}
-                {canCancel && (
-                  <span className="inline-flex items-center gap-1 rounded-lg bg-[hsl(var(--status-cancelled))]/10 px-2.5 py-1 text-xs font-medium text-[hsl(var(--status-cancelled))]">
+                {isCancelled && (
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-[hsl(var(--status-cancelled))]/10 px-2.5 py-1 text-xs font-semibold text-[hsl(var(--status-cancelled))]">
                     <XCircle className="h-3.5 w-3.5" />
                     Cancelled
                   </span>
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              {/* Action Buttons list */}
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                 <Button
                   asChild
                   variant="outline"
                   size="sm"
-                  className="rounded-xl gap-1.5"
+                  className="rounded-xl gap-1.5 text-xs h-9 flex-1 sm:flex-initial"
                 >
-                  <Link
-                    to={`/profile/user/transaction/${transaction.transactionId}`}
-                  >
+                  <Link href={`/profile/user/transactions/${transaction.id}`}>
                     <Eye className="h-3.5 w-3.5" />
-                    View details
+                    Details
+                  </Link>
+                </Button>
+
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl gap-1.5 text-xs h-9 flex-1 sm:flex-initial"
+                >
+                  <Link href={`/properties/${transaction.room.property.id}`}>
+                    <Eye className="h-3.5 w-3.5" />
+                    Property
                   </Link>
                 </Button>
 
@@ -210,10 +228,10 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
                     <Button
                       asChild
                       size="sm"
-                      className="rounded-xl gap-1.5 bg-[hsl(var(--status-pending))] hover:bg-[hsl(var(--status-pending))]/90 text-white"
+                      className="rounded-xl gap-1.5 text-xs h-9 bg-[hsl(var(--status-pending))] hover:bg-[hsl(var(--status-pending))]/90 text-white flex-1 sm:flex-initial"
                     >
                       <Link
-                        to={`/profile/user/transaction/${transaction.transactionId}/upload-proof`}
+                        href={`/profile/user/transaction/${transaction.id}/upload-proof`}
                       >
                         <Upload className="h-3.5 w-3.5" />
                         Upload proof
@@ -221,29 +239,13 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
                     </Button>
                   )}
 
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="rounded-xl gap-1.5"
-                >
-                  <Link
-                    to={`/property/${transaction.room.property.propertyName}`}
-                  >
-                    <Eye className="h-3.5 w-3.5" />
-                    View property
-                  </Link>
-                </Button>
-
-                {isCompleted && !transaction.review?.comment && (
+                {isCompleted && !transaction.review?.comments && (
                   <Button
                     asChild
                     size="sm"
-                    className="rounded-xl gap-1.5 bg-primary hover:bg-primary/90"
+                    className="rounded-xl gap-1.5 text-xs h-9 bg-primary hover:bg-primary/90 flex-1 sm:flex-initial"
                   >
-                    <Link
-                      to={`/profile/user/review/${transaction.transactionId}`}
-                    >
+                    <Link href={`/profile/user/review/${transaction.id}`}>
                       <Star className="h-3.5 w-3.5" />
                       Submit review
                     </Link>
@@ -254,10 +256,15 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-xl gap-1.5 text-[hsl(var(--status-cancelled))] hover:text-[hsl(var(--status-cancelled))] hover:bg-[hsl(var(--status-cancelled))]/5"
+                    disabled={isCancelling}
+                    className="rounded-xl gap-1.5 text-xs h-9 text-[hsl(var(--status-cancelled))] border-[hsl(var(--status-cancelled))]/30 hover:text-[hsl(var(--status-cancelled))] hover:bg-[hsl(var(--status-cancelled))]/5 flex-1 sm:flex-initial"
                     onClick={() => setShowCancelDialog(true)}
                   >
-                    <XCircle className="h-3.5 w-3.5" />
+                    {isCancelling ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <XCircle className="h-3.5 w-3.5" />
+                    )}
                     Cancel booking
                   </Button>
                 )}
@@ -268,35 +275,45 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
       </article>
 
       {/* Cancel Confirmation Dialog */}
-      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <AlertDialogContent className="rounded-2xl max-w-md">
+      <AlertDialog
+        open={showCancelDialog}
+        onOpenChange={isCancelling ? undefined : setShowCancelDialog}
+      >
+        <AlertDialogContent className="rounded-2xl max-w-md mx-4">
           <AlertDialogHeader>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-2xl bg-[hsl(var(--status-cancelled))]/10 flex items-center justify-center shrink-0">
-                <AlertTriangle className="h-6 w-6 text-[hsl(var(--status-cancelled))]" />
+              <div className="w-11 h-11 rounded-xl bg-[hsl(var(--status-cancelled))]/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-5 w-5 text-[hsl(var(--status-cancelled))]" />
               </div>
-              <AlertDialogTitle className="text-lg">
+              <AlertDialogTitle className="text-lg font-heading font-bold">
                 Cancel this booking?
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-sm">
+            <AlertDialogDescription className="text-sm leading-relaxed">
               Are you sure you want to cancel your reservation at{" "}
-              <span className="font-semibold text-foreground">
-                {transaction.room.property.propertyName}
+              <span className="font-semibold text-foreground text-inline">
+                {transaction.room.property.name}
               </span>{" "}
-              ({transaction.room.roomName})? This action cannot be undone. A refund will
-              be processed according to the cancellation policy.
+              ({transaction.room.name})? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">
+          <AlertDialogFooter className="mt-2 gap-2 sm:gap-0">
+            <AlertDialogCancel className="rounded-xl" disabled={isCancelling}>
               Keep Booking
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleCancelBooking}
-              className="rounded-xl bg-[hsl(var(--status-cancelled))] text-white hover:bg-[hsl(var(--status-cancelled))]/90"
+              disabled={isCancelling}
+              className="rounded-xl bg-[hsl(var(--status-cancelled))] text-white hover:bg-[hsl(var(--status-cancelled))]/90 min-w-[120px]"
             >
-              Yes, Cancel Booking
+              {isCancelling ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Cancelling...
+                </>
+              ) : (
+                "Yes, Cancel Booking"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

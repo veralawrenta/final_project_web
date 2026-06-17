@@ -4,10 +4,9 @@ import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import {
   CalendarResponse,
   Property,
-  PropertyDetail,
+  PropertyRoomDetail,
   PropertyType,
-  TenantProperty,
-  TenantPropertyId,
+  TenantProperties,
 } from "@/types/property";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -30,10 +29,12 @@ interface SearchPropertiesParams extends PropertiesQueryParams {
 
 export const useSearchProperties = (
   queries: SearchPropertiesParams,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) => {
   return useQuery({
-    queryKey: ["properties", queries?.search ?? "",
+    queryKey: [
+      "properties",
+      queries?.search ?? "",
       queries.cityId,
       queries.checkIn ? format(queries.checkIn, "dd-MM-yyyy") : "",
       queries.checkOut ? format(queries.checkOut, "dd-MM-yyyy") : "",
@@ -51,7 +52,7 @@ export const useSearchProperties = (
       };
       const { data } = await axiosInstance.get<PageableResponse<Property>>(
         "/properties/search",
-        {params}
+        { params },
       );
       return data;
     },
@@ -61,10 +62,13 @@ export const useSearchProperties = (
 
 export const useGetAllProperties = (
   queries?: PropertiesQueryParams,
-  options?: { enabled?: boolean }
+  options?: { enabled?: boolean },
 ) => {
   return useQuery({
-    queryKey: ["properties", "public", queries?.search ?? "",
+    queryKey: [
+      "properties",
+      "public",
+      queries?.search ?? "",
       queries?.page ?? 1,
       queries?.sortBy ?? "name",
       queries?.sortOrder ?? "asc",
@@ -73,12 +77,12 @@ export const useGetAllProperties = (
     queryFn: async () => {
       const { data } = await axiosInstance.get<PageableResponse<Property>>(
         "/properties/public",
-        {params: queries}
+        { params: queries },
       );
       return data;
     },
-    staleTime: 10 * 60 * 1000, //ten mins
-    enabled: options?.enabled !== false, // Enable by default, can be overridden
+    staleTime: 10 * 60 * 1000, 
+    enabled: options?.enabled !== false, 
   });
 };
 
@@ -87,7 +91,7 @@ export const useGetPropertyWithAvailability = (
   checkIn: Date,
   checkOut: Date,
   totalGuests: number,
-  enabled: boolean = true
+  enabled: boolean = true,
 ) => {
   return useQuery({
     queryKey: [
@@ -101,7 +105,7 @@ export const useGetPropertyWithAvailability = (
       },
     ],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<PropertyDetail>(
+      const { data } = await axiosInstance.get<PropertyRoomDetail>(
         `/properties/${propertyId}/availability`,
         {
           params: {
@@ -109,7 +113,7 @@ export const useGetPropertyWithAvailability = (
             checkOut: format(checkOut, "dd-MM-yyyy"),
             totalGuests,
           },
-        }
+        },
       );
       return data;
     },
@@ -121,7 +125,7 @@ export const useGetPropertyWithAvailability = (
 export const useGetMonthCalendarSearch = (
   propertyId: number,
   startDate?: Date,
-  enabled: boolean = true
+  enabled: boolean = true,
 ) => {
   return useQuery({
     queryKey: [
@@ -134,8 +138,10 @@ export const useGetMonthCalendarSearch = (
       const { data } = await axiosInstance.get<CalendarResponse>(
         `/properties/${propertyId}/calendar-prices`,
         {
-          params: startDate ? { startDate: format(startDate, "dd-MM-yyyy") } : {},
-        }
+          params: startDate
+            ? { startDate: format(startDate, "dd-MM-yyyy") }
+            : {},
+        },
       );
       return data;
     },
@@ -159,7 +165,7 @@ export const useGetTenantProperties = (queries?: PropertiesQueryParams) => {
     ],
     queryFn: async () => {
       const { data } = await axiosInstance.get<
-        PageableResponse<TenantProperty>
+        PageableResponse<TenantProperties>
       >("/properties", {
         params: queries,
         headers: {
@@ -179,13 +185,13 @@ export const useGetTenantPropertyId = (propertyId: number) => {
   return useQuery({
     queryKey: ["tenant-property-id", propertyId],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<TenantPropertyId>(
+      const { data } = await axiosInstance.get<TenantProperties>(
         `/properties/${propertyId}`,
         {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -232,7 +238,7 @@ export const usePublishProperty = () => {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return response.data;
     },
@@ -244,7 +250,7 @@ export const usePublishProperty = () => {
     },
     onError: (error: any) => {
       toast.error(
-        error.response?.data?.message || "Failed to publish property"
+        error.response?.data?.message || "Failed to publish property",
       );
     },
   });
@@ -264,7 +270,7 @@ export const useUpdateProperty = (propertyId: number) => {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,
           },
-        }
+        },
       );
       return data;
     },
@@ -306,10 +312,21 @@ export const useDeleteProperty = () => {
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
         error.response?.data.message ||
-          "Failed to delete property. Please check if there are active bookings."
+          "Failed to delete property. Please check if there are active bookings.",
       );
     },
   });
 };
 
-
+export const useGetPropertyId = (propertyId: number) => {
+  return useQuery({
+    queryKey: ["property-id", propertyId],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get<PropertyRoomDetail>(
+        `/properties/public/${propertyId}`,
+      );
+      return data;
+    },
+    enabled: !!propertyId && !isNaN(propertyId),
+  });
+};

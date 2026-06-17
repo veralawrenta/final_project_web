@@ -1,6 +1,6 @@
 'use client'
 import PropertyDetails from '@/components/dashboard-tenant/property/id/PropertyIdDetails'
-import PropertyGallery from '@/components/dashboard-tenant/property/id/PropertyIdGallery'
+import PropertyGallery from '@/components/dashboard-tenant/property/id/PropertyGallery'
 import RoomCard from '@/components/dashboard-tenant/property/id/PropertyIdRoomCard'
 import { useGetTenantPropertyId } from '@/hooks/useProperty'
 import { useParams } from 'next/navigation'
@@ -50,7 +50,7 @@ export default function PropertyPage() {
       <div className="max-w-5xl mx-auto px-4 space-y-12">
         <section>
           <PropertyGallery 
-            images={property.images || []} 
+            images={property.propertyImages} 
             propertyName={property.name} 
           />
         </section>

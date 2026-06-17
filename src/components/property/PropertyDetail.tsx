@@ -4,24 +4,27 @@ import Navbar from "@/components/Navbar";
 import { PropertyDetailSearchBar } from "@/components/property/SearchBarProperty";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { useGetPropertyWithAvailability } from "@/hooks/useProperty";
+import { formatCurrency } from "@/lib/price/currency";
+import { RoomIdPublic } from "@/types/room";
+import { differenceInCalendarDays, format, parse } from "date-fns";
+import { MapPin } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PropertyAmenities } from "./amenities/PropertyAmenities";
 import RoomCard from "./property-detail/RoomCard";
-import { useGetPropertyWithAvailability } from "@/hooks/useProperty";
-import { RoomIdPublic } from "@/types/room";
 import RoomPricePreview from "./property-detail/RoomPricePreview";
-import { differenceInCalendarDays, format, parse } from "date-fns";
 import PropertyReviewCard from "./PropertyReviewCard";
 
 const mapRoomToCard = (room: any): RoomIdPublic => ({
   id: room.id,
   name: room.name,
   basePrice: room.basePrice,
+  description: room.description,
   displayPrice: room.displayPrice,
   totalGuests: room.totalGuests,
   isAvailable: room.isAvailable,
+  useSeasonalRate: room.useSeasonalRate,
   roomImages: room.roomImages.map((img: any) => ({
     urlImages: img.urlImages,
     isCover: img.isCover,
@@ -119,9 +122,10 @@ export default function PropertyDetail() {
       checkIn: format(checkIn, "dd-MM-yyyy"),
       checkOut: format(checkOut, "dd-MM-yyyy"),
       guests: String(guests),
+      roomId: String(selectedRoom.id),
     });
     router.push(
-      `/property/${propertyId}/rooms/${selectedRoom.id}/transaction?${qs.toString()}`,
+      `/properties/${propertyId}/rooms/${selectedRoom.id}/transaction?${qs.toString()}`,
     );
   };
 
@@ -132,10 +136,7 @@ export default function PropertyDetail() {
         <button
           onClick={() => router.back()}
           className="flex items-center gap-2 text-sm font-medium"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </button>
+        ></button>
       </div>
 
       <main className="container mx-auto pb-20 md:pb-12 mt-16">
@@ -143,6 +144,9 @@ export default function PropertyDetail() {
           <PropertyDetailSearchBar
             propertyId={propertyId}
             maxGuests={Math.max(...rooms.map((r) => r.totalGuests), 10)}
+            defaultCheckIn={checkIn}
+            defaultCheckOut={checkOut}
+            defaultGuests={guests}
           />
         </div>
         <div className="relative mt-6 px-4 md:px-0">
@@ -169,8 +173,8 @@ export default function PropertyDetail() {
           )}
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mt-6 px-4 md:px-0">
-          <div className="md:col-span-2 space-y-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-6 px-4 md:px-0">
+          <div className="md:col-span-1 lg:col-span-2 space-y-6">
             <div>
               <span className="inline-block px-3 py-1 bg-secondary rounded-full text-sm mb-2 font-semibold">
                 {property.propertyType}
@@ -212,17 +216,39 @@ export default function PropertyDetail() {
               <PropertyReviewCard propertyId={propertyId} />
             </div>
           </div>
-          <RoomPricePreview
-            room={selectedRoom}
-            nights={nights}
-            checkIn={checkIn}
-            checkOut={checkOut}
-            guests={guests}
-            displayPrice={displayPrice}
-            onContinue={handleContinue}
-          />
+          <div className="hidden md:block">
+            <RoomPricePreview
+              room={selectedRoom}
+              nights={nights}
+              checkIn={checkIn}
+              checkOut={checkOut}
+              guests={guests}
+              displayPrice={displayPrice}
+              onContinue={handleContinue}
+            />
+          </div>
         </div>
       </main>
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background border-t shadow-lg px-4 py-3 flex items-center justify-between">
+        <div>
+          <p className="text-xs text-muted-foreground">
+            {nights} night{nights !== 1 ? "s" : ""}
+          </p>
+          <p className="text-lg font-bold">
+            {formatCurrency(displayPrice * nights)}
+          </p>
+          {selectedRoom && (
+            <p className="text-xs text-muted-foreground">{selectedRoom.name}</p>
+          )}
+        </div>
+        <Button
+          onClick={handleContinue}
+          disabled={!selectedRoom}
+          className="px-6"
+        >
+          Reserve
+        </Button>
+      </div>
     </div>
   );
 }
