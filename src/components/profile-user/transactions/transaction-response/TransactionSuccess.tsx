@@ -5,17 +5,17 @@ import { Separator } from "@/components/ui/separator";
 import { useGetTransactionIdByUser } from "@/hooks/useTransactions";
 import { formatCurrency } from "@/lib/price/currency";
 import { PaymentMethodEnum } from "@/lib/validator/profile.transaction.schema";
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
 import {
-    ArrowRight,
-    Calendar,
-    Check,
-    Clock,
-    CreditCard,
-    FileText,
-    Home,
-    MapPin,
-    Users,
+  ArrowRight,
+  Calendar,
+  Check,
+  Clock,
+  CreditCard,
+  FileText,
+  Home,
+  MapPin,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -168,14 +168,14 @@ const TransactionSuccess = () => {
                   <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Check-in
                   </p>
-                  <p className="text-sm font-semibold">{transaction?.checkIn ? formatDate(transaction?.checkIn, "dd-MM-yyyy"): "-"}</p>
+                  <p className="text-sm font-semibold">{transaction?.checkIn ? format(transaction?.checkIn, "dd-MM-yyyy"): "-"}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-medium flex items-center gap-1">
                     <Calendar className="h-3 w-3" /> Check-out
                   </p>
                   <p className="text-sm font-semibold">
-                    {transaction?.checkOut ? formatDate(transaction?.checkOut, "dd-MM-yyyy") : "-"}
+                    {transaction?.checkOut ? format(transaction?.checkOut, "dd-MM-yyyy") : "-"}
                   </p>
                 </div>
                 <div className="space-y-1">

@@ -1,5 +1,6 @@
 "use client";
 import PaginationSection from "@/components/PaginationSection";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,8 +12,9 @@ import {
 } from "@/components/ui/select";
 import { useGetAllUserReviews } from "@/hooks/useReviews";
 import { SortBy, SortOrder } from "@/types/pagination";
-import { formatDate } from "date-fns";
-import { Badge, Link, MessageSquare, Search, Star } from "lucide-react";
+import { format } from "date-fns";
+import {  MessageSquare, Search, Star } from "lucide-react";
+import Link from "next/link";
 import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
 import { useTransition } from "react";
 import { useDebounceValue } from "usehooks-ts";
@@ -211,7 +213,7 @@ const MyReviews = () => {
  
                           {checkIn && checkOut && (
                             <p className="mt-0.5 text-xs text-muted-foreground">
-                              Stayed {formatDate(checkIn, "dd-MM-yyyy")} — {formatDate(checkOut, "dd-MM-yyyy")}
+                              Stayed {format(checkIn, "dd-MM-yyyy")} — {format(checkOut, "dd-MM-yyyy")}
                             </p>
                           )}
  
@@ -252,7 +254,7 @@ const MyReviews = () => {
                           )}
                           {review.transaction?.room?.property?.name && (
                             <Button asChild variant="outline" size="sm" className="rounded-xl">
-                              <Link href={`/property/${review.transaction.room.property.name}`}>View Property</Link>
+                              <Link href={`/property/${review.transaction.room.property.id}`}>View Property</Link>
                             </Button>
                           )}
                         </div>

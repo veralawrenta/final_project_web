@@ -24,7 +24,7 @@ export const useGetAllTenantTransactions = (
         "transactions/tenant",
         {
           params: {...queries,
-            status: queries?.status?.toUpperCase(),
+            status: queries?.status === "ALL" ? undefined : queries?.status?.toUpperCase(),
           },
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,

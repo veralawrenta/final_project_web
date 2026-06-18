@@ -32,12 +32,6 @@ const typeLabels: Record<string, string> = {
   HOUSE: "House",
 };
 
-const formatDate = (date: string | Date): string => {
-  const parsed = typeof date === "string" ? parseISO(date) : date;
-  if (!isValid(parsed)) return "-";
-  return format(parsed, "MMM d, yyyy");
-};
-
 const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
   const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -241,7 +235,7 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-1">
-                      {formatDate(rate.startDate)} — {formatDate(rate.endDate)}
+                      {format(rate.startDate, "dd-MM-yyyy")} — {format(rate.endDate, "dd-MM-yyyy")}
                     </p>
                   </div>
                 ))}
@@ -267,8 +261,8 @@ const RoomDetailsTenant = ({ room }: TenantRoomDetailsProps) => {
                   >
                     <p className="font-medium">{block.reason}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatDate(block.startDate)} —{" "}
-                      {formatDate(block.endDate)}
+                      {format(block.startDate, "dd-MM-yyyy")} —{" "}
+                      {format(block.endDate, "dd-MM-yyyy")}
                     </p>
                   </div>
                 ))}

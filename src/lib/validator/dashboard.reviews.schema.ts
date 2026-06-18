@@ -1,11 +1,12 @@
 import { TransactionStatus } from "@/types/transaction";
 import z from "zod";
 import { ACCEPTED_IMAGE_TYPES, MAX_FILE_SIZE } from "./dashboard.images.schema";
+import { format } from "date-fns";
 
 export const createReviewSchema = z
   .object({
     transactionId: z.string().min(1, "Transaction id is required"),
-    checkOut: z.date(),
+    checkOut: z.string(),
     status: z.enum(TransactionStatus),
     ratings: z.number().min(1, "Rating is required"),
     comments: z.string().min(1, "Comment is required"),
@@ -28,7 +29,7 @@ export const createReviewSchema = z
       return;
     }
     if (!data.checkOut) return;
-    const today = new Date();
+    const today = format(new Date(), "dd-MM-yyyy");
     if (data.checkOut >= today) {
       ctx.addIssue({
         path: ["checkOut"],

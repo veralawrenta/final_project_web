@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/price/currency";
 import { Room } from "@/types/room";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { AlertCircle, Home, TrendingUp, Users } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -26,11 +26,6 @@ export default function RoomCard({ room }: RoomCardProps) {
 
   const toggleDetails = () => {
     setIsExpanded(!isExpanded);
-  };
-
-  const formatDate = (date: Date | string) => {
-    const dateObj = typeof date === "string" ? new Date(date) : date;
-    return format(dateObj, "dd-MM-yyyy");
   };
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -98,8 +93,8 @@ export default function RoomCard({ room }: RoomCardProps) {
                     <ul className="text-xs text-muted-foreground space-y-1 ml-6">
                       {room.roomNonAvailability?.map((block) => (
                         <li key={block.id}>
-                          {formatDate(block.startDate)} to{" "}
-                          {formatDate(block.endDate)}
+                          {format(block.startDate, "dd-MM-yyyy")} to{" "}
+                          {format(block.endDate, "dd-MM-yyyy")}
                         </li>
                       ))}
                     </ul>
@@ -119,8 +114,8 @@ export default function RoomCard({ room }: RoomCardProps) {
                           </span>{" "}
                           {formatCurrency(rate.fixedPrice)}
                           {" ("}
-                          {formatDate(rate.startDate)} to{" "}
-                          {formatDate(rate.endDate)}
+                          {format(rate.startDate, "dd-MM-yyyy")} to{" "}
+                          {format(rate.endDate, "dd-MM-yyyy")}
                           {")"}
                         </li>
                       ))}

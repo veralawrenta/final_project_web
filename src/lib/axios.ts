@@ -18,10 +18,7 @@ axiosInstance.interceptors.response.use(
       const role = session?.user?.role;
 
       toast.error("Session expired. Please login again.")
-
-      const loginUrl =
-        role === Role.TENANT ? "/auth/login/tenant" : "/auth/login/user";
-      await signOut({ callbackUrl: loginUrl });
+      await signOut({ callbackUrl: "/" });
     };
     return Promise.reject(error);
   },

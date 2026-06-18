@@ -10,7 +10,7 @@ import { RoomIdPublic } from "@/types/room";
 import { differenceInCalendarDays, format, parse } from "date-fns";
 import { MapPin } from "lucide-react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PropertyAmenities } from "./amenities/PropertyAmenities";
 import RoomCard from "./property-detail/RoomCard";
 import RoomPricePreview from "./property-detail/RoomPricePreview";
@@ -67,7 +67,7 @@ export default function PropertyDetail() {
     Boolean(propertyId),
   );
 
-  const rooms: RoomIdPublic[] = property?.rooms.map(mapRoomToCard) ?? [];
+  const rooms: RoomIdPublic[] = useMemo(() => property?.rooms.map(mapRoomToCard) ?? [], [property]);
 
   useEffect(() => {
     if (property && !selectedRoom) {
@@ -76,7 +76,7 @@ export default function PropertyDetail() {
         setSelectedRoom(firstAvailable);
       }
     }
-  }, [property]);
+  }, [property?.id]);
 
   if (isLoading) {
     return (

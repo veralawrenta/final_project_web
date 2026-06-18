@@ -1,4 +1,4 @@
-import { Property, PropertyRoomDetail } from "@/types/property";
+import { PropertyRoomDetail } from "@/types/property";
 import { RoomIdPublic } from "@/types/room";
 import { format } from "date-fns";
 import {
@@ -15,8 +15,8 @@ import {
 interface DetailStepProps {
   property: PropertyRoomDetail;
   selectedRoom: RoomIdPublic;
-  checkIn: string;   // "yyyy-MM-dd" — matches <input type="date">
-  checkOut: string;  // "yyyy-MM-dd"
+  checkIn: string;
+  checkOut: string;
   totalGuests: number;
   bookedUnits: number;
   specialRequest: string;
@@ -159,7 +159,6 @@ const CreateTransactionStep = ({
           <div className="flex items-center gap-2 text-sm text-primary font-medium">
             <Clock className="h-4 w-4" />
             {nights} night{nights > 1 ? "s" : ""} ·{" "}
-            {/* checkIn/checkOut are "yyyy-MM-dd" so new Date() is safe here */}
             {format(new Date(checkIn), "dd-MM-yyyy")} →{" "}
             {format(new Date(checkOut), "dd-MM-yyyy")}
           </div>

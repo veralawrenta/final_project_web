@@ -34,9 +34,7 @@ export interface Property {
     basePrice: number;
     totalGuests: number;
     description: string;
-    isAvailable: boolean;
     displayPrice?: number;
-    useSeasonalRate: boolean;
     roomImages: RoomImage[];
     transactions?: Array<{
       id: string;
@@ -48,8 +46,8 @@ export interface Property {
   }>;
 }
 
-export interface PropertyRoomDetail extends Omit<Property, "rooms">  {
-  rooms: RoomIdPublic[],
+export interface PropertyRoomDetail extends Omit<Property, "rooms"> {
+  rooms: RoomIdPublic[];
   averageRating: number | null;
   searchContext: {
     checkIn: string;
@@ -107,7 +105,10 @@ export interface PropertyImage {
 [];
 
 //for dashboard property Id tenant
-export interface TenantProperty extends Omit<Property, "amenities" | "rooms" | "latitude" | "longitude">{
+export interface TenantProperty extends Omit<
+  Property,
+  "amenities" | "rooms" | "latitude" | "longitude"
+> {
   latitude?: number;
   longitude?: number;
   status: PropertyStatus;

@@ -1,32 +1,49 @@
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { formatEnum } from "@/lib/enum-utils";
 import { formatCurrency } from "@/lib/price/currency";
-import { TransactionManagementPayload, Transactions, transactionStatusConfig } from "@/types/transaction";
-import { formatDate } from "date-fns";
+import {
+  TransactionManagementPayload,
+  Transactions,
+  transactionStatusConfig,
+} from "@/types/transaction";
+import { format } from "date-fns";
 import { CheckCircle, Eye, MoreHorizontal, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface TransactionListProps {
-  transactions : TransactionManagementPayload[];
-  onViewTransaction? : (transactions : Transactions) => void;
-  onCancelRequest: (transactions : Transactions) => void;
-};
+  transactions: TransactionManagementPayload[];
+  onViewTransaction?: (transactions: Transactions) => void;
+  onCancelRequest: (transactions: Transactions) => void;
+}
 
-const TransactionList = ({transactions, onViewTransaction, onCancelRequest} : TransactionListProps) => {
+const TransactionList = ({
+  transactions,
+  onViewTransaction,
+  onCancelRequest,
+}: TransactionListProps) => {
   if (transactions.length === 0) {
     return (
       <div className="bg-card rounded-2xl border border-border p-8 text-center flex flex-col items-center justify-center min-h-[240px]">
-      <div className="inline-flex items-center gap-2 px-3 py-1 bg-muted/50 rounded-full border border-border text-xs text-muted-foreground mb-3 font-medium">
-        <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-        Zero Results
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-muted/50 rounded-full border border-border text-xs text-muted-foreground mb-3 font-medium">
+          <div className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+          Zero Results
+        </div>
+        <h4 className="font-medium text-sm text-foreground">
+          No matching reservations
+        </h4>
+        <p className="text-xs text-muted-foreground max-w-xs mt-1">
+          Try broadening your search or modifying your booking status filters to
+          see available data.
+        </p>
       </div>
-      <h4 className="font-medium text-sm text-foreground">No matching reservations</h4>
-      <p className="text-xs text-muted-foreground max-w-xs mt-1">
-        Try broadening your search or modifying your booking status filters to see available data.
-      </p>
-    </div>
-    )
-  };
+    );
+  }
 
   return (
     <div className="bg-card rounded-2xl border border-border overflow-hidden">
@@ -39,7 +56,7 @@ const TransactionList = ({transactions, onViewTransaction, onCancelRequest} : Tr
         <span>Status</span>
         <span></span>
       </div>
- 
+
       <div className="divide-y divide-border">
         {transactions.map((t) => {
           const status = transactionStatusConfig[t.displayStatus];
@@ -48,7 +65,7 @@ const TransactionList = ({transactions, onViewTransaction, onCancelRequest} : Tr
             (new Date(t.checkOut).getTime() - new Date(t.checkIn).getTime()) /
               (1000 * 60 * 60 * 24),
           );
- 
+
           return (
             <div
               key={t.id}
@@ -56,43 +73,61 @@ const TransactionList = ({transactions, onViewTransaction, onCancelRequest} : Tr
             >
               {/* Guest */}
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-semibold text-xs shrink-0">
-                  {`${t.user.firstName[0]} ${t.user.lastName[0]}`}
-                </div>
+                  {t.user.avatar ? (
+                    <img
+                      src={t.user.avatar}
+                      alt="user-avatar"
+                      className="w-9 h-9 rounded-xl"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                     {t.user.firstName?.[0]}{t.user.lastName?.[0]}
+                    </div>
+                  )}
+
                 <div className="min-w-0">
                   <p className="font-medium text-sm truncate">{`${t.user.firstName} ${t.user.lastName}`}</p>
-                  <p className="text-xs text-muted-foreground font-mono">{t.id}</p>
                 </div>
               </div>
- 
+
               {/* Property */}
               <div className="min-w-0">
-                <p className="text-sm font-medium truncate">{t.room.property.name}</p>
+                <p className="text-sm font-medium truncate">
+                  {t.room.property.name}
+                </p>
                 <p className="text-xs text-muted-foreground">{t.room.name}</p>
               </div>
- 
+
               {/* Dates */}
               <div>
                 <p className="text-sm">
-                  {formatDate(t.checkIn, "dd-MM-yyyy")} – {formatDate(t.checkOut, "dd-MM-yyyy")}
+                  {format(t.checkIn, "dd-MM-yyyy")} –{" "}
+                  {format(t.checkOut, "dd-MM-yyyy")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {nights} night{nights > 1 ? 's' : ''} · {t.totalGuests} guest{t.totalGuests > 1 ? 's' : ''}
+                  {nights} night{nights > 1 ? "s" : ""} · {t.totalGuests} guest
+                  {t.totalGuests > 1 ? "s" : ""}
                 </p>
               </div>
- 
+
               {/* Amount */}
               <div>
-                <p className="text-sm font-bold">{formatCurrency(t.totalPrice)}</p>
-                <p className="text-xs text-muted-foreground">{t.paymentMethod}</p>
+                <p className="text-sm font-bold">
+                  {formatCurrency(t.totalPrice)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatEnum(t.paymentMethod)}
+                </p>
               </div>
- 
+
               {/* Status */}
-              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold w-fit ${status?.className}`}>
+              <div
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold w-fit ${status?.className}`}
+              >
                 {StatusIcon && <StatusIcon className="h-3.5 w-3.5" />}
                 {status?.label}
               </div>
- 
+
               {/* Actions */}
               <div className="flex justify-end">
                 <DropdownMenu>
@@ -106,11 +141,15 @@ const TransactionList = ({transactions, onViewTransaction, onCancelRequest} : Tr
                       <Eye className="h-4 w-4 mr-2" /> View Details
                     </DropdownMenuItem>
                     {t.displayStatus === "PENDING" && (
-                      <DropdownMenuItem onClick={() => toast.success(`Transaction no. ${t.id} confirmed!`)}>
+                      <DropdownMenuItem
+                        onClick={() =>
+                          toast.success(`Transaction no. ${t.id} confirmed!`)
+                        }
+                      >
                         <CheckCircle className="h-4 w-4 mr-2" /> Confirm
                       </DropdownMenuItem>
                     )}
-                    {(t.displayStatus === 'PENDING') && (
+                    {t.displayStatus === "PENDING" && (
                       <DropdownMenuItem
                         className="text-destructive"
                         onClick={() => onCancelRequest(t)}

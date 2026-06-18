@@ -103,7 +103,7 @@ const MaintenanceList = ({
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-2">
-                    <span className="px-2 py-0.5 bg-warning/10 text-warning rounded text-xs font-semibold">
+                    <span className="px-2 py-0.5 bg-orange-500 text-accent rounded text-xs font-semibold border-orange-600 border-2">
                       Blocked
                     </span>
                     <span className="px-2 py-0.5 bg-secondary rounded text-xs font-medium">
@@ -112,7 +112,7 @@ const MaintenanceList = ({
                   </div>
 
                   <h3 className="font-heading font-semibold">{getRoomName(record)}</h3>
-                  <p className="text-sm text-blue-600">{getPropertyName(record)}</p>
+                  <p className="text-sm text-primary">{getPropertyName(record)}</p>
                   {record.reason && (
                     <p className="text-sm text-muted-foreground mt-1">{record.reason}</p>
                   )}

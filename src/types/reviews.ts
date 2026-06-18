@@ -19,6 +19,7 @@ export interface Reviews {
     room?: {
       name: string;
       property?: {
+        id: number;
         name?: string;
         address?: string;
         city?: {
@@ -26,10 +27,7 @@ export interface Reviews {
         };
         tenant: {
           tenantName: string;
-        }
-        propertyImages?: {
-          imageUrl: string;
-        }[];
+        };
       };
     };
   };
