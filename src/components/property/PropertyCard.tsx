@@ -7,7 +7,7 @@ import Link from "next/link";
 
 interface Props {
   property: PropertyCard;
-  checkIn : string | null;
+  checkIn: string | null;
   checkOut: string | null;
   guests: string | null;
 }
@@ -18,7 +18,14 @@ const PropertyCardForm = ({ property, checkIn, checkOut, guests }: Props) => {
     property.propertyImages[0]?.urlImages ??
     "/placeholder.jpg";
 
-  const price = property.displayPrice ?? (property.availableRooms?.length ? Math.min(...property.availableRooms.map((r) => r.basePrice)) : 0);
+  const price =
+    property.displayPrice ??
+    (property.availableRooms?.length
+      ? Math.min(...property.availableRooms.map((r) => r.basePrice))
+      : property.rooms?.length
+        ? Math.min(...property.rooms.map((r) => r.basePrice))
+        : 0);
+        
   const qs = new URLSearchParams();
   if (checkIn) qs.set("checkIn", checkIn);
   if (checkOut) qs.set("checkOut", checkOut);

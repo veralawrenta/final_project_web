@@ -6,7 +6,7 @@ import { useCreateReviewByUser } from "@/hooks/useReviews";
 import { useGetTransactionIdByUser } from "@/hooks/useTransactions";
 import { createReviewSchema } from "@/lib/validator/dashboard.reviews.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
 import {
   ArrowLeft,
   Calendar,
@@ -166,8 +166,8 @@ const CreateReviewComponent = () => {
                 <span>·</span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {formatDate(userTransaction?.checkIn, "dd-MM-yyyy")} –{" "}
-                  {formatDate(userTransaction?.checkOut, "dd-MM-yyyy")}
+                  {format(userTransaction?.checkIn, "dd-MM-yyyy")} –{" "}
+                  {format(userTransaction?.checkOut, "dd-MM-yyyy")}
                 </span>
               </div>
             </div>

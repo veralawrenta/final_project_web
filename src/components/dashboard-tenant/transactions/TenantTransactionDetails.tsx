@@ -5,9 +5,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCancelTransactionByTenant, useConfirmTransaction, useGetTransactionIdByTenant, useRejectTransaction } from "@/hooks/useTenantTransactions";
+import { formatEnum } from "@/lib/enum-utils";
 import { formatCurrency } from "@/lib/price/currency";
 import { TransactionStatus, transactionStatusConfig } from "@/types/transaction";
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -15,10 +16,14 @@ import {
   Building2,
   Calendar,
   CheckCircle,
+  Copy,
+  Check,
   CreditCard,
   Download,
   FileText,
   Image,
+  Mail,
+  Hash,
   Users,
   XCircle,
 } from "lucide-react";
@@ -32,16 +37,16 @@ interface TenantTransactionDetailsProps {
 const TenantTransactionDetails = ({
   onBack,
 }: TenantTransactionDetailsProps) => {
-  const { transactionId } = useParams<{ transactionId: string }>();
+  const params = useParams();
+  const transactionId = Array.isArray(params.id) ? params.id[0] : params.id as string;
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showProofModal, setShowProofModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [rejectReason, setRejectReason] = useState("");
-
-  const { data: t, isPending } = useGetTransactionIdByTenant(
-    Array.isArray(transactionId) ? transactionId[0] : transactionId,
-  );
+  const [copied, setCopied] = useState(false);
+  
+  const { data: t, isPending } = useGetTransactionIdByTenant(transactionId);
 
   const confirmMutation = useConfirmTransaction();
   const rejectMutation = useRejectTransaction();
@@ -84,14 +89,20 @@ const TenantTransactionDetails = ({
 
   const handleReject = () => {
     setShowRejectDialog(false);
-    rejectMutation.mutate({transactionId, reason: ""});
+    rejectMutation.mutate({transactionId, reason: rejectReason.trim()});
     setRejectReason("");
   };
 
   const handleCancel = () => {
     setShowCancelDialog(false)
-    cancelMutation.mutate({transactionId, reason: ""})
+    cancelMutation.mutate({transactionId, reason:cancelReason.trim()})
     setCancelReason("");
+  };
+
+  const handleCopyId = () => {
+    navigator.clipboard.writeText(t.id);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -107,9 +118,6 @@ const TenantTransactionDetails = ({
         </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-heading font-bold">Booking Details</h1>
-          <p className="text-sm text-muted-foreground font-mono">
-            {t.id}
-          </p>
         </div>
         <div
           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold ${status?.className}`}
@@ -169,7 +177,7 @@ const TenantTransactionDetails = ({
                   <div>
                     <p className="text-xs text-muted-foreground">Check-in</p>
                     <p className="text-sm font-semibold">
-                      {formatDate(t.checkIn, "dd-MM-yyyy")}
+                      {format(t.checkIn, "dd-MM-yyyy")}
                     </p>
                   </div>
                 </div>
@@ -180,7 +188,7 @@ const TenantTransactionDetails = ({
                   <div>
                     <p className="text-xs text-muted-foreground">Check-out</p>
                     <p className="text-sm font-semibold">
-                      {formatDate(t.checkOut, "dd-MM-yyyy")}
+                      {format(t.checkOut, "dd-MM-yyyy")}
                     </p>
                   </div>
                 </div>
@@ -235,10 +243,10 @@ const TenantTransactionDetails = ({
                   <AlertTriangle className="h-5 w-5 text-status-pending shrink-0" />
                   <div>
                     <p className="text-sm font-medium">
-                      No payment proof uploaded yet
+                      No payment made or uploaded yet
                     </p>
                     <p className="text-xs text-muted-foreground">
-                     The guest selected Bank Transfer but has not submitted proof of payment. You may cancel this booking until payment is uploaded.
+                     The guest selected but has not submitted proof of payment. You may cancel this booking until payment is uploaded.
                     </p>
                   </div>
                 </div>
@@ -249,21 +257,49 @@ const TenantTransactionDetails = ({
 
         {/* Right: Guest & Payment Info */}
         <div className="space-y-6">
-          {/* Guest Info */}
-          <div className="bg-card rounded-2xl border border-border p-5 space-y-4">
-            <h3 className="font-heading font-semibold text-sm">
-              Guest Information
+          {/* Refined Guest Info Card */}
+          <div className="bg-card rounded-2xl border border-border p-5 space-y-4 shadow-sm">
+            <h3 className="font-heading font-semibold text-xs text-muted-foreground uppercase tracking-wider">
+              Primary Guest
             </h3>
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                {t.user.firstName[0]}
-                {t.user.lastName[0]}
+            
+            <div className="flex items-center gap-3.5 pb-4 border-b border-border">
+              <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary/10 to-primary/20 flex items-center justify-center text-primary font-bold text-sm shadow-inner shrink-0">
+                {t.user.firstName[0].toUpperCase()}
+                {t.user.lastName[0].toUpperCase()}
               </div>
-              <div>
-                <p className="font-medium text-sm">
+              <div className="min-w-0">
+                <p className="font-heading font-bold text-base text-foreground truncate">
                   {t.user.firstName} {t.user.lastName}
                 </p>
-                <p className="text-xs text-muted-foreground">{t.user.email}</p>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                  <Mail className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
+                  <span className="truncate">{t.user.email}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2.5 pt-1">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+                 Booking Reference ID
+                </span>
+                <div className="flex items-center justify-between gap-2 bg-secondary/60 border border-border/80 px-2.5 py-1.5 rounded-xl group">
+                  <code className="text-xs font-mono font-semibold text-foreground truncate select-all">
+                    {t.id}
+                  </code>
+                  <button
+                    onClick={handleCopyId}
+                    className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-all shrink-0 focus:outline-none focus:ring-1 focus:ring-primary/40"
+                    title="Copy ID to clipboard"
+                  >
+                    {copied ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-500 animate-in fade-in" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5 text-muted-foreground/60 transition-transform active:scale-90" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -278,14 +314,14 @@ const TenantTransactionDetails = ({
                 <span className="text-muted-foreground">Method</span>
                 <div className="flex items-center gap-1.5 font-medium">
                   <CreditCard className="h-3.5 w-3.5" />
-                  {t.paymentMethod ?? "—"}
+                  {formatEnum(t.paymentMethod) ?? "—"}
                 </div>
               </div>
               {t.paymentDate && (
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Payment Date</span>
                   <span className="font-medium">
-                    {formatDate(t.paymentDate, "dd-MM-yyyy")}
+                    {format(t.paymentDate, "dd-MM-yyyy")}
                   </span>
                 </div>
               )}
@@ -293,7 +329,7 @@ const TenantTransactionDetails = ({
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Booking Date</span>
                   <span className="font-medium">
-                    {formatDate(t.createdAt, "dd-MM-yyyy")}
+                    {format(t.createdAt, "dd-MM-yyyy")}
                   </span>
                 </div>
               )}
@@ -321,6 +357,7 @@ const TenantTransactionDetails = ({
               {canReject && (
                 <Button
                 variant={"outline"}
+                onClick={() => setShowRejectDialog(true)}
                 className="w-full gap-2 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10" >
                 <Ban className="h-4 w-4" /> Reject Transaction
                 </Button>
@@ -328,8 +365,8 @@ const TenantTransactionDetails = ({
               {canCancel && (
                 <Button
                   variant="outline"
-                  className="w-full gap-2 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={() => setShowCancelDialog(true)}
+                  className="w-full gap-2 rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10"
                 >
                   <XCircle className="h-4 w-4" /> Cancel Booking
                 </Button>

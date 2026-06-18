@@ -1,6 +1,5 @@
 "use client";
 
-import { InteractiveMap } from "@/components/dashboard-tenant/property/property-forms/maps/InteractiveMaps";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -15,7 +14,7 @@ import {
   TransactionStatus,
   transactionStatusConfig,
 } from "@/types/transaction";
-import { differenceInCalendarDays, formatDate, startOfDay } from "date-fns";
+import { differenceInCalendarDays, format, startOfDay } from "date-fns";
 import {
   ArrowLeft,
   CalendarDays,
@@ -309,7 +308,7 @@ const TransactionDetail = () => {
                     </p>
                     <p className="mt-1 text-xs sm:text-sm font-bold text-slate-800">
                       {transaction.createdAt
-                        ? formatDate(
+                        ? format(
                             new Date(transaction.createdAt),
                             "dd-MM-yyyy",
                           )
@@ -332,7 +331,7 @@ const TransactionDetail = () => {
                     Check-in
                   </p>
                   <p className="mt-0.5 text-sm sm:text-base font-bold text-slate-900">
-                    {formatDate(new Date(transaction.checkIn), "dd-MM-yyyy")}
+                    {format(new Date(transaction.checkIn), "dd-MM-yyyy")}
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
                     From 2:00 PM
@@ -343,7 +342,7 @@ const TransactionDetail = () => {
                     Check-out
                   </p>
                   <p className="mt-0.5 text-sm sm:text-base font-bold text-slate-900">
-                    {formatDate(new Date(transaction.checkOut), "dd-MM-yyyy")}
+                    {format(new Date(transaction.checkOut), "dd-MM-yyyy")}
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
                     Before 12:00 PM
@@ -568,7 +567,7 @@ const TransactionDetail = () => {
                   </span>
                   <span className="font-bold text-slate-800">
                     {transaction.paymentDate
-                      ? formatDate(
+                      ? format(
                           new Date(transaction.paymentDate),
                           "dd-MM-yyyy",
                         )

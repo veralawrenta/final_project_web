@@ -1,8 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useGetMonthCalendarSearch } from "@/hooks/useProperty";
-import { calculateTotalPrice } from "@/lib/date/calculatePrice";
-import { formatCurrency } from "@/lib/price/currency";
+import { calculateTotalPrice } from "@/lib/price/calculatePrice";
 import { addMonths, differenceInCalendarDays, format, isBefore, startOfDay } from "date-fns";
 import { Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -108,7 +107,6 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10, defaultChe
           calendar={data?.calendar}
         />
 
-        {/* GUESTS */}
         <div>
           <label className="block text-xs mb-1.5 text-muted-foreground font-medium">
             Guests
@@ -126,14 +124,6 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10, defaultChe
           </select>
         </div>
         <div className="flex flex-col justify-end gap-2">
-          {nights > 0 && totalPrice > 0 && (
-            <div className="text-xs text-center text-muted-foreground">
-              {nights} night{nights > 1 ? "s" : ""} •{" "}
-              <strong className="text-foreground">
-                {formatCurrency(totalPrice)}
-              </strong>
-            </div>
-          )}
           <Button
             className="h-12 w-full"
             disabled={!checkIn || !checkOut}

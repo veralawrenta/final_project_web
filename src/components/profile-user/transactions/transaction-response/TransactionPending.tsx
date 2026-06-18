@@ -4,20 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useGetTransactionIdByUser } from "@/hooks/useTransactions";
 import { formatCurrency } from "@/lib/price/currency";
-import { PaymentMethodEnum } from "@/lib/validator/profile.transaction.schema";
-import { TransactionStatus } from "@/types/transaction";
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
 import {
-    AlertCircle,
-    BedDouble,
-    Building2,
-    Calendar,
-    Clock,
-    CreditCard,
-    FileText,
-    Home,
-    MapPin,
-    Users
+  AlertCircle,
+  BedDouble,
+  Building2,
+  Calendar,
+  Clock,
+  CreditCard,
+  FileText,
+  Home,
+  MapPin,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -26,17 +24,11 @@ const TransactionPending = () => {
   const params = useParams();
   const transactionId = params.id as string;
   const { data: trx, isPending } = useGetTransactionIdByUser(transactionId);
-
-  const pending = trx?.status === TransactionStatus.WAITING_FOR_PAYMENT;
-  const paymentMethodLabel =
-    trx?.paymentMethod === PaymentMethodEnum.BANK_TRANSFER
-      ? "Bank Transfer"
-      : (trx?.paymentMethod ?? "-");
   const formattedCheckIn = trx?.checkIn
-    ? formatDate(trx.checkIn, "dd-MM-yyyy")
+    ? format(trx.checkIn, "dd-MM-yyyy")
     : "-";
   const formattedCheckOut = trx?.checkOut
-    ? formatDate(trx.checkOut, "dd-MM-yyyy")
+    ? format(trx.checkOut, "dd-MM-yyyy")
     : "-";
 
   return (

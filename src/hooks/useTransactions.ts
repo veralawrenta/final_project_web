@@ -65,10 +65,7 @@ export const useCreateTransaction = () => {
       console.log("🚀 Transaction payload:", JSON.stringify(values, null, 2));
       const { data } = await axiosInstance.post(
         "/transactions",
-        
           values,
-          //checkIn: format(new Date(values.checkIn), "dd-MM-yyyy"),
-          //checkOut: format(new Date(values.checkOut), "dd-MM-yyyy"),
         {
           headers: {
             Authorization: `Bearer ${session.data?.user.accessToken}`,

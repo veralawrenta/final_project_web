@@ -1,21 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useQueryState, parseAsInteger, parseAsString, parseAsStringEnum } from "nuqs";
-import { useDebounceValue } from "usehooks-ts";
-import { formatDate } from "date-fns";
-import { 
-  BedDouble, Building2, Calendar, MessageSquare, 
-  Reply, Search, Send, Star, User, X 
+import { format } from "date-fns";
+import {
+  BedDouble, Building2, Calendar, MessageSquare,
+  Reply, Search, Send, Star, User, X
 } from "lucide-react";
-
-import { SortBy, SortOrder } from "@/types/pagination";
+import { parseAsInteger, parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import { useState } from "react";
+import { useDebounceValue } from "usehooks-ts";
 import { useGetAllTenantReviews } from "@/hooks/useReviews";
-
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { SortBy, SortOrder } from "@/types/pagination";
 import PaginationSection from "../PaginationSection";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import ReplyReviewModal from "./reviews/ReplyReviewModal";
 
 type filterType = "all" | "reviewed" | "pending";
@@ -191,7 +189,7 @@ const ReviewManagement = () => {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Reviewed on {formatDate(r.createdAt, "dd MMM yyyy")}
+                        Reviewed on {format(r.createdAt, "dd MMM yyyy")}
                       </p>
                     </div>
                   </div>
@@ -215,7 +213,7 @@ const ReviewManagement = () => {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Calendar className="h-3.5 w-3.5 text-muted-foreground/80" />
-                    {`${formatDate(r.transaction.checkIn, "dd/MM/yyyy")} – ${formatDate(r.transaction.checkOut, "dd/MM/yyyy")}`}
+                    {`${format(r.transaction.checkIn, "dd/MM/yyyy")} – ${format(r.transaction.checkOut, "dd/MM/yyyy")}`}
                   </span>
                   <span className="flex items-center gap-1.5 sm:hidden">
                     <User className="h-3.5 w-3.5 text-muted-foreground/80" />

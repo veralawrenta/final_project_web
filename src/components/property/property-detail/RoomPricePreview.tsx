@@ -43,10 +43,7 @@ const RoomPricePreview = ({
             </div>
           </div>
 
-          <Button
-            disabled
-            className="w-full bg-muted-foreground border-none"
-          >
+          <Button disabled className="w-full bg-muted-foreground border-none">
             Select a room
           </Button>
 
@@ -66,23 +63,21 @@ const RoomPricePreview = ({
     <div className="hidden md:block sticky top-24 p-6 border rounded-xl bg-card space-y-4">
       <div>
         <p className="text-sm text-primary">Selected Room</p>
-        <h3 className="font-semibold">{room.name}</h3>
+        <div className="flex justify-between">
+          <h3 className="font-semibold">{room.name}</h3>
+        </div>
       </div>
 
       <div>
-        <div className="text-2xl font-bold">
-          {formatCurrency(room.displayPrice)}
-          <span className="text-sm text-muted-foreground"> / night</span>
-        </div>
         {isSeasonal && (
-          <p className="text-xs text-orange-600">Seasonal price applied</p>
+          <p className="text-sm text-orange-600">Seasonal price applied</p>
         )}
       </div>
 
       {nights > 0 && (
-        <div className="text-sm">
-          {nights} night{nights > 1 ? "s" : ""} •{" "}
-          <strong>{formatCurrency(total)}</strong>
+        <div className="text-md flex justify-between">
+          {nights} night{nights > 1 ? "s" : ""}  {" "}
+          <strong className="text-lg">{formatCurrency(total)}</strong>
         </div>
       )}
 
@@ -108,10 +103,6 @@ const RoomPricePreview = ({
       >
         {room.isAvailable ? "Continue" : "Unavailable"}
       </Button>
-
-      <p className="text-xs text-center text-muted-foreground">
-        Price preview only — no booking yet
-      </p>
     </div>
   );
 };

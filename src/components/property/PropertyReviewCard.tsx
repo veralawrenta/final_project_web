@@ -1,10 +1,10 @@
 import { useGetAllPropertyReviews } from "@/hooks/useReviews";
 import { SortOrder } from "@/types/pagination";
+import { format } from "date-fns";
 import { MessageSquare, Star } from "lucide-react";
 import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
 import PaginationSection from "../PaginationSection";
 import { Badge } from "../ui/badge";
-import { formatDate } from "date-fns";
 
 interface PropertyReviewCardProps {
   propertyId: number;
@@ -129,8 +129,8 @@ const PropertyReviewCard = ({ propertyId }: PropertyReviewCardProps) => {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {review.transaction.room?.name} ·{" "}
-                    {formatDate(review.transaction.checkIn, "dd-MM-yyyy")} –{" "}
-                    {formatDate(review.transaction.checkOut, "dd-MM-yyyy")}
+                    {format(review.transaction.checkIn, "dd-MM-yyyy")} –{" "}
+                    {format(review.transaction.checkOut, "dd-MM-yyyy")}
                   </p>
                 </div>
               </div>
@@ -149,7 +149,7 @@ const PropertyReviewCard = ({ propertyId }: PropertyReviewCardProps) => {
                   ))}
                 </div>
                 <Badge variant="outline" className="rounded-full">
-                  {formatDate(review.createdAt, "dd-MM-yyyy")}
+                  {format(review.createdAt, "dd-MM-yyyy")}
                 </Badge>
               </div>
             </div>

@@ -4,9 +4,11 @@ import { PageableResponse, PaginationQueryParams } from "@/types/pagination";
 import {
   CalendarResponse,
   Property,
+  PropertyCard,
   PropertyRoomDetail,
   PropertyType,
   TenantProperties,
+  TenantProperty,
 } from "@/types/property";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -75,7 +77,7 @@ export const useGetAllProperties = (
       queries?.propertyType ?? "",
     ],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<PageableResponse<Property>>(
+      const { data } = await axiosInstance.get<PageableResponse<PropertyCard>>(
         "/properties/public",
         { params: queries },
       );
@@ -165,7 +167,7 @@ export const useGetTenantProperties = (queries?: PropertiesQueryParams) => {
     ],
     queryFn: async () => {
       const { data } = await axiosInstance.get<
-        PageableResponse<TenantProperties>
+        PageableResponse<TenantProperty>
       >("/properties", {
         params: queries,
         headers: {

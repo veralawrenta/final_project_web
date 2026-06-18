@@ -20,7 +20,7 @@ import {
   TransactionStatus,
   transactionStatusConfig
 } from "@/types/transaction";
-import { formatDate } from "date-fns";
+import { format } from "date-fns";
 import {
   AlertTriangle,
   CalendarDays,
@@ -155,7 +155,7 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
                   </p>
                   <p className="mt-1 flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
                     <CalendarDays className="h-4 w-4 text-primary shrink-0" />
-                    {formatDate(transaction.checkIn, "dd-MM-yyyy")}
+                    {format(transaction.checkIn, "dd-MM-yyyy")}
                   </p>
                 </div>
                 <div className="col-span-1">
@@ -164,7 +164,7 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
                   </p>
                   <p className="mt-1 flex items-center gap-1.5 text-xs sm:text-sm font-semibold">
                     <CalendarDays className="h-4 w-4 text-primary shrink-0" />
-                    {formatDate(transaction.checkOut, "dd-MM-yyyy")}
+                    {format(transaction.checkOut, "dd-MM-yyyy")}
                   </p>
                 </div>
                 <div className="col-span-2 md:col-span-1 border-t md:border-t-0 md:border-l border-border/80 pt-2.5 md:pt-0 md:pl-4">

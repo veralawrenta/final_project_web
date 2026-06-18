@@ -48,7 +48,6 @@ const CreateMaintenanceBlockForm = () => {
 
   const { data: tenantRooms } = useGetTenantRooms();
   const allRooms = tenantRooms?.data || [];
-
   const createBlock = useCreateRoomNonAvailability();
 
   const form = useForm<CreateMaintenanceBlockValues>({
@@ -61,8 +60,11 @@ const CreateMaintenanceBlockForm = () => {
       roomInventory: 1,
     },
   });
+
   const filteredRooms = selectedPropertyId
-    ? allRooms.filter((room) => room.property?.id === Number(selectedPropertyId))
+    ? allRooms.filter(
+        (room) => room.propertyId === Number(selectedPropertyId),
+      )
     : [];
 
   const watchedRoomId = form.watch("roomId");
@@ -184,7 +186,7 @@ const CreateMaintenanceBlockForm = () => {
                             variant="outline"
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
                             {field.value ? (
@@ -223,7 +225,7 @@ const CreateMaintenanceBlockForm = () => {
                             variant="outline"
                             className={cn(
                               "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
+                              !field.value && "text-muted-foreground",
                             )}
                           >
                             {field.value ? (

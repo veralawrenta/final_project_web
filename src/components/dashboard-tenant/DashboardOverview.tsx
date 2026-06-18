@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { SalesChart } from "./overview/SalesChart";
 import TenantActivity from "./overview/TenantActivity";
+import { formatCurrency } from "@/lib/price/currency";
 
 export function DashboardOverview() {
   const router = useRouter();
@@ -95,7 +96,7 @@ export function DashboardOverview() {
     },
     {
       label: "Total Revenue",
-      value: stats.totalRevenue,
+      value: formatCurrency(stats.totalRevenue),
       icon: BadgeDollarSign,
       color: "text-indigo-600 dark:text-indigo-400",
       bgColor: "bg-indigo-50 dark:bg-indigo-950/50",
@@ -239,7 +240,6 @@ export function DashboardOverview() {
           </div>
         </div>
 
-        {/* Profile Section */}
         <div className="bg-card rounded-xl border border-border shadow-sm p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">

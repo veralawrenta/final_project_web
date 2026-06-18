@@ -37,7 +37,7 @@ const RoomCard = ({
           <img
             src={image.urlImages}
             alt={room.name}
-            className="w-full h-full object-cover pl-2"
+            className="w-full h-full object-cover px-2 rounded-xl"
           />
           {!room.isAvailable && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
