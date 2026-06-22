@@ -212,7 +212,6 @@ export const useUploadRoomImages = () => {
           );
           uploadedImages.push(response.data);
         } catch (error) {
-          console.error(`Failed to upload image ${index + 1}:`, error);
         }
       }
 

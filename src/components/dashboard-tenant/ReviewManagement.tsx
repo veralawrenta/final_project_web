@@ -2,10 +2,23 @@
 
 import { format } from "date-fns";
 import {
-  BedDouble, Building2, Calendar, MessageSquare,
-  Reply, Search, Send, Star, User, X
+  BedDouble,
+  Building2,
+  Calendar,
+  MessageSquare,
+  Reply,
+  Search,
+  Send,
+  Star,
+  User,
+  X,
 } from "lucide-react";
-import { parseAsInteger, parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
+import {
+  parseAsInteger,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+} from "nuqs";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { useGetAllTenantReviews } from "@/hooks/useReviews";
@@ -13,14 +26,21 @@ import { SortBy, SortOrder } from "@/types/pagination";
 import PaginationSection from "../PaginationSection";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import ReplyReviewModal from "./reviews/ReplyReviewModal";
+import PendingLoader from "../PendingLoader";
 
 type filterType = "all" | "reviewed" | "pending";
 
 const ReviewManagement = () => {
   const [replyTo, setReplyTo] = useState<number | null>(null);
-  
+
   const [searchQuery, setSearchQuery] = useQueryState(
     "searchQuery",
     parseAsString.withDefault(""),
@@ -28,11 +48,15 @@ const ReviewManagement = () => {
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [filter, setFilter] = useQueryState(
     "filter",
-    parseAsStringEnum<filterType>(["all", "reviewed", "pending"]).withDefault("all"),
+    parseAsStringEnum<filterType>(["all", "reviewed", "pending"]).withDefault(
+      "all",
+    ),
   );
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum<SortBy>(["createdAt", "propertyName"]).withDefault("createdAt"),
+    parseAsStringEnum<SortBy>(["createdAt", "propertyName"]).withDefault(
+      "createdAt",
+    ),
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
@@ -40,7 +64,7 @@ const ReviewManagement = () => {
   );
 
   const [debounceSearch] = useDebounceValue(searchQuery, 500);
-  const { data: reviewData } = useGetAllTenantReviews({
+  const { data: reviewData, isPending } = useGetAllTenantReviews({
     search: debounceSearch,
     page,
     filter,
@@ -72,13 +96,22 @@ const ReviewManagement = () => {
     setPage(1);
   };
 
-  const isFiltered = searchQuery || filter !== "all" || sortBy !== "createdAt" || sortOrder !== "desc";
+  const isFiltered =
+    searchQuery ||
+    filter !== "all" ||
+    sortBy !== "createdAt" ||
+    sortOrder !== "desc";
 
+  if (isPending) {
+    return <PendingLoader context="review" />;
+  }
   return (
     <div className="space-y-8 p-1">
       {/* Header section */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight font-heading">Guest Reviews</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-heading">
+          Guest Reviews
+        </h1>
         <p className="text-sm text-muted-foreground mt-2">
           {`View and reply to guest feedback across all properties — ${reviewData?.summary.totalCount ?? 0} total reviews`}
         </p>
@@ -87,17 +120,44 @@ const ReviewManagement = () => {
       {/* Overview Analytics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: "Total Reviews", value: reviewData?.summary.totalCount, icon: MessageSquare, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-500/10" },
-          { label: "Unreplied", value: reviewData?.summary.pending, icon: Reply, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10" },
-          { label: "Replied", value: reviewData?.summary.reviewed, icon: Send, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-500/10" },
+          {
+            label: "Total Reviews",
+            value: reviewData?.summary.totalCount,
+            icon: MessageSquare,
+            color: "text-blue-600 dark:text-blue-400",
+            bg: "bg-blue-500/10",
+          },
+          {
+            label: "Unreplied",
+            value: reviewData?.summary.pending,
+            icon: Reply,
+            color: "text-amber-600 dark:text-amber-400",
+            bg: "bg-amber-500/10",
+          },
+          {
+            label: "Replied",
+            value: reviewData?.summary.reviewed,
+            icon: Send,
+            color: "text-emerald-600 dark:text-emerald-400",
+            bg: "bg-emerald-500/10",
+          },
         ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-card rounded-xl border border-border p-5 shadow-sm flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-lg ${bg} flex items-center justify-center ${color} shrink-0`}>
+          <div
+            key={label}
+            className="bg-card rounded-xl border border-border p-5 shadow-sm flex items-center gap-4"
+          >
+            <div
+              className={`w-12 h-12 rounded-lg ${bg} flex items-center justify-center ${color} shrink-0`}
+            >
               <Icon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
-              <p className="text-2xl font-bold tracking-tight mt-0.5">{value ?? 0}</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                {label}
+              </p>
+              <p className="text-2xl font-bold tracking-tight mt-0.5">
+                {value ?? 0}
+              </p>
             </div>
           </div>
         ))}
@@ -121,16 +181,25 @@ const ReviewManagement = () => {
             <SelectValue placeholder="Filter Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All ({reviewData?.summary.totalCount ?? 0})</SelectItem>
-            <SelectItem value="pending">Unreplied ({reviewData?.summary.pending ?? 0})</SelectItem>
-            <SelectItem value="reviewed">Replied ({reviewData?.summary.reviewed ?? 0})</SelectItem>
+            <SelectItem value="all">
+              All ({reviewData?.summary.totalCount ?? 0})
+            </SelectItem>
+            <SelectItem value="pending">
+              Unreplied ({reviewData?.summary.pending ?? 0})
+            </SelectItem>
+            <SelectItem value="reviewed">
+              Replied ({reviewData?.summary.reviewed ?? 0})
+            </SelectItem>
           </SelectContent>
         </Select>
 
         <Select
           value={`${sortBy}-${sortOrder}`}
           onValueChange={(value) => {
-            const [newSortBy, newSortOrder] = value.split("-") as [SortBy, SortOrder];
+            const [newSortBy, newSortOrder] = value.split("-") as [
+              SortBy,
+              SortOrder,
+            ];
             setSortBy(newSortBy);
             setSortOrder(newSortOrder);
             setPage(1);
@@ -148,7 +217,12 @@ const ReviewManagement = () => {
         </Select>
 
         {isFiltered && (
-          <Button variant="ghost" size="sm" onClick={handleClearAll} className="rounded-lg h-10 text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearAll}
+            className="rounded-lg h-10 text-muted-foreground hover:text-foreground"
+          >
             <X className="mr-2 h-4 w-4" />
             Clear Filters
           </Button>
@@ -163,13 +237,18 @@ const ReviewManagement = () => {
 
         {reviews && reviews.length > 0 ? (
           reviews.map((r) => {
-            const guestName = r.user ? `${r.user.firstName} ${r.user.lastName}` : "Unknown Guest";
-            const guestInitial = r.user 
-              ? `${r.user.firstName?.[0] ?? ""}${r.user.lastName?.[0] ?? ""}`.toUpperCase() 
+            const guestName = r.user
+              ? `${r.user.firstName} ${r.user.lastName}`
+              : "Unknown Guest";
+            const guestInitial = r.user
+              ? `${r.user.firstName?.[0] ?? ""}${r.user.lastName?.[0] ?? ""}`.toUpperCase()
               : "?";
 
             return (
-              <div key={r.id} className="bg-card rounded-xl border border-border shadow-sm hover:border-muted-foreground/30 transition-all p-5">
+              <div
+                key={r.id}
+                className="bg-card rounded-xl border border-border shadow-sm hover:border-muted-foreground/30 transition-all p-5"
+              >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex items-start gap-3.5">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary font-semibold text-secondary-foreground text-xs border shadow-inner">
@@ -177,13 +256,21 @@ const ReviewManagement = () => {
                     </div>
                     <div className="space-y-0.5">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-semibold text-sm tracking-tight">{guestName}</h4>
+                        <h4 className="font-semibold text-sm tracking-tight">
+                          {guestName}
+                        </h4>
                         {r.reply ? (
-                          <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/20 text-xs font-normal">
+                          <Badge
+                            variant="secondary"
+                            className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/10 border-emerald-500/20 text-xs font-normal"
+                          >
                             Replied
                           </Badge>
                         ) : (
-                          <Badge variant="secondary" className="bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border-amber-500/20 text-xs font-normal">
+                          <Badge
+                            variant="secondary"
+                            className="bg-amber-500/10 text-amber-700 dark:text-amber-400 hover:bg-amber-500/10 border-amber-500/20 text-xs font-normal"
+                          >
                             Awaiting Reply
                           </Badge>
                         )}
@@ -193,10 +280,13 @@ const ReviewManagement = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-0.5 self-start sm:self-auto">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`h-4 w-4 ${i < r.ratings ? "fill-amber-400 text-amber-400" : "text-muted/30"}`} />
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${i < r.ratings ? "fill-amber-400 text-amber-400" : "text-muted/30"}`}
+                      />
                     ))}
                   </div>
                 </div>
@@ -221,7 +311,9 @@ const ReviewManagement = () => {
                   </span>
                 </div>
 
-                <p className="mt-3 text-sm leading-relaxed text-foreground/90 pl-0.5">{r.comments}</p>
+                <p className="mt-3 text-sm leading-relaxed text-foreground/90 pl-0.5">
+                  {r.comments}
+                </p>
 
                 {/* Reply UI box */}
                 {r.reply && (
@@ -232,7 +324,9 @@ const ReviewManagement = () => {
                         {r.transaction.room?.property?.tenant.tenantName}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground pl-5.5">{r.reply}</p>
+                    <p className="text-sm text-muted-foreground pl-5.5">
+                      {r.reply}
+                    </p>
                   </div>
                 )}
 
@@ -259,8 +353,8 @@ const ReviewManagement = () => {
               {filter === "pending"
                 ? "All reviews have been replied to. Great job!"
                 : filter === "reviewed"
-                ? "No replied reviews match your current filter preferences."
-                : "No guest reviews yet. Reviews will appear here once guests leave feedback."}
+                  ? "No replied reviews match your current filter preferences."
+                  : "No guest reviews yet. Reviews will appear here once guests leave feedback."}
             </p>
           </div>
         )}

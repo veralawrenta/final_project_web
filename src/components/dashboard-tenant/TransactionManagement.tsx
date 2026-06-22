@@ -1,7 +1,8 @@
 "use client";
 import {
   useCancelTransactionByTenant,
-  useGetAllTenantTransactions,
+  useConfirmTransactionByTenant,
+  useGetAllTenantTransactions
 } from "@/hooks/useTenantTransactions";
 import { formatCurrency } from "@/lib/price/currency";
 import { SortOrder, TransactionSortBy } from "@/types/pagination";
@@ -16,6 +17,8 @@ import {
   Search,
   Users,
 } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   parseAsInteger,
   parseAsString,
@@ -46,7 +49,6 @@ import {
 } from "../ui/select";
 import TransactionCalendar from "./transactions/TransactionCalendar";
 import TransactionList from "./transactions/TransactionList";
-import { useRouter } from "next/navigation";
 
 type ViewModeType = "calendar" | "list";
 
@@ -59,9 +61,14 @@ const TransactionManagement = ({
 }) => {
   const router = useRouter();
   const [activeStatus, setActiveStatus] = useState<TransactionStatusFilter>(
-    ["ALL", "PENDING", "ONGOING", "UPCOMING", "COMPLETED", "CANCELLED"].includes(
-      initialFilter ?? "",
-    )
+    [
+      "ALL",
+      "PENDING",
+      "ONGOING",
+      "UPCOMING",
+      "COMPLETED",
+      "CANCELLED",
+    ].includes(initialFilter ?? "")
       ? (initialFilter as TransactionStatusFilter)
       : "ALL",
   );
@@ -100,7 +107,9 @@ const TransactionManagement = ({
     sortOrder,
   });
 
+  
   const cancelTransaction = useCancelTransactionByTenant();
+  const confirmTransaction = useConfirmTransactionByTenant()
 
   const statusOptions: {
     key: TransactionStatusFilter;
@@ -146,7 +155,7 @@ const TransactionManagement = ({
     setPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  
+
   const handleCancelTransaction = () => {
     if (!cancelTarget) return;
     cancelTransaction.mutate(
@@ -163,39 +172,31 @@ const TransactionManagement = ({
     );
   };
 
+  const handleConfirmTransaction = (transactionId: string) => {
+    if (!transactionId) return;
+
+    confirmTransaction.mutate(transactionId);
+  }
+
   if (isPending) {
     return (
-      <div className="space-y-6 animate-pulse px-4 sm:px-0">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="h-8 w-48 sm:w-56 bg-muted rounded-xl" />
-            <div className="h-4 w-64 sm:w-72 bg-muted rounded-lg mt-2" />
-          </div>
-          <div className="h-10 w-full sm:w-32 bg-muted/60 rounded-xl" />
+      <div className="flex flex-col items-center justify-center py-32 space-y-6 w-full rounded-3xl border-2 border-dashed bg-muted/5">
+        <div className="relative h-12 w-12 animate-bounce">
+          <Image
+            src="/images/nuit-logo.png"
+            width={48}
+            height={48}
+            alt="Loading..."
+            className="object-contain grayscale opacity-50 h-auto w-auto"
+          />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div
-              key={`stat-sk-${i}`}
-              className="bg-card rounded-2xl border border-border p-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-muted/60 shrink-0" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-3 w-16 bg-muted rounded" />
-                  <div className="h-5 w-20 bg-muted/80 rounded" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 border border-border bg-muted/10 rounded-2xl">
-          <div className="w-10 h-10 rounded-xl bg-muted/60 shrink-0" />
-          <div className="flex-1 space-y-2 w-full">
-            <div className="h-4 w-1/4 bg-muted rounded" />
-            <div className="h-3 w-1/2 bg-muted/60 rounded" />
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-1 w-24 bg-muted overflow-hidden rounded-full">
+            <div className="h-full bg-primary animate-progress-loading w-full" />
           </div>
-          <div className="h-8 w-full sm:w-24 bg-muted rounded-xl shrink-0 mt-2 sm:mt-0" />
+          <p className="text-sm font-medium text-muted-foreground">
+            Syncing your properties transactions...
+          </p>
         </div>
       </div>
     );
@@ -279,20 +280,28 @@ const TransactionManagement = ({
               key={label}
               {...(target ? { onClick: () => setActiveStatus(target) } : {})}
               className={`w-full text-left bg-card rounded-2xl border p-4 transition-all ${
-                target 
+                target
                   ? `hover:shadow-md hover:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/40 ${
-                      activeStatus === target ? "border-primary ring-2 ring-primary/20" : "border-border"
+                      activeStatus === target
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-border"
                     }`
                   : "border-border"
               }`}
             >
               <div className="flex items-center gap-4">
-                <div className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center shrink-0 ${color}`}>
+                <div
+                  className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center shrink-0 ${color}`}
+                >
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground truncate">{label}</p>
-                  <p className="text-base md:text-lg font-heading font-bold text-foreground mt-0.5 truncate">{value}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {label}
+                  </p>
+                  <p className="text-base md:text-lg font-heading font-bold text-foreground mt-0.5 truncate">
+                    {value}
+                  </p>
                 </div>
               </div>
             </Element>
@@ -302,22 +311,24 @@ const TransactionManagement = ({
 
       {/* ── Pending Alert Banner ── */}
       {pendingCount > 0 && (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-status-pending/10 border border-status-pending/20 rounded-2xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-4 bg-primary/20 border border-primary/20 rounded-2xl">
           <div className="w-10 h-10 rounded-xl bg-status-pending/20 flex items-center justify-center shrink-0">
             <Clock className="h-5 w-5 text-status-pending" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground">
-              {pendingCount} booking{pendingCount > 1 ? "s" : ""} pending confirmation
+              {pendingCount} booking{pendingCount > 1 ? "s" : ""} pending
+              confirmation
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Review and confirm these reservations to avoid automatic cancellation.
+              Review and confirm these reservations to avoid automatic
+              cancellation.
             </p>
           </div>
           <Button
             size="sm"
             variant="outline"
-            className="w-full sm:w-auto mt-2 sm:mt-0 border-status-pending/40 text-status-pending hover:bg-status-pending/10 shrink-0"
+            className="w-full bb-status-pending sm:w-auto mt-2 sm:mt-0 border-status-pending text-slate-800 font-semibold hover:bg-status-pending/10 shrink-0"
             onClick={() => setActiveStatus("PENDING")}
           >
             Review Now
@@ -341,7 +352,9 @@ const TransactionManagement = ({
           <div className="grid grid-cols-2 md:col-span-6 gap-3 w-full">
             <Select
               value={activeStatus}
-              onValueChange={(v) => setActiveStatus(v as TransactionStatusFilter)}
+              onValueChange={(v) =>
+                setActiveStatus(v as TransactionStatusFilter)
+              }
             >
               <SelectTrigger className="h-10 w-full rounded-xl text-xs md:text-sm">
                 <SelectValue placeholder="Filter status" />
@@ -381,6 +394,7 @@ const TransactionManagement = ({
             onViewTransaction={(t) => {
               router.push(`/dashboard/tenant/transaction/${t.id}`);
             }}
+            onConfirm={(t) => handleConfirmTransaction(t.id)}
             onCancelRequest={setCancelTarget}
           />
         ) : (
@@ -433,8 +447,8 @@ const TransactionManagement = ({
                   <span className="font-semibold text-foreground">
                     {cancelTarget.room.property.name}
                   </span>{" "}
-                  ({cancelTarget.room.name}). The guest will be notified and
-                  any payment will need to be refunded.
+                  ({cancelTarget.room.name}). The guest will be notified and any
+                  payment will need to be refunded.
                 </>
               )}
             </AlertDialogDescription>
@@ -462,7 +476,9 @@ const TransactionManagement = ({
               disabled={!cancelReason.trim() || cancelTransaction.isPending}
               className="w-full sm:w-auto rounded-xl text-xs sm:text-sm bg-[hsl(var(--status-cancelled))] text-white hover:bg-[hsl(var(--status-cancelled))]/90 disabled:opacity-50"
             >
-              {cancelTransaction.isPending ? "Cancelling..." : "Yes, Cancel Booking"}
+              {cancelTransaction.isPending
+                ? "Cancelling..."
+                : "Yes, Cancel Booking"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -122,7 +122,7 @@ const TransactionCardList = ({ transaction }: TransactionCardProps) => {
                   <p className="flex items-start gap-1.5 text-xs sm:text-sm text-muted-foreground max-w-full">
                     <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5 text-muted-foreground/70" />
                     <span className="line-clamp-2 wrap-break-words">
-                      {transaction.room.property.address},{" "}
+          
                       {transaction.room.property.city.name}
                     </span>
                   </p>

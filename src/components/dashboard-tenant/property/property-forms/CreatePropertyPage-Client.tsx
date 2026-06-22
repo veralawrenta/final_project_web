@@ -39,7 +39,6 @@ const CreatePropertyStep2Page = ({ propertyId }: CreatePropertyStep2PageProps) =
       await publishProperty.mutateAsync(propertyId);
 
     } catch (error: any) {
-      console.error("Failed to complete property:", error);
     }
   };
 

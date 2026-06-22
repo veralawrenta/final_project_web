@@ -8,11 +8,12 @@ import StepsHeader from "@/components/profile-user/transactions/create-transacti
 import TransactionConfirmation from "@/components/profile-user/transactions/create-transaction/TransactionConfirmation";
 import UploadPaymentProof from "@/components/profile-user/transactions/upload-payment/UploadPaymentProof";
 import { useCreateTransaction } from "@/hooks/useTransactions";
+import { axiosInstance } from "@/lib/axios";
 import {
   cardDetailsSchema,
   PaymentMethodEnum,
 } from "@/lib/validator/profile.transaction.schema";
-import { Property, PropertyRoomDetail } from "@/types/property";
+import { PropertyRoomDetail } from "@/types/property";
 import {
   TransactionPaymentMethod,
   TransactionSteps,
@@ -20,8 +21,9 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInCalendarDays, format, parse } from "date-fns";
 import { ArrowLeft } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -57,11 +59,10 @@ const CreateTransactionComponent = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const roomId = Number(searchParams.get("roomId"));
-const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms[0];
+  const selectedRoom =
+    property.rooms.find((r) => r.id === roomId) ?? property.rooms[0];
 
   const [step, setStep] = useState<TransactionSteps>("details");
-
-  // Normalise URL params ("dd-MM-yyyy") → "yyyy-MM-dd" for native date inputs
   const [checkIn, setCheckIn] = useState(
     toInputFormat(searchParams.get("checkIn") ?? ""),
   );
@@ -80,22 +81,20 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
   const [transactionId, setTransactionId] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const confirmationNumber = useMemo(
-    () => `STH-${Math.random().toString(36).substr(2, 8).toUpperCase()}`,
-    [],
-  );
+  const { data: session } = useSession();
 
-  // Safe night count — both values are now "yyyy-MM-dd" so new Date() works correctly
+  useEffect(() => {
+    if (session?.user && (!session.user.firstName || !session.user.lastName)) {
+      toast.error("Please complete your profile before creating booking");
+      router.push("/profile/user/settings");
+    }
+  }, [session]);
+
   const nights =
     checkIn && checkOut
       ? differenceInCalendarDays(new Date(checkOut), new Date(checkIn))
       : 0;
-
-  const total = (() => {
-    const sub = nights * Math.max(bookedUnits, 1) * (selectedRoom.basePrice ?? 0);
-    return sub + Math.round(sub * 0.1) + Math.round(sub * 0.05);
-  })();
-
+  const total = nights * Math.max(bookedUnits, 1) * (selectedRoom.basePrice ?? 0);
   const {
     register: registerCard,
     handleSubmit: handleCardSubmit,
@@ -135,7 +134,6 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
         totalGuests,
         paymentMethod: selectedPaymentMethod,
       });
-      console.log("transaction result:", result);
       setTransactionId(result.id);
       if (selectedPaymentMethod === "BANK_TRANSFER") {
         setStep("upload_proof");
@@ -149,36 +147,32 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
       setIsProcessing(false);
     }
   };
-
   const handleCreditCardContinue = handleCardSubmit(async (cardValues) => {
     setIsProcessing(true);
     try {
       Xendit.setPublishableKey(process.env.NEXT_PUBLIC_XENDIT_PUBLIC_KEY!);
-      console.log(
-        "💳 Card number being sent to Xendit:",
-        cardValues.cardNumber.replace(/\s/g, ""),
-      );
       const tokenId = await new Promise<string>((resolve, reject) => {
-        Xendit.card.createToken(
-          {
-            amount: total,
+        const tokenPayload = {
+          amount: String(total),
             card_holder_first_name: cardValues.cardHolderFirstName,
             card_holder_last_name: cardValues.cardHolderLastName,
             card_number: cardValues.cardNumber.replace(/\s/g, ""),
             card_exp_month: cardValues.expiredMonth,
-            card_exp_year: cardValues.expiredYear,
+            card_exp_year:
+              cardValues.expiredYear.length === 2
+                ? `20${cardValues.expiredYear}`
+                : cardValues.expiredYear,
             card_cvn: cardValues.cvv,
             card_holder_email: cardValues.cardholderEmail,
             is_multiple_use: false,
-            skip_three_d_secure: true,
-          },
-          (err: any, token: any) => {
-            console.log("Xendit token:", JSON.stringify(token, null, 2)); // ← add this
+        };
+
+          Xendit.card.createToken(tokenPayload, (err: any, token: any) => {
             if (err) return reject(err);
+
             if (token.status === "VERIFIED") {
               return resolve(token.id);
             }
-
             if (token.status === "IN_REVIEW") {
               // 3DS required — open the authentication URL in a popup
               const authWindow = window.open(
@@ -186,18 +180,38 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
                 "xendit-3ds",
                 "width=500,height=600",
               );
-              const handler = (event: MessageEvent) => {
-                if (event.data?.status === "VERIFIED") {
-                  window.removeEventListener("message", handler);
-                  authWindow?.close();
-                  resolve(event.data.id ?? token.id);
-                } else if (event.data?.status === "FAILED") {
-                  window.removeEventListener("message", handler);
-                  authWindow?.close();
-                  reject(new Error("3DS authentication failed"));
+              const pollInterval = setInterval(async () => {
+                try {
+                  const { data } = await axiosInstance.get(
+                    `/xendit/token-status/${token.id}`,
+                  );
+
+                  if (data.status === "VALID" || data.status === "VERIFIED") {
+                    clearInterval(pollInterval);
+                    clearInterval(closeCheckInterval);
+                    authWindow?.close();
+                    resolve(token.id);
+                  } else if (
+                    data.status === "FAILED" ||
+                    (data.status === "IN_REVIEW" && data.failure_reason)
+                  ) {
+                    clearInterval(pollInterval);
+                    clearInterval(closeCheckInterval);
+                    authWindow?.close();
+                    reject(new Error("3DS authentication failed"));
+                  }
+                } catch (err) {
                 }
-              };
-              window.addEventListener("message", handler);
+              }, 2000);
+
+              const closeCheckInterval = setInterval(() => {
+                if (authWindow?.closed) {
+                  clearInterval(pollInterval);
+                  clearInterval(closeCheckInterval);
+                  reject(new Error("Authentication window was closed"));
+                }
+              }, 500);
+
               return;
             }
 
@@ -207,12 +221,6 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
           },
         );
       });
-      console.log("checkIn:", checkIn, "checkOut:", checkOut);
-      console.log(
-        "toApiFormat result:",
-        toApiFormat(checkIn),
-        toApiFormat(checkOut),
-      );
       const result = await createTransaction.mutateAsync({
         roomId: selectedRoom.id,
         checkIn: toApiFormat(checkIn),
@@ -222,13 +230,10 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
         paymentMethod: PaymentMethodEnum.CREDIT_CARD,
         tokenId,
       });
-      console.log("transaction result:", result);
-      console.log("✅ Card form valid, proceeding...");
       setTransactionId(result.id);
       setPaymentUrl(result.paymentUrl ?? null);
       setStep("processing_payment" as TransactionSteps);
     } catch (err: any) {
-      console.error("❌ Full error:", err);
       toast.error(err?.message || "Payment failed");
     } finally {
       setIsProcessing(false);
@@ -322,6 +327,7 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
                 <ProcessingPayment
                   selectedPaymentMethod={selectedPaymentMethod}
                   paymentUrl={paymentUrl}
+                  transactionId={transactionId}
                   onComplete={() => setStep("confirmation")}
                 />
               )}
@@ -346,7 +352,7 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
                   totalGuests={totalGuests}
                   bookedUnits={bookedUnits}
                   selectedPaymentMethod={selectedPaymentMethod}
-                  confirmationNumber={confirmationNumber}
+                  confirmationNumber={transactionId}
                   basePrice={selectedRoom.basePrice}
                 />
               )}

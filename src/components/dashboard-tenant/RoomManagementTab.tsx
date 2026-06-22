@@ -41,6 +41,7 @@ import { useRouter } from "next/navigation";
 import { parseAsInteger, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
+import PendingLoader from "../PendingLoader";
 
 const RoomManagementTab = () => {
   const router = useRouter();
@@ -193,22 +194,7 @@ const RoomManagementTab = () => {
 
       <div className="space-y-4">
         {isPending && (
-          <div className="flex flex-col items-center justify-center py-32 space-y-4 w-full border-2 border-dashed rounded-3xl bg-muted/5">
-            <div className="relative h-16 w-16 animate-pulse">
-               <Image
-                src="/images/nuit-logo.png"
-                width={300}
-                height={300}
-                alt="Loading..."
-                className="object-contain"
-                priority
-              />
-            </div>
-            <div className="flex flex-col items-center space-y-2">
-               <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-               <p className="text-xs font-medium text-muted-foreground">Fetching your rooms...</p>
-            </div>
-          </div>
+          <PendingLoader context="room" />
         )}
         {!isPending && filteredRooms.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 px-4 border-2 border-dashed rounded-3xl bg-muted/30">

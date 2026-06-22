@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useCancelTransactionByTenant, useConfirmTransaction, useGetTransactionIdByTenant, useRejectTransaction } from "@/hooks/useTenantTransactions";
+import { useCancelTransactionByTenant, useConfirmTransactionByTenant, useGetTransactionIdByTenant, useRejectTransaction } from "@/hooks/useTenantTransactions";
 import { formatEnum } from "@/lib/enum-utils";
 import { formatCurrency } from "@/lib/price/currency";
 import { TransactionStatus, transactionStatusConfig } from "@/types/transaction";
@@ -48,7 +48,7 @@ const TenantTransactionDetails = ({
   
   const { data: t, isPending } = useGetTransactionIdByTenant(transactionId);
 
-  const confirmMutation = useConfirmTransaction();
+  const confirmMutation = useConfirmTransactionByTenant();
   const rejectMutation = useRejectTransaction();
   const cancelMutation = useCancelTransactionByTenant();
 
@@ -265,8 +265,7 @@ const TenantTransactionDetails = ({
             
             <div className="flex items-center gap-3.5 pb-4 border-b border-border">
               <div className="w-12 h-12 rounded-xl bg-linear-to-br from-primary/10 to-primary/20 flex items-center justify-center text-primary font-bold text-sm shadow-inner shrink-0">
-                {t.user.firstName[0].toUpperCase()}
-                {t.user.lastName[0].toUpperCase()}
+                {(t.user.firstName[0] ?? t.user.lastName[0] ?? "?").toUpperCase()}
               </div>
               <div className="min-w-0">
                 <p className="font-heading font-bold text-base text-foreground truncate">

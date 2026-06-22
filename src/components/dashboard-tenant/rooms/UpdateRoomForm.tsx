@@ -78,7 +78,7 @@ const UpdateRoomForm = () => {
   useEffect(() => {
     if (roomData) {
       form.reset({
-        propertyId: roomData.property?.id,
+        propertyId: roomData.propertyId,
         name: roomData.name,
         description: roomData.description || "",
         basePrice: roomData.basePrice,
@@ -124,7 +124,6 @@ const UpdateRoomForm = () => {
       await deleteRoomImage(roomImageId);
       setImageToDelete(null);
     } catch (error) {
-      console.error("Delete image failed:", error);
     }
   };
 
@@ -151,7 +150,6 @@ const UpdateRoomForm = () => {
       await new Promise((resolve) => setTimeout(resolve, 500));
       router.push("/dashboard/tenant/room");
     } catch (error) {
-      console.error("Update room failed:", error);
     } finally {
       setIsSubmitting(false);
     }

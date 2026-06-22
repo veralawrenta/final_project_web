@@ -4,8 +4,8 @@ export const createSeasonalRatesSchema = z
   .object({
     propertyId: z.number().min(1, "Please select a property"),
     name: z.string().min(1, "Seasonal rate name is required"),
-    startDate: z.string(),
-    endDate: z.string(),
+    startDate: z.date(),
+    endDate: z.date(),
     fixedPrice: z.number().min(1, "Fixed price must be at least Rp 1"),
   })
   .superRefine((data, ctx) => {

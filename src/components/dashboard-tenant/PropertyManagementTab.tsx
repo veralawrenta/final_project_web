@@ -37,6 +37,7 @@ import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import Image from "next/image"; // Added for the branded loader
+import PendingLoader from "../PendingLoader";
 
 type SortBy = "name" | "price";
 type SortOrder = "asc" | "desc";
@@ -220,21 +221,7 @@ export default function PropertyManagementTab({
         </div>
       )}
       {isPending && (
-        <div className="flex flex-col items-center justify-center py-32 space-y-4 w-full border-2 border-dashed rounded-4xl bg-muted/5">
-          <div className="relative h-16 w-16 animate-pulse">
-            <Image
-              src="/images/nuit-logo.png"
-              fill
-              alt="Loading..."
-              className="object-contain"
-              priority
-            />
-          </div>
-          <div className="flex flex-col items-center space-y-2">
-            <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            <p className="text-xs font-medium text-muted-foreground">Fetching properties...</p>
-          </div>
-        </div>
+        <PendingLoader context="property" />
       )}
 
       {!isPending && (

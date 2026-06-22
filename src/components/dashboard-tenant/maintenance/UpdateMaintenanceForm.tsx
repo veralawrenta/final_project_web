@@ -82,8 +82,8 @@ export default function UpdateMaintenanceBlockPage() {
       const room = allRooms.find((r) => r.id === blockData.room?.id);
       if (!room) return;
 
-      if (room.property?.id !== undefined) {
-        setSelectedPropertyId(String(room.property?.id));
+      if (room.propertyId !== undefined) {
+        setSelectedPropertyId(String(room.propertyId));
       }
       setSelectedRoomId(String(blockData.room?.id));
 
@@ -91,7 +91,6 @@ export default function UpdateMaintenanceBlockPage() {
       const endDate = parseISO(blockData.endDate);
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        console.error("❌ Invalid dates after parsing!");
         return;
       }
 
@@ -105,7 +104,7 @@ export default function UpdateMaintenanceBlockPage() {
   }, [blockData, allRooms, form]);
 
   const filteredRooms = selectedPropertyId
-    ? allRooms.filter((room) => room.property?.id === Number(selectedPropertyId))
+    ? allRooms.filter((room) => room.propertyId === Number(selectedPropertyId))
     : [];
 
   const selectedRoom = allRooms.find((r) => r.id === Number(selectedRoomId));
@@ -129,7 +128,6 @@ export default function UpdateMaintenanceBlockPage() {
       });
       handleCancel();
     } catch (error) {
-      console.error("Failed to update maintenance block:", error);
     }
   };
   if (blocksLoading) {

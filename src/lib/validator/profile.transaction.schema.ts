@@ -56,9 +56,9 @@ export const createTransactionSchema = z.object({
       .regex(/^(0[1-9]|1[0-2])$/, "Expired month must be between 01 and 12"),
     expiredYear: z
       .string()
-      .regex(/^\d{4}$/, "Expired year must be a 4-digit number")
+      .regex(/^\d{2}$/, "Expired year must be a 2-digit number")
       .refine(
-        (year) => Number(year) >= new Date().getFullYear(),
+        (year) => Number(`20${year}`) >= new Date().getFullYear(),
         "Expired year must be this year or later",
       ),
     cvv: z

@@ -1,10 +1,11 @@
 import { axiosInstance } from "@/lib/axios";
 import { TenantActivityResponse } from "@/types/dashboard";
 import { PaginationQueryParams } from "@/types/pagination";
-import { CalendarTransaction, MonthlyRevenue, TenantTransactionResponse, TransactionManagementPayload, Transactions, TransactionStatusFilter } from "@/types/transaction";
+import { CalendarTransaction, MonthlyRevenue, TenantTransactionResponse, TransactionManagementPayload, TransactionStatusFilter } from "@/types/transaction";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface TenantTransactionQueryParams extends PaginationQueryParams {
@@ -132,9 +133,10 @@ export const useRejectTransaction = () => {
   });
 };
 
-export const useConfirmTransaction = () => {
+export const useConfirmTransactionByTenant = () => {
   const queryClient = useQueryClient();
   const session = useSession();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (transactionId: string) => {
@@ -154,6 +156,9 @@ export const useConfirmTransaction = () => {
       queryClient.invalidateQueries({
         queryKey: ["tenantTransactions", "userTransactions"],
       });
+      setTimeout(() => {
+        router.refresh();
+      }, 500)
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(

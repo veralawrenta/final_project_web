@@ -2,6 +2,7 @@
 import { useMeProfile } from "@/hooks/useProfile";
 import {
   BadgeDollarSign,
+  BadgePercent,
   BedDouble,
   Building2,
   ChevronDown,
@@ -75,7 +76,7 @@ const navItems: NavItem[] = [
   {
     label: "Seasonal Rates",
     href: "/dashboard/tenant/seasonal-rates",
-    icon: <BadgeDollarSign className="w-5 h-5" />,
+    icon: <BadgePercent className="w-5 h-5" />,
   },
   {
     label: "Setting",

@@ -68,7 +68,7 @@ export const useCreateSeasonalRates = () => {
 
   return useMutation({
     mutationFn: async (
-      payload: z.infer<typeof createSeasonalRatesSchema> //& { roomId: number }
+      payload: z.infer<typeof createSeasonalRatesSchema>
     ) => {
       const formattedBody = {
         name: payload.name,
