@@ -1,5 +1,5 @@
 import { MasterAmenity } from "./amenity";
-import { RoomIdPublic, RoomImage } from "./room";
+import { Room, RoomIdPublic, RoomImage } from "./room";
 
 export enum PropertyType {
   APARTMENT = "APARTMENT",
@@ -113,36 +113,13 @@ export interface TenantProperty extends Omit<
   longitude?: number;
   status: PropertyStatus;
   amenities: string[];
-  rooms: Array<{
-    id: number;
-    name: string;
-    description: string;
-    basePrice: number;
-    totalUnits: number;
-    totalGuests: number;
-    roomImages: RoomImage[];
-    roomNonAvailability: Array<{
-      id: number;
-      reason: string;
-      startDate: Date;
-      endDate: Date;
-    }>;
-    seasonalRates: Array<{
-      id: number;
-      name: string;
-      startDate: Date;
-      endDate: Date;
-      fixedPrice: number;
-    }>;
-  }>;
-}
-export interface TenantProperties extends TenantProperty {
-  hasMaintenance: boolean;
-  hasPropertyImages: boolean;
-  hasSeasonalRate: boolean;
-  hasPublishableRoom: boolean;
-  lowestPrice: number | null;
-  totalRooms: number;
+  rooms: Room[]
+  hasMaintenance?: boolean;
+  hasPropertyImages?: boolean;
+  hasSeasonalRate?: boolean;
+  hasPublishableRoom?: boolean;
+  lowestPrice?: number | null;
+  totalRooms?: number;
 }
 
 export type EditPropertyTypes = {

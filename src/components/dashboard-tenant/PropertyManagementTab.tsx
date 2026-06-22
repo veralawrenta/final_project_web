@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useDeleteProperty, useGetTenantProperties } from "@/hooks/useProperty";
 import { formatCurrency } from "@/lib/price/currency";
-import { PropertyType, TenantProperties } from "@/types/property";
+import { PropertyType, TenantProperty } from "@/types/property";
 import {
   Edit,
   Eye,
@@ -129,9 +129,9 @@ export default function PropertyManagementTab({
     setPage(1);
   };
 
-  const deletingProperty: TenantProperties | undefined =
+  const deletingProperty: TenantProperty | undefined =
     tenantProperties?.data.find(
-      (p: TenantProperties) => p.id === isDeletingProperty
+      (p: TenantProperty) => p.id === isDeletingProperty
     );
   const hasActiveFilters =
     search.trim() !== "" ||
@@ -260,7 +260,7 @@ export default function PropertyManagementTab({
           ) : (
             <>
               <div className="grid gap-4">
-                {tenantProperties.data.map((property: TenantProperties) => (
+                {tenantProperties.data.map((property: TenantProperty) => (
                   <div
                     key={property.id}
                     className="bg-card rounded-2xl border border-border overflow-hidden hover:shadow-md transition-shadow"
@@ -304,7 +304,7 @@ export default function PropertyManagementTab({
                               <MapPin className="h-3.5 w-3.5" />
                               <span className="text-sm">{property.city.name}</span>
                             </div>
-                            {property.lowestPrice !== null && (
+                            {property.lowestPrice != null && (
                               <p className="text-lg font-bold mt-2">
                                 {formatCurrency(property.lowestPrice)}
                                 <span className="text-sm font-normal text-muted-foreground">
@@ -313,7 +313,7 @@ export default function PropertyManagementTab({
                                 </span>
                               </p>
                             )}
-                            {property.totalRooms > 0 && (
+                            {!!property.totalRooms && property.totalRooms > 0 &&  (
                               <p className="text-sm text-muted-foreground mt-2">
                                 {property.totalRooms}{" "}
                                 {property.totalRooms === 1 ? "room" : "rooms"} available

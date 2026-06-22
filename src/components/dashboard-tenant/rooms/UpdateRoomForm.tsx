@@ -78,7 +78,7 @@ const UpdateRoomForm = () => {
   useEffect(() => {
     if (roomData) {
       form.reset({
-        propertyId: roomData.property?.id,
+        propertyId: roomData.propertyId,
         name: roomData.name,
         description: roomData.description || "",
         basePrice: roomData.basePrice,

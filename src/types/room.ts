@@ -25,7 +25,7 @@ export interface RoomNonAvailability {
 export interface Room {
   id: number;
   name: string;
-  propertyId: number;
+  propertyId?: number;
   totalGuests: number;
   totalUnits: number;
   basePrice: number;

@@ -34,7 +34,7 @@ export default function CreateSeasonalRatePage() {
         .map((r) => ({
           id: r.id,
           name: r.name,
-          propertyId: r.property?.id!,
+          propertyId: r.propertyId,
           propertyName: r.property!.name,
         })),
     [roomsData?.data]
