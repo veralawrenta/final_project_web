@@ -12,7 +12,7 @@ import {
   cardDetailsSchema,
   PaymentMethodEnum,
 } from "@/lib/validator/profile.transaction.schema";
-import { Property, PropertyRoomDetail } from "@/types/property";
+import { PropertyRoomDetail } from "@/types/property";
 import {
   TransactionPaymentMethod,
   TransactionSteps,
@@ -57,7 +57,8 @@ const CreateTransactionComponent = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const roomId = Number(searchParams.get("roomId"));
-const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms[0];
+  const selectedRoom =
+    property.rooms.find((r) => r.id === roomId) ?? property.rooms[0];
 
   const [step, setStep] = useState<TransactionSteps>("details");
 
@@ -92,7 +93,8 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
       : 0;
 
   const total = (() => {
-    const sub = nights * Math.max(bookedUnits, 1) * (selectedRoom.basePrice ?? 0);
+    const sub =
+      nights * Math.max(bookedUnits, 1) * (selectedRoom.basePrice ?? 0);
     return sub + Math.round(sub * 0.1) + Math.round(sub * 0.05);
   })();
 
@@ -156,16 +158,18 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
       const tokenId = await new Promise<string>((resolve, reject) => {
         Xendit.card.createToken(
           {
-            amount: total,
+            amount: String(total),
             card_holder_first_name: cardValues.cardHolderFirstName,
             card_holder_last_name: cardValues.cardHolderLastName,
             card_number: cardValues.cardNumber.replace(/\s/g, ""),
             card_exp_month: cardValues.expiredMonth,
-            card_exp_year: cardValues.expiredYear,
+            card_exp_year:
+              cardValues.expiredYear.length === 2
+                ? `20${cardValues.expiredYear}`
+                : cardValues.expiredYear,
             card_cvn: cardValues.cvv,
             card_holder_email: cardValues.cardholderEmail,
             is_multiple_use: false,
-            skip_three_d_secure: true,
           },
           (err: any, token: any) => {
             if (err) return reject(err);
