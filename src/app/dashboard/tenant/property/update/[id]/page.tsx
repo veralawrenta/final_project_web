@@ -51,7 +51,6 @@ const EditPropertyPage = () => {
         );
       }
     } catch (error) {
-      console.error(error);
     }
   };
 

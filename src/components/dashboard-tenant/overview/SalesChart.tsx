@@ -60,7 +60,7 @@ export function SalesChart() {
         </div>
       </div>
     );
-  };
+  }
 
   if (!monthlyRevenue || monthlyRevenue.length === 0) {
     return (
@@ -80,7 +80,7 @@ export function SalesChart() {
         </CardContent>
       </Card>
     );
-  };
+  }
 
   return (
     <Card className="shadow-sm border-border">
@@ -97,48 +97,42 @@ export function SalesChart() {
           config={chartConfig}
           className="aspect-21/9 max-h-[320px] w-full"
         >
-          {isPending ? (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Loading...
-            </div>
-          ) : (
-            <AreaChart
-              accessibilityLayer
-              data={chartData}
-              margin={{ left: 12, right: 12 }}
-            >
-              <CartesianGrid vertical={false} className="stroke-muted/60" />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                className="text-xs text-muted-foreground font-medium"
-              />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              <defs>
-                <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--color-revenue)"
-                    stopOpacity={0.4}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--color-revenue)"
-                    stopOpacity={0.01}
-                  />
-                </linearGradient>
-              </defs>
-              <Area
-                dataKey="revenue"
-                type="natural"
-                fill="url(#fillRevenue)"
-                stroke="var(--color-revenue)"
-                strokeWidth={2}
-              />
-            </AreaChart>
-          )}
+          <AreaChart
+            accessibilityLayer
+            data={chartData}
+            margin={{ left: 12, right: 12 }}
+          >
+            <CartesianGrid vertical={false} className="stroke-muted/60" />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              className="text-xs text-muted-foreground font-medium"
+            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <defs>
+              <linearGradient id="fillRevenue" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-revenue)"
+                  stopOpacity={0.4}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-revenue)"
+                  stopOpacity={0.01}
+                />
+              </linearGradient>
+            </defs>
+            <Area
+              dataKey="revenue"
+              type="natural"
+              fill="url(#fillRevenue)"
+              stroke="var(--color-revenue)"
+              strokeWidth={2}
+            />
+          </AreaChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="border-t pt-4">

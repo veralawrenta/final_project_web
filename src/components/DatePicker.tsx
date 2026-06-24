@@ -1,84 +1,196 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { formatCurrency } from "@/lib/price/currency";
+import { cn } from "@/lib/utils";
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
-import { Calendar } from "lucide-react";
-import { PropertyDayButton } from "./property/search-bar/PropertyDayButton";
+  addMonths,
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isSameDay,
+  isSameMonth,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
+} from "date-fns";
+import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
 
 interface CalendarDay {
   date: string;
   lowestPrice: number | null;
-  roomPrices?: { isSeasonalRate: boolean }[];
+  isSeasonalRate?: boolean;
+  availableRoomsCount?: number;
 }
 
 interface DatePickerProps {
   label: string;
   value?: Date;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSelect: (date?: Date) => void;
+  onSelect: (date: Date) => void;
+  calendarData?: CalendarDay[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   disabled?: boolean;
   disabledDate?: (date: Date) => boolean;
-  calendar?: CalendarDay[];
 }
 
 export function DatePicker({
   label,
   value,
-  open,
-  onOpenChange,
   onSelect,
-  disabled,
+  calendarData = [],
+  open: controlledOpen,
+  onOpenChange,
+  disabled = false,
   disabledDate,
-  calendar = [],
 }: DatePickerProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(value ?? new Date());
+
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = (next: boolean) => {
+    if (onOpenChange) onOpenChange(next);
+    else setInternalOpen(next);
+  };
+
+  // Map calendar data for O(1) lookups by date string
+  const priceMap = useMemo(() => {
+    const map = new Map<string, CalendarDay>();
+    calendarData.forEach((day) => map.set(day.date, day));
+    return map;
+  }, [calendarData]);
+
+  // Generate all days needed to display a perfect grid for the current month
+  const daysGrid = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(monthStart);
+    const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // Sunday start
+    const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
+
+    return eachDayOfInterval({ start: startDate, end: endDate });
+  }, [currentMonth]);
+
+  const handleDateClick = (date: Date) => {
+    onSelect(date);
+    setIsOpen(false);
+  };
+
+  const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+
   return (
-    <div>
-      <label className="block text-xs mb-1.5 text-muted-foreground">
+    <div className="relative w-full">
+      <label className="block text-xs mb-1.5 font-medium text-muted-foreground">
         {label}
       </label>
 
-      <Popover open={open} onOpenChange={onOpenChange}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            disabled={disabled}
-            className="w-full h-12 bg-secondary justify-start"
-          >
-            <Calendar className="mr-2 h-4 w-4" />
-            {value ? format(value, "dd-MM-yyyy") : "Select date"}
-          </Button>
-        </PopoverTrigger>
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full h-12 px-3 bg-secondary border border-input rounded-md flex items-center justify-start text-sm transition-colors hover:bg-accent focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <Calendar className="mr-2 h-4 w-4 shrink-0 text-muted-foreground" />
+        <span>{value ? format(value, "dd-MM-yyyy") : "Select date"}</span>
+      </button>
 
-        {/* FIX 1: constrain width to viewport on mobile, wider on sm+
-            - w-[calc(100vw-2rem)] caps it to screen width minus padding on mobile
-            - sm:w-auto lets it size naturally on larger screens
-            - overflow-hidden prevents any child from breaking out
-            - align="start" avoids it popping off the right edge         */}
-        <PopoverContent
-          className="p-0 w-[calc(100vw-2rem)] sm:w-auto overflow-hidden"
-          align="start"
-          sideOffset={8}
-        >
-          <CalendarComponent
-            mode="single"
-            selected={value}
-            onSelect={onSelect}
-            disabled={disabledDate}
-            className="p-2 sm:p-3 w-full"
-            components={{
-              DayButton: (props) => (
-                <PropertyDayButton {...props} calendar={calendar} />
-              ),
-            }}
+      {/* Calendar Dropdown Panel */}
+      {isOpen && (
+        <>
+          {/* Backdrop for easy closing on mobile tap outside */}
+          <div
+            className="fixed inset-0 z-40 lg:hidden"
+            onClick={() => setIsOpen(false)}
           />
-        </PopoverContent>
-      </Popover>
+
+          <div className="absolute left-0 mt-2 z-50 p-4 bg-background border rounded-xl shadow-lg w-[calc(100vw-2rem)] sm:w-[380px] max-w-sm">
+            {/* Header: Month Navigation */}
+            <div className="flex items-center justify-between mb-4">
+              <button
+                type="button"
+                onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+                className="p-1.5 rounded-md hover:bg-accent border"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <h2 className="font-semibold text-sm">
+                {format(currentMonth, "MMMM yyyy")}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+                className="p-1.5 rounded-md hover:bg-accent border"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Weekday Labels Grid */}
+            <div className="grid grid-cols-7 gap-1 text-center mb-2">
+              {weekdays.map((day) => (
+                <div
+                  key={day}
+                  className="text-muted-foreground text-[11px] font-medium uppercase tracking-wider py-1"
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Days Grid */}
+            <div className="grid grid-cols-7 gap-x-1 gap-y-2">
+              {daysGrid.map((date, index) => {
+                const dateStr = format(date, "dd-MM-yyyy");
+                const dayData = priceMap.get(dateStr);
+                const isSelected = value && isSameDay(date, value);
+                const isCurrentMonth = isSameMonth(date, currentMonth);
+                const isDisabledByRule = disabledDate?.(date) ?? false;
+
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    disabled={!isCurrentMonth}
+                    onClick={() => handleDateClick(date)}
+                    className={cn(
+                      "h-12 w-full p-1 rounded-md flex flex-col items-center justify-between transition-all focus:outline-none",
+                      !isCurrentMonth && "opacity-0 pointer-events-none", // Hide days outside current month completely
+                      isDisabledByRule &&
+                        isCurrentMonth &&
+                        "opacity-30 cursor-not-allowed hover:bg-transparent",
+                      isSelected
+                        ? "bg-primary text-primary-foreground font-medium"
+                        : "hover:bg-accent",
+                    )}
+                  >
+                    {/* Date Number */}
+                    <span className="text-xs font-medium">
+                      {format(date, "d")}
+                    </span>
+
+                    {/* Price Label */}
+                    {dayData?.lowestPrice ? (
+                      <span
+                        className={cn(
+                          "text-[7px] px-1 rounded-sm tracking-tight font-semibold",
+                          isSelected
+                            ? "text-primary-foreground"
+                            : dayData.isSeasonalRate
+                              ? "text-orange-500"
+                              : "text-blue-600",
+                        )}
+                      >
+                        {formatCurrency(dayData.lowestPrice)}
+                      </span>
+                    ) : (
+                      <span className="h-3 w-1" /> /* Spacer to hold layout balance */
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

@@ -52,7 +52,6 @@ const CreateRoomForm = () => {
         formData,
       });
     } catch (error: any) {
-      console.error("Failed to create room:", error);
     }
   };
 

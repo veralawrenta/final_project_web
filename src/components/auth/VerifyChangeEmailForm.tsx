@@ -47,7 +47,6 @@ const VerifyChangeEmailForm = () => {
           router.replace("/profile/user");
         }
       } catch (err) {
-        console.error(err);
         setError("Invalid or expired verification link");
         toast.error("Verification failed");
       } finally {

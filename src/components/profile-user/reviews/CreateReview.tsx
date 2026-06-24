@@ -63,7 +63,6 @@ const CreateReviewComponent = () => {
       });
       setIsSubmitted(true);
     } catch (error) {
-      console.error("Failed to submit review:", error);
     }
   };
 

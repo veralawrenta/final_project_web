@@ -1,28 +1,34 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useGetMonthCalendarSearch } from "@/hooks/useProperty";
-import { calculateTotalPrice } from "@/lib/price/calculatePrice";
-import { addMonths, differenceInCalendarDays, format, isBefore, startOfDay } from "date-fns";
+import { addMonths, format, isBefore, startOfDay } from "date-fns";
 import { Search } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DatePicker } from "../DatePicker";
 
 interface Props {
   propertyId: number;
   maxGuests?: number;
-  defaultCheckIn? : Date;
+  defaultCheckIn?: Date;
   defaultCheckOut?: Date;
-  defaultGuests?: number;
+ guests?: number;
+ onGuestsChange : (guests: number) => void;
 }
 
-export function PropertyDetailSearchBar({ propertyId, maxGuests = 10, defaultCheckIn, defaultCheckOut, defaultGuests }: Props) {
+export function PropertyDetailSearchBar({
+  propertyId,
+  maxGuests = 10,
+  defaultCheckIn,
+  defaultCheckOut,
+  guests,
+  onGuestsChange,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
 
   const [checkIn, setCheckIn] = useState<Date | undefined>(defaultCheckIn);
   const [checkOut, setCheckOut] = useState<Date | undefined>(defaultCheckOut);
-  const [guests, setGuests] = useState(defaultGuests);
   const [openCheckIn, setOpenCheckIn] = useState(false);
   const [openCheckOut, setOpenCheckOut] = useState(false);
 
@@ -32,19 +38,20 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10, defaultChe
 
   const { data } = useGetMonthCalendarSearch(propertyId, calendarMonth, true);
 
-  const nights = checkIn && checkOut ? differenceInCalendarDays(checkOut, checkIn) : 0;
-
-  const totalPrice =
-    checkIn && checkOut && data
-      ? calculateTotalPrice(checkIn, checkOut, data.calendar)
-      : 0;
+  const calendarForPicker = useMemo(() => {
+    return (data?.calendar ?? []).map((day) => ({
+      date: day.date,
+      lowestPrice: day.lowestPrice,
+      isSeasonalRate: day.roomPrices?.some((r) => r.isSeasonalRate) ?? false,
+    }));
+  }, [data?.calendar]);
 
   const search = () => {
     if (!checkIn || !checkOut) return;
     const params = new URLSearchParams({
       checkIn: format(checkIn, "dd-MM-yyyy"),
       checkOut: format(checkOut, "dd-MM-yyyy"),
-      guests: String(guests ?? 1),
+      guests: String(guests),
     });
 
     router.push(`${pathname}?${params.toString()}`);
@@ -64,16 +71,16 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10, defaultChe
             setCheckOut(undefined);
             setOpenCheckIn(false);
           }}
-          disabledDate={(date) => {
+          disabledDate={(date: Date) => {
             const d = date;
             if (isBefore(startOfDay(d), startOfDay(new Date()))) return true;
             const day = data?.calendar.find(
-              (c) => c.date === format(d, "dd-MM-yyyy")
+              (c) => c.date === format(d, "dd-MM-yyyy"),
             );
             if (day && day.availableRoomsCount === 0) return true;
             return false;
           }}
-          calendar={data?.calendar}
+          calendarData={calendarForPicker}
         />
 
         <DatePicker
@@ -87,24 +94,23 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10, defaultChe
             setCheckOut(date);
             setOpenCheckOut(false);
           }}
-          disabledDate={(date) => {
+          disabledDate={(date: Date) => {
             if (!checkIn) return true;
 
             const d = date;
 
             if (d <= checkIn) return true;
-            if (maxCheckoutDate && d > maxCheckoutDate)
-              return true;
+            if (maxCheckoutDate && d > maxCheckoutDate) return true;
 
             const day = data?.calendar.find(
-              (c) => c.date === format(d, "dd-MM-yyyy")
+              (c) => c.date === format(d, "dd-MM-yyyy"),
             );
 
             if (day && day.availableRoomsCount === 0) return true;
 
             return false;
           }}
-          calendar={data?.calendar}
+          calendarData={calendarForPicker}
         />
 
         <div>
@@ -113,7 +119,7 @@ export function PropertyDetailSearchBar({ propertyId, maxGuests = 10, defaultChe
           </label>
           <select
             value={guests}
-            onChange={(e) => setGuests(Number(e.target.value))}
+            onChange={(e) => onGuestsChange(Number(e.target.value))}
             className="w-full h-12 bg-secondary rounded-xl px-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary transition-all appearance-none cursor-pointer"
           >
             {Array.from({ length: maxGuests }, (_, i) => i + 1).map((n) => (

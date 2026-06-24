@@ -5,25 +5,24 @@ import {
   Field,
   FieldDescription,
   FieldGroup,
-  FieldLabel,
-  FieldSeparator,
+  FieldLabel
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { axiosInstance } from "@/lib/axios";
 import { cn } from "@/lib/utils";
+import { Role } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import * as z from "zod";
 import { loginSchema } from "../../lib/validator/auth.login.schema";
-import { toast, Toaster } from "sonner";
 import { Card, CardContent } from "../ui/card";
-import Image from "next/image";
-import { Loader2 } from "lucide-react";
-import { Role } from "@/types/user";
 
 export function LoginForTenantForm({
   className,

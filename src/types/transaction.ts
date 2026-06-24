@@ -34,6 +34,10 @@ export interface Transactions {
       propertyImages: {
         urlImages: string;
       }[];
+      tenant: {
+        id: number,
+        tenantName: string;
+      }
     };
   };
   user: {

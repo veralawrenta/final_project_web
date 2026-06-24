@@ -1,27 +1,35 @@
+import { useGetTransactionIdByUser } from "@/hooks/useTransactions";
+import { TransactionPaymentMethod } from "@/types/transaction";
 import { Lock, Shield } from "lucide-react";
 import { useEffect } from "react";
-import { TransactionPaymentMethod } from "@/types/transaction";
 
 interface ProcessingPaymentProps {
   selectedPaymentMethod: TransactionPaymentMethod;
   paymentUrl: string | null;
+  transactionId: string;
   onComplete: () => void;
 }
 
 const ProcessingPayment = ({
   selectedPaymentMethod,
   paymentUrl,
+  transactionId,
   onComplete,
 }: ProcessingPaymentProps) => {
+  const {data: transactions} = useGetTransactionIdByUser(transactionId, { refetchInterval: 2000});
+
   useEffect(() => {
-    if (!paymentUrl) {
-      // No redirect URL — auto-advance after 3s as fallback
-      const timer = setTimeout(onComplete, 3000);
-      return () => clearTimeout(timer);
-    }
-    // Real Xendit URL — redirect immediately
+    if (paymentUrl) {
     window.location.href = paymentUrl;
-  }, [paymentUrl, onComplete]);
+    return
+  }
+  if (
+    transactions?.status === "CONFIRMED" ||
+    transactions?.status === "WAITING_FOR_CONFIRMATION"
+  ) {
+    onComplete();
+  }
+}, [transactions?.status, paymentUrl, onComplete]);
 
   const methodLabel =
     selectedPaymentMethod === "CREDIT_CARD" ? "card" : "SHOPEEPAY";

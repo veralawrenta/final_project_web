@@ -86,8 +86,6 @@ function DateRangePicker({
         "MMM d, yyyy"
       )}`;
     } catch (error) {
-      // If date formatting fails, return placeholder
-      console.error("Date formatting error:", error);
       return placeholder;
     }
   }, [value, placeholder]);

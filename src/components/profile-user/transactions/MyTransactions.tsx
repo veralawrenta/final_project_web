@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import PaginationSection from "@/components/PaginationSection";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,35 +8,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useGetAllUserTransaction
-} from "@/hooks/useTransactions";
+import { useGetAllUserTransaction } from "@/hooks/useTransactions";
 import { SortBy, SortOrder } from "@/types/pagination";
-import { TransactionStatus, TransactionStatusFilter } from "@/types/transaction";
+import {
+  TransactionStatus,
+  TransactionStatusFilter,
+} from "@/types/transaction";
 import { Calendar, Search, SlidersHorizontal } from "lucide-react";
 import Link from "next/link";
 import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
 import { useDebounceValue } from "usehooks-ts";
 import TransactionCard from "./TransactionCardList";
+import Image from "next/image";
+import PendingLoader from "@/components/PendingLoader";
 
 const ITEMS_PER_PAGE = 4;
 
 const FILTER_TABS: {
   key: TransactionStatusFilter;
   label: string;
-  summaryKey?: "upcoming" | "activeGuests" | "completed" | "pending" | "cancelled";
+  summaryKey?:
+    | "upcoming"
+    | "activeGuests"
+    | "completed"
+    | "pending"
+    | "cancelled";
 }[] = [
   { key: "ALL", label: "All Bookings" },
   { key: "ONGOING", label: "Ongoing", summaryKey: "activeGuests" },
   { key: "UPCOMING", label: "Upcoming", summaryKey: "upcoming" },
   { key: "COMPLETED", label: "Completed", summaryKey: "completed" },
   { key: "PENDING", label: "Pending", summaryKey: "pending" },
-  { key: "CANCELLED", label: "Cancelled", summaryKey: "cancelled" }
+  { key: "CANCELLED", label: "Cancelled", summaryKey: "cancelled" },
 ];
 
-const TAB_TO_STATUS: Partial<Record<TransactionStatusFilter, TransactionStatus[]>> = {
-  ONGOING:   [TransactionStatus.CONFIRMED],
-  UPCOMING:  [
+const TAB_TO_STATUS: Partial<
+  Record<TransactionStatusFilter, TransactionStatus[]>
+> = {
+  ONGOING: [TransactionStatus.CONFIRMED],
+  UPCOMING: [
     TransactionStatus.CONFIRMED,
     TransactionStatus.WAITING_FOR_PAYMENT,
     TransactionStatus.WAITING_FOR_CONFIRMATION,
@@ -51,11 +61,11 @@ const TAB_TO_STATUS: Partial<Record<TransactionStatusFilter, TransactionStatus[]
     TransactionStatus.WAITING_FOR_PAYMENT,
     TransactionStatus.WAITING_FOR_CONFIRMATION,
   ],
-  CANCELLED: [  
+  CANCELLED: [
     TransactionStatus.CANCELLED_BY_USER,
     TransactionStatus.CANCELLED_BY_TENANT,
     TransactionStatus.EXPIRED,
-  ]
+  ],
 };
 
 const MyTransactions = () => {
@@ -72,7 +82,9 @@ const MyTransactions = () => {
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum<SortBy>(["createdAt", "propertyName"]).withDefault("createdAt"),
+    parseAsStringEnum<SortBy>(["createdAt", "propertyName"]).withDefault(
+      "createdAt",
+    ),
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
@@ -82,7 +94,8 @@ const MyTransactions = () => {
   const [debounceSearch] = useDebounceValue(search, 500);
 
   const tabConfig = FILTER_TABS.find((t) => t.key === activeTab)!;
-  const statusParams = tabConfig.key === "ALL" ? undefined : TAB_TO_STATUS[tabConfig.key];
+  const statusParams =
+    tabConfig.key === "ALL" ? undefined : TAB_TO_STATUS[tabConfig.key];
 
   const { data: userTransactions, isPending } = useGetAllUserTransaction({
     search: debounceSearch || undefined,
@@ -92,13 +105,14 @@ const MyTransactions = () => {
     sortOrder,
     status: statusParams,
   });
+  
 
   const transactions = userTransactions?.data ?? [];
   const meta = userTransactions?.meta;
   const summary = userTransactions?.summary;
 
   const tabCount = (tab: (typeof FILTER_TABS)[number]): number => {
-    if (tab.key === "ALL") return  summary?.totalTransactions ?? 0;
+    if (tab.key === "ALL") return summary?.totalTransactions ?? 0;
     if (tab.key === "UPCOMING") return 0;
     if (!tab.summaryKey) return 0;
     return summary?.[tab.summaryKey] ?? 0;
@@ -173,7 +187,10 @@ const MyTransactions = () => {
               <span className="hidden sm:inline">Sort:</span>
             </div>
 
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortBy)}>
+            <Select
+              value={sortBy}
+              onValueChange={(v) => setSortBy(v as SortBy)}
+            >
               <SelectTrigger className="h-9 w-[140px] rounded-xl text-sm">
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
@@ -183,7 +200,10 @@ const MyTransactions = () => {
               </SelectContent>
             </Select>
 
-            <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as SortOrder)}>
+            <Select
+              value={sortOrder}
+              onValueChange={(v) => setSortOrder(v as SortOrder)}
+            >
               <SelectTrigger className="h-9 w-[120px] rounded-xl text-sm">
                 <SelectValue placeholder="Order" />
               </SelectTrigger>
@@ -201,12 +221,7 @@ const MyTransactions = () => {
           </p>
 
           {isPending ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-36 rounded-2xl border border-border bg-card animate-pulse"
-              />
-            ))
+            <PendingLoader context="transaction"/>
           ) : transactions.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-12 text-center sm:p-12">
               <Calendar className="mx-auto h-10 w-10 text-muted-foreground/40 sm:h-12 sm:w-12" />
@@ -222,10 +237,7 @@ const MyTransactions = () => {
             </div>
           ) : (
             transactions.map((t) => (
-              <TransactionCard
-                key={t.id}
-                transaction={t}
-              />
+              <TransactionCard key={t.id} transaction={t} />
             ))
           )}
         </div>
@@ -235,7 +247,6 @@ const MyTransactions = () => {
             onChangePage={(p) => setPage(p)}
           />
         )}
-
       </div>
     </main>
   );

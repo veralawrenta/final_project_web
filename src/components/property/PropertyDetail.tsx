@@ -15,6 +15,7 @@ import { PropertyAmenities } from "./amenities/PropertyAmenities";
 import RoomCard from "./property-detail/RoomCard";
 import RoomPricePreview from "./property-detail/RoomPricePreview";
 import PropertyReviewCard from "./PropertyReviewCard";
+import { useSession } from "next-auth/react";
 
 const mapRoomToCard = (room: any): RoomIdPublic => ({
   id: room.id,
@@ -41,6 +42,8 @@ export default function PropertyDetail() {
   const checkOutParam = searchParams.get("checkOut");
   const guestsParam = searchParams.get("guests");
 
+  const [guests, setGuests] = useState(guestsParam ? Number(guestsParam) : 1);
+
   const today = new Date();
   const checkIn = checkInParam
     ? parse(checkInParam, "dd-MM-yyyy", new Date())
@@ -49,11 +52,13 @@ export default function PropertyDetail() {
     ? parse(checkOutParam, "dd-MM-yyyy", new Date())
     : new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
-  const guests = guestsParam ? Number(guestsParam) : 1;
   const nights = differenceInCalendarDays(checkOut, checkIn);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedRoom, setSelectedRoom] = useState<RoomIdPublic | null>(null);
+
+  const { status } = useSession();
+  const isSignIn = status === "authenticated";
 
   const {
     data: property,
@@ -67,7 +72,10 @@ export default function PropertyDetail() {
     Boolean(propertyId),
   );
 
-  const rooms: RoomIdPublic[] = useMemo(() => property?.rooms.map(mapRoomToCard) ?? [], [property]);
+  const rooms: RoomIdPublic[] = useMemo(
+    () => property?.rooms.map(mapRoomToCard) ?? [],
+    [property],
+  );
 
   useEffect(() => {
     if (property && !selectedRoom) {
@@ -116,8 +124,8 @@ export default function PropertyDetail() {
       ? property.propertyImages.map((img) => img.urlImages)
       : ["/placeholder-property.jpg"];
 
-  const handleContinue = () => {
-    if (!selectedRoom) return;
+  const buildContinueUrl = () => {
+    if (!selectedRoom) return null;
     const qs = new URLSearchParams({
       checkIn: format(checkIn, "dd-MM-yyyy"),
       checkOut: format(checkOut, "dd-MM-yyyy"),
@@ -127,6 +135,17 @@ export default function PropertyDetail() {
     router.push(
       `/properties/${propertyId}/rooms/${selectedRoom.id}/transaction?${qs.toString()}`,
     );
+  };
+
+  const handleContinue = () => {
+    if (!selectedRoom) return;
+
+    if (!isSignIn) {
+      router.push("/auth/login/user");
+      return;
+    }
+    const url = buildContinueUrl();
+    if (url) router.push(url);
   };
 
   return (
@@ -146,7 +165,8 @@ export default function PropertyDetail() {
             maxGuests={Math.max(...rooms.map((r) => r.totalGuests), 10)}
             defaultCheckIn={checkIn}
             defaultCheckOut={checkOut}
-            defaultGuests={guests}
+            guests={guests}
+            onGuestsChange={setGuests}
           />
         </div>
         <div className="relative mt-6 px-4 md:px-0">

@@ -59,10 +59,6 @@ export const useCreateTransaction = () => {
     mutationFn: async (
       values: CreateTransactionFormValues,
     ): Promise<TransactionResponse> => {
-      console.log("🔑 Token:", session.data?.user.accessToken);
-      console.log("🔑 Session:", session.data);
-
-      console.log("🚀 Transaction payload:", JSON.stringify(values, null, 2));
       const { data } = await axiosInstance.post(
         "/transactions",
           values,
@@ -88,7 +84,7 @@ export const useCreateTransaction = () => {
   });
 };
 
-export const useGetTransactionIdByUser = (transactionId: string) => {
+export const useGetTransactionIdByUser = (transactionId: string, options? : {refetchInterval?: number}) => {
   const session = useSession();
 
   return useQuery({
@@ -109,12 +105,14 @@ export const useGetTransactionIdByUser = (transactionId: string) => {
     },
     enabled: !!session.data?.user.accessToken && !!transactionId,
     staleTime: 5 * 60 * 1000,
+    ...options,
   });
 };
 
 export const useCancelTransactionByUser = () => {
   const queryClient = useQueryClient();
   const session = useSession();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (transactionId: string) => {
@@ -134,6 +132,9 @@ export const useCancelTransactionByUser = () => {
       queryClient.invalidateQueries({
         queryKey: ["tenantTransactions", "userTransactions"],
       });
+      setTimeout(() => {
+        router.refresh
+      }, 500)
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(
