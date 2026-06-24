@@ -1,14 +1,12 @@
 import { axiosInstance } from "@/lib/axios";
 import {
   createReplyReviewSchema,
-  CreateReviewPayload,
-  createReviewSchema,
+  CreateReviewPayload
 } from "@/lib/validator/dashboard.reviews.schema";
 import {
-  PageableResponse,
-  PaginationQueryParams,
+  PaginationQueryParams
 } from "@/types/pagination";
-import { ReviewResponse, Reviews } from "@/types/reviews";
+import { ReviewResponse } from "@/types/reviews";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
