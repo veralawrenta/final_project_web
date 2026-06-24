@@ -59,10 +59,6 @@ export const useCreateTransaction = () => {
     mutationFn: async (
       values: CreateTransactionFormValues,
     ): Promise<TransactionResponse> => {
-      console.log("🔑 Token:", session.data?.user.accessToken);
-      console.log("🔑 Session:", session.data);
-
-      console.log("🚀 Transaction payload:", JSON.stringify(values, null, 2));
       const { data } = await axiosInstance.post(
         "/transactions",
           values,

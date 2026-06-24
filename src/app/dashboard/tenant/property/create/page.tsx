@@ -51,7 +51,6 @@ const CreatePropertyStep1Page = ({
 
       router.push(`/dashboard/tenant/property/create/${property.id}/rooms`);
     } catch (error: any) {
-      console.error("Failed to create property:", error);
     }
   };
 

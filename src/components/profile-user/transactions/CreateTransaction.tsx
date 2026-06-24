@@ -135,7 +135,6 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
         totalGuests,
         paymentMethod: selectedPaymentMethod,
       });
-      console.log("transaction result:", result);
       setTransactionId(result.id);
       if (selectedPaymentMethod === "BANK_TRANSFER") {
         setStep("upload_proof");
@@ -154,10 +153,6 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
     setIsProcessing(true);
     try {
       Xendit.setPublishableKey(process.env.NEXT_PUBLIC_XENDIT_PUBLIC_KEY!);
-      console.log(
-        "💳 Card number being sent to Xendit:",
-        cardValues.cardNumber.replace(/\s/g, ""),
-      );
       const tokenId = await new Promise<string>((resolve, reject) => {
         Xendit.card.createToken(
           {
@@ -173,7 +168,6 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
             skip_three_d_secure: true,
           },
           (err: any, token: any) => {
-            console.log("Xendit token:", JSON.stringify(token, null, 2)); // ← add this
             if (err) return reject(err);
             if (token.status === "VERIFIED") {
               return resolve(token.id);
@@ -207,12 +201,6 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
           },
         );
       });
-      console.log("checkIn:", checkIn, "checkOut:", checkOut);
-      console.log(
-        "toApiFormat result:",
-        toApiFormat(checkIn),
-        toApiFormat(checkOut),
-      );
       const result = await createTransaction.mutateAsync({
         roomId: selectedRoom.id,
         checkIn: toApiFormat(checkIn),
@@ -222,13 +210,10 @@ const selectedRoom = property.rooms.find(r => r.id === roomId) ?? property.rooms
         paymentMethod: PaymentMethodEnum.CREDIT_CARD,
         tokenId,
       });
-      console.log("transaction result:", result);
-      console.log("✅ Card form valid, proceeding...");
       setTransactionId(result.id);
       setPaymentUrl(result.paymentUrl ?? null);
       setStep("processing_payment" as TransactionSteps);
     } catch (err: any) {
-      console.error("❌ Full error:", err);
       toast.error(err?.message || "Payment failed");
     } finally {
       setIsProcessing(false);
