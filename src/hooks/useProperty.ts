@@ -7,8 +7,7 @@ import {
   PropertyCard,
   PropertyRoomDetail,
   PropertyType,
-  TenantProperties,
-  TenantProperty,
+  TenantProperty
 } from "@/types/property";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -187,7 +186,7 @@ export const useGetTenantPropertyId = (propertyId: number) => {
   return useQuery({
     queryKey: ["tenant-property-id", propertyId],
     queryFn: async () => {
-      const { data } = await axiosInstance.get<TenantProperties>(
+      const { data } = await axiosInstance.get<TenantProperty>(
         `/properties/${propertyId}`,
         {
           headers: {

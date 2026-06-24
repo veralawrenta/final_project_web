@@ -2,11 +2,11 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { TenantProperties } from "@/types/property";
+import { TenantProperty } from "@/types/property";
 import { AlertCircle, CheckCircle2, Home, MapPin, Zap } from "lucide-react";
 
 interface PropertyDetailsProps {
-  property: TenantProperties;
+  property: TenantProperty;
 }
 
 export default function PropertyDetails({ property }: PropertyDetailsProps) {
