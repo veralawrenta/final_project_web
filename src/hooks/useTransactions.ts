@@ -84,7 +84,7 @@ export const useCreateTransaction = () => {
   });
 };
 
-export const useGetTransactionIdByUser = (transactionId: string) => {
+export const useGetTransactionIdByUser = (transactionId: string, options? : {refetchInterval?: number}) => {
   const session = useSession();
 
   return useQuery({
@@ -105,6 +105,7 @@ export const useGetTransactionIdByUser = (transactionId: string) => {
     },
     enabled: !!session.data?.user.accessToken && !!transactionId,
     staleTime: 5 * 60 * 1000,
+    ...options,
   });
 };
 

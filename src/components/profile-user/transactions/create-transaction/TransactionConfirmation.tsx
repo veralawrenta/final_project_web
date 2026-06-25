@@ -10,13 +10,13 @@ import Link from "next/link";
 
 interface TransactionConfirmationProps {
   property: PropertyRoomDetail;
-  checkIn: string;   // "yyyy-MM-dd"
-  checkOut: string;  // "yyyy-MM-dd"
+  checkIn: string;   
+  checkOut: string;
   totalGuests: number;
   bookedUnits: number;
   selectedPaymentMethod: TransactionPaymentMethod;
   confirmationNumber: string;
-  basePrice: number;
+  totalPrice: number;
 }
 
 const paymentMethodLabels: Record<TransactionPaymentMethod, string> = {
@@ -33,15 +33,8 @@ const TransactionConfirmation = ({
   bookedUnits,
   selectedPaymentMethod,
   confirmationNumber,
-  basePrice,
+  totalPrice,
 }: TransactionConfirmationProps) => {
-  // Both values are "yyyy-MM-dd" so new Date() parses them correctly
-  const nights = differenceInCalendarDays(new Date(checkOut), new Date(checkIn));
-  const subtotal = nights * Math.max(bookedUnits, 1) * basePrice;
-  const serviceFee = Math.round(subtotal * 0.1);
-  const taxes = Math.round(subtotal * 0.05);
-  const total = subtotal + serviceFee + taxes;
-
   return (
     <div className="space-y-6">
       <div className="bg-linear-to-br from-primary/5 via-card to-primary/5 rounded-3xl border border-primary/20 p-8 text-center">
@@ -133,7 +126,7 @@ const TransactionConfirmation = ({
           <div className="flex justify-between items-center">
             <span className="font-bold text-lg">Total paid</span>
             <span className="font-bold text-2xl text-primary">
-              {formatCurrency(total)}
+              {formatCurrency(totalPrice)}
             </span>
           </div>
         </div>

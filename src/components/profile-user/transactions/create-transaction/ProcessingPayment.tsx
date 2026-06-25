@@ -1,21 +1,24 @@
 import { Lock, Shield } from "lucide-react";
 import { useEffect } from "react";
 import { TransactionPaymentMethod } from "@/types/transaction";
+import { useGetTransactionIdByUser } from "@/hooks/useTransactions";
 
 interface ProcessingPaymentProps {
   selectedPaymentMethod: TransactionPaymentMethod;
   paymentUrl: string | null;
+  transactionId: string;
   onComplete: () => void;
 }
 
 const ProcessingPayment = ({
   selectedPaymentMethod,
   paymentUrl,
+  transactionId,
   onComplete,
 }: ProcessingPaymentProps) => {
+  const {data: transactions} = useGetTransactionIdByUser(transactionId, { refetchInterval: 2000});
   useEffect(() => {
     if (!paymentUrl) {
-      // No redirect URL — auto-advance after 3s as fallback
       const timer = setTimeout(onComplete, 3000);
       return () => clearTimeout(timer);
     }
