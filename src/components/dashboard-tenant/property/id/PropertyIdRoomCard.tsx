@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/price/currency";
 import { Room } from "@/types/room";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { AlertCircle, Home, TrendingUp, Users } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";

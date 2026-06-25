@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/price/currency";
 import { Room } from "@/types/room";
-import { format, isValid, parseISO } from "date-fns";
+import { format } from "date-fns";
 import {
   ArrowLeft,
   BedDouble,

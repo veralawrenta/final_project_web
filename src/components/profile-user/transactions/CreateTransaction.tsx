@@ -142,7 +142,6 @@ const CreateTransactionComponent = ({
         setStep("processing_payment" as TransactionSteps);
       }
     } catch {
-      // error toast handled in mutation's onError
     } finally {
       setIsProcessing(false);
     }
@@ -152,12 +151,12 @@ const CreateTransactionComponent = ({
     try {
       Xendit.setPublishableKey(process.env.NEXT_PUBLIC_XENDIT_PUBLIC_KEY!);
       const tokenId = await new Promise<string>((resolve, reject) => {
-        const tokenPayload = {
+         const tokenPayload = {
           amount: String(total),
             card_holder_first_name: cardValues.cardHolderFirstName,
             card_holder_last_name: cardValues.cardHolderLastName,
             card_number: cardValues.cardNumber.replace(/\s/g, ""),
-            card_exp_month: cardValues.expiredMonth,
+            card_exp_month: cardValues.expiredMonth.padStart(2, "0"),
             card_exp_year:
               cardValues.expiredYear.length === 2
                 ? `20${cardValues.expiredYear}`
@@ -166,7 +165,6 @@ const CreateTransactionComponent = ({
             card_holder_email: cardValues.cardholderEmail,
             is_multiple_use: false,
         };
-
           Xendit.card.createToken(tokenPayload, (err: any, token: any) => {
             if (err) return reject(err);
 
@@ -174,7 +172,6 @@ const CreateTransactionComponent = ({
               return resolve(token.id);
             }
             if (token.status === "IN_REVIEW") {
-              // 3DS required — open the authentication URL in a popup
               const authWindow = window.open(
                 token.payer_authentication_url,
                 "xendit-3ds",
@@ -186,7 +183,7 @@ const CreateTransactionComponent = ({
                     `/xendit/token-status/${token.id}`,
                   );
 
-                  if (data.status === "VALID" || data.status === "VERIFIED") {
+                  if (data.status === "VERIFIED") {
                     clearInterval(pollInterval);
                     clearInterval(closeCheckInterval);
                     authWindow?.close();
@@ -201,6 +198,7 @@ const CreateTransactionComponent = ({
                     reject(new Error("3DS authentication failed"));
                   }
                 } catch (err) {
+                  console.error("Polling error:", err);
                 }
               }, 2000);
 
@@ -353,7 +351,7 @@ const CreateTransactionComponent = ({
                   bookedUnits={bookedUnits}
                   selectedPaymentMethod={selectedPaymentMethod}
                   confirmationNumber={transactionId}
-                  basePrice={selectedRoom.basePrice}
+                  totalPrice={total}
                 />
               )}
             </div>
