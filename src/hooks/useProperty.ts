@@ -166,7 +166,7 @@ export const useGetTenantProperties = (queries?: PropertiesQueryParams) => {
     ],
     queryFn: async () => {
       const { data } = await axiosInstance.get<
-        PageableResponse<TenantProperties>
+        PageableResponse<TenantProperty>
       >("/properties", {
         params: queries,
         headers: {
