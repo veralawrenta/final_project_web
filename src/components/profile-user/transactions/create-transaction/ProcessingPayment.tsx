@@ -2,8 +2,6 @@ import { useGetTransactionIdByUser } from "@/hooks/useTransactions";
 import { TransactionPaymentMethod } from "@/types/transaction";
 import { Lock, Shield } from "lucide-react";
 import { useEffect } from "react";
-import { TransactionPaymentMethod } from "@/types/transaction";
-import { useGetTransactionIdByUser } from "@/hooks/useTransactions";
 
 interface ProcessingPaymentProps {
   selectedPaymentMethod: TransactionPaymentMethod;
@@ -19,12 +17,9 @@ const ProcessingPayment = ({
   onComplete,
 }: ProcessingPaymentProps) => {
   const {data: transactions} = useGetTransactionIdByUser(transactionId, { refetchInterval: 2000});
+
   useEffect(() => {
-    if (!paymentUrl) {
-      const timer = setTimeout(onComplete, 3000);
-      return () => clearTimeout(timer);
-    }
-    // Real Xendit URL — redirect immediately
+    if (paymentUrl) {
     window.location.href = paymentUrl;
     return
   }
