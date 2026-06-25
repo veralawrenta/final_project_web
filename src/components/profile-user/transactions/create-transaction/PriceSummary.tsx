@@ -30,13 +30,10 @@ const PriceSummary = ({
   isProcessing,
   onContinue,
 }: PriceSummaryProps) => {
-  const subtotal =
+  const total =
     nights > 0
       ? selectedRoom.basePrice * nights * Math.max(bookedUnits, 1)
       : 0;
-  const serviceFee = Math.round(subtotal * 0.1);
-  const taxes = Math.round(subtotal * 0.05);
-  const total = subtotal + serviceFee + taxes;
 
   const ctaLabel = () => {
     if (isProcessing) return null;
@@ -79,19 +76,7 @@ const PriceSummary = ({
               {bookedUnits > 1 ? ` × ${bookedUnits} units` : ""}
             </span>
             <span className="font-medium">
-              {nights > 0 ? formatCurrency(subtotal) : "—"}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Service fee (10%)</span>
-            <span className="font-medium">
-              {nights > 0 ? formatCurrency(serviceFee) : "—"}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Taxes (5%)</span>
-            <span className="font-medium">
-              {nights > 0 ? formatCurrency(taxes) : "—"}
+              {nights > 0 ? formatCurrency(total) : "—"}
             </span>
           </div>
           <Separator />

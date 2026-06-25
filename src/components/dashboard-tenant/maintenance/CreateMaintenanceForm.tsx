@@ -87,7 +87,6 @@ const CreateMaintenanceBlockForm = () => {
       });
       handleCancel();
     } catch (error) {
-      console.error("Failed to create maintenance block:", error);
     }
   };
 

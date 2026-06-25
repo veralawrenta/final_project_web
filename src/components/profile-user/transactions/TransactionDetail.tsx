@@ -29,6 +29,7 @@ import {
   Shield,
   Star,
   Upload,
+  User,
   Users,
   X,
   XCircle,
@@ -247,6 +248,7 @@ const TransactionDetail = () => {
           {/* Column Left: Core Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Property Display Meta Card */}
+            {/* Property Display Meta Card */}
             <div className="rounded-2xl border border-border bg-white overflow-hidden shadow-xs">
               <div className="relative h-44 sm:h-56 bg-muted">
                 {transaction.room.property.propertyImages?.[0]?.urlImages ? (
@@ -272,7 +274,9 @@ const TransactionDetail = () => {
                   </p>
                 </div>
               </div>
-              <div className="p-4 sm:p-5 bg-white border-t border-border/30">
+
+              <div className="p-4 sm:p-5 bg-white space-y-4">
+                {/* Core Specs Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-semibold">
@@ -308,13 +312,34 @@ const TransactionDetail = () => {
                     </p>
                     <p className="mt-1 text-xs sm:text-sm font-bold text-slate-800">
                       {transaction.createdAt
-                        ? format(
-                            new Date(transaction.createdAt),
-                            "dd-MM-yyyy",
-                          )
+                        ? format(new Date(transaction.createdAt), "dd-MM-yyyy")
                         : "—"}
                     </p>
                   </div>
+                </div>
+
+                {/* Enhanced Tenant Meta Box */}
+                <div className="container mx-auto mt-4 py-3 border-t-2 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground font-semibold">
+                        Property Host
+                      </p>
+                      <p className="text-xs sm:text-sm font-bold text-slate-800 truncate">
+                        {transaction.room.property.tenant.tenantName}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] font-semibold bg-green-600 px-2 py-0.5 border-slate-200 text-muted tracking-wide shrink-0 self-start sm:self-auto shadow-xs"
+                  >
+                    Verified Host
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -567,10 +592,7 @@ const TransactionDetail = () => {
                   </span>
                   <span className="font-bold text-slate-800">
                     {transaction.paymentDate
-                      ? format(
-                          new Date(transaction.paymentDate),
-                          "dd-MM-yyyy",
-                        )
+                      ? format(new Date(transaction.paymentDate), "dd-MM-yyyy")
                       : "—"}
                   </span>
                 </div>
@@ -594,15 +616,27 @@ const TransactionDetail = () => {
 
               <Button
                 asChild
-                variant="outline"
+                variant="default"
                 size="sm"
                 className="w-full rounded-xl gap-2 justify-start h-9 text-xs font-semibold"
               >
                 <Link href={`/properties/${transaction.room.property.id}`}>
-                  <Eye className="h-3.5 w-3.5 text-muted-foreground" /> View
-                  Property Listing
+                  <Eye className="h-3.5 w-3.5" /> View Property Listing
                 </Link>
               </Button>
+              <div>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="sm"
+                  className="w-full rounded-xl gap-2 justify-start h-9 text-xs font-semibold"
+                >
+                  <Link href={`/customer-service-form`}>
+                    <Eye className="h-3.5 w-3.5 text-muted-foreground" />{" "}
+                    Contact Customer Service
+                  </Link>
+                </Button>
+              </div>
 
               {transaction.status === TransactionStatus.CONFIRMED &&
                 new Date(transaction.checkOut) < new Date() && (

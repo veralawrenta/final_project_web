@@ -1,5 +1,6 @@
 "use client";
 import PaginationSection from "@/components/PaginationSection";
+import PendingLoader from "@/components/PendingLoader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +14,8 @@ import {
 import { useGetAllUserReviews } from "@/hooks/useReviews";
 import { SortBy, SortOrder } from "@/types/pagination";
 import { format } from "date-fns";
-import {  MessageSquare, Search, Star } from "lucide-react";
+import { MessageSquare, Search, Star } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { parseAsInteger, parseAsStringEnum, useQueryState } from "nuqs";
 import { useTransition } from "react";
@@ -25,10 +27,9 @@ const MyReviews = () => {
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsStringEnum<SortBy>([
+    parseAsStringEnum<SortBy>(["createdAt", "propertyName"]).withDefault(
       "createdAt",
-      "propertyName",
-    ]).withDefault("createdAt"),
+    ),
   );
   const [filter, setFilter] = useQueryState(
     "filter",
@@ -122,9 +123,7 @@ const MyReviews = () => {
                   <SelectValue placeholder="Filter" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">
-                    All ({totalReviews})
-                  </SelectItem>
+                  <SelectItem value="all">All ({totalReviews})</SelectItem>
                   <SelectItem value="reviewed">
                     Reviewed ({reviewedReviews})
                   </SelectItem>
@@ -156,138 +155,143 @@ const MyReviews = () => {
           </div>
 
           {isPending ? (
+            <PendingLoader context="review" />
+          ) : userReviews?.data && userReviews.data.length > 0 ? (
             <div className="space-y-4">
-                {Array.from({ length: 3 }).map((_, i) => (
+              {userReviews.data.map((review) => {
+                const propertyName =
+                  review.transaction?.room?.property?.name ??
+                  "Unknown Property";
+                const roomName = review.transaction?.room?.name ?? "";
+                const location =
+                  review.transaction?.room?.property?.address ?? "";
+                const checkIn = review.transaction?.checkIn;
+                const checkOut = review.transaction?.checkOut;
+                const isReviewed = review.ratings > 0;
+
+                return (
                   <div
-                    key={i}
-                    className="rounded-2xl border border-border bg-card p-5 shadow-sm animate-pulse"
+                    key={review.id}
+                    className="rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:shadow-md"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 w-48 rounded bg-muted" />
-                        <div className="h-3 w-32 rounded bg-muted" />
-                        <div className="h-3 w-40 rounded bg-muted" />
-                      </div>
-                      <div className="h-9 w-28 rounded-xl bg-muted" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : userReviews?.data && userReviews.data.length > 0 ? (
-              <div className="space-y-4">
-                {userReviews.data.map((review) => {
-                  const propertyName = review.transaction?.room?.property?.name ?? "Unknown Property";
-                  const roomName = review.transaction?.room?.name ?? "";
-                  const location = review.transaction?.room?.property?.address ?? "";
-                  const checkIn = review.transaction?.checkIn;
-                  const checkOut = review.transaction?.checkOut;
-                  const isReviewed = review.ratings > 0;
- 
-                  return (
-                    <div
-                      key={review.id}
-                      className="rounded-2xl border border-border bg-card p-5 shadow-sm transition hover:shadow-md"
-                    >
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-heading font-semibold">{propertyName}</h3>
-                            {isReviewed ? (
-                              <Badge className="rounded-full bg-primary/10 text-primary text-xs border-0">
-                                Reviewed
-                              </Badge>
-                            ) : (
-                              <Badge
-                                className="rounded-full text-xs border-amber-300 text-amber-600 bg-amber-50"
-                              >
-                                Pending
-                              </Badge>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-heading font-semibold">
+                            {propertyName}
+                          </h3>
+                          {isReviewed ? (
+                            <Badge className="rounded-full bg-primary/10 text-primary text-xs border-0">
+                              Reviewed
+                            </Badge>
+                          ) : (
+                            <Badge className="rounded-full text-xs border-amber-300 text-amber-600 bg-amber-50">
+                              Pending
+                            </Badge>
+                          )}
+                        </div>
+
+                        {(roomName || location) && (
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {[roomName, location].filter(Boolean).join(" · ")}
+                          </p>
+                        )}
+
+                        {checkIn && checkOut && (
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            Stayed {format(checkIn, "dd-MM-yyyy")} —{" "}
+                            {format(checkOut, "dd-MM-yyyy")}
+                          </p>
+                        )}
+
+                        {isReviewed && (
+                          <div className="mt-3">
+                            <div className="flex items-center gap-1">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${
+                                    i < review.ratings
+                                      ? "fill-amber-400 text-amber-400"
+                                      : "text-muted-foreground/30"
+                                  }`}
+                                />
+                              ))}
+                              <span className="ml-1 text-sm font-medium">
+                                {review.ratings}/5
+                              </span>
+                            </div>
+                            {review.comments && (
+                              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                                "{review.comments}"
+                              </p>
                             )}
                           </div>
- 
-                          {(roomName || location) && (
-                            <p className="mt-1 text-sm text-muted-foreground">
-                              {[roomName, location].filter(Boolean).join(" · ")}
-                            </p>
-                          )}
- 
-                          {checkIn && checkOut && (
-                            <p className="mt-0.5 text-xs text-muted-foreground">
-                              Stayed {format(checkIn, "dd-MM-yyyy")} — {format(checkOut, "dd-MM-yyyy")}
-                            </p>
-                          )}
- 
-                          {isReviewed && (
-                            <div className="mt-3">
-                              <div className="flex items-center gap-1">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`h-4 w-4 ${
-                                      i < review.ratings
-                                        ? "fill-amber-400 text-amber-400"
-                                        : "text-muted-foreground/30"
-                                    }`}
-                                  />
-                                ))}
-                                <span className="ml-1 text-sm font-medium">
-                                  {review.ratings}/5
-                                </span>
-                              </div>
-                              {review.comments && (
-                                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                                  "{review.comments}"
-                                </p>
-                              )}
-                            </div>
-                          )}
-                        </div>
- 
-                        <div className="flex items-center gap-2 shrink-0">
-                          {!isReviewed && (
-                            <Button asChild size="sm" className="rounded-xl gap-1.5">
-                              <Link href={`/profile/user/reviews/${review.transaction.id}`}>
-                                <MessageSquare className="h-4 w-4" />
-                                Write Review
-                              </Link>
-                            </Button>
-                          )}
-                          {review.transaction?.room?.property?.name && (
-                            <Button asChild variant="outline" size="sm" className="rounded-xl">
-                              <Link href={`/property/${review.transaction.room.property.id}`}>View Property</Link>
-                            </Button>
-                          )}
-                        </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        {!isReviewed && (
+                          <Button
+                            asChild
+                            size="sm"
+                            className="rounded-xl gap-1.5"
+                          >
+                            <Link
+                              href={`/profile/user/reviews/${review.transaction.id}`}
+                            >
+                              <MessageSquare className="h-4 w-4" />
+                              Write Review
+                            </Link>
+                          </Button>
+                        )}
+                        {review.transaction?.room?.property?.name && (
+                          <Button
+                            asChild
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl"
+                          >
+                            <Link
+                              href={`/property/${review.transaction.room.property.id}`}
+                            >
+                              View Property
+                            </Link>
+                          </Button>
+                        )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
-                <Star className="mx-auto h-12 w-12 text-muted-foreground/40" />
-                <h3 className="mt-4 text-lg font-heading font-bold">No reviews found</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Try adjusting your filters or search query.
-                </p>
-              </div>
-            )}
-          </div>
-          <div className="pt-4">
-            <PaginationSection
-              meta={
-                userReviews?.meta ?? {
-                  page: 1,
-                  take: 6,
-                  total: 0,
-                  totalPages: 1,
-                }
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border bg-card p-12 text-center">
+              <Star className="mx-auto h-12 w-12 text-muted-foreground/40" />
+              <h3 className="mt-4 text-lg font-heading font-bold">
+                No reviews found
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Try adjusting your filters or search query.
+              </p>
+            </div>
+          )}
+        </div>
+        <div className="pt-4">
+          <PaginationSection
+            meta={
+              userReviews?.meta ?? {
+                page: 1,
+                take: 6,
+                total: 0,
+                totalPages: 1,
               }
-              onChangePage={onChangePage}
-            />
-          </div>
+            }
+            onChangePage={onChangePage}
+          />
         </div>
       </div>
+    </div>
   );
 };
 

@@ -107,7 +107,7 @@ const PaymentMethodStep = ({
               {cardErrors.expiredMonth && <p className="text-xs text-destructive mt-1">{cardErrors.expiredMonth?.message}</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Year (YYYY)</label>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Year (YY)</label>
               <input {...registerCard("expiredYear")} type="text" placeholder="28" maxLength={2}
                 className="w-full px-4 py-3.5 bg-secondary border border-border rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
               />

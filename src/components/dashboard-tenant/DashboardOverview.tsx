@@ -158,7 +158,7 @@ export function DashboardOverview() {
                   size="sm"
                   variant="outline"
                   className="border-amber-300 text-amber-700 bg-white hover:bg-amber-100 self-start sm:self-auto"
-                  onClick={() => router.push("/dashboard/tenant/transactions")}
+                  onClick={() => router.push("/dashboard/tenant/transaction")}
                 >
                   <Clock className="h-4 w-4 mr-1.5" />
                   View Pending

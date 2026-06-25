@@ -1,3 +1,5 @@
+import { useGetTransactionIdByUser } from "@/hooks/useTransactions";
+import { TransactionPaymentMethod } from "@/types/transaction";
 import { Lock, Shield } from "lucide-react";
 import { useEffect } from "react";
 import { TransactionPaymentMethod } from "@/types/transaction";
@@ -24,7 +26,15 @@ const ProcessingPayment = ({
     }
     // Real Xendit URL — redirect immediately
     window.location.href = paymentUrl;
-  }, [paymentUrl, onComplete]);
+    return
+  }
+  if (
+    transactions?.status === "CONFIRMED" ||
+    transactions?.status === "WAITING_FOR_CONFIRMATION"
+  ) {
+    onComplete();
+  }
+}, [transactions?.status, paymentUrl, onComplete]);
 
   const methodLabel =
     selectedPaymentMethod === "CREDIT_CARD" ? "card" : "SHOPEEPAY";

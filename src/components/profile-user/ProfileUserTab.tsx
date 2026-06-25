@@ -106,7 +106,6 @@ const ProfileUserTab = () => {
         },
       });
     } catch (error) {
-      console.error("Failed to update profile:", error);
     } finally {
       setIsSubmitting(false);
     }

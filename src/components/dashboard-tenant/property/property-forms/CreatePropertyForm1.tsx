@@ -402,7 +402,6 @@ export function CreatePropertyStep1Form({
                         });
                       }
                     } catch (e) {
-                      console.error("Reverse geocoding failed", e);
                     }
                   }}
                   height="300px"

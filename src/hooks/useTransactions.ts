@@ -112,6 +112,7 @@ export const useGetTransactionIdByUser = (transactionId: string, options? : {ref
 export const useCancelTransactionByUser = () => {
   const queryClient = useQueryClient();
   const session = useSession();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (transactionId: string) => {
@@ -131,6 +132,9 @@ export const useCancelTransactionByUser = () => {
       queryClient.invalidateQueries({
         queryKey: ["tenantTransactions", "userTransactions"],
       });
+      setTimeout(() => {
+        router.refresh
+      }, 500)
     },
     onError: (error: AxiosError<{ message: string }>) => {
       toast.error(

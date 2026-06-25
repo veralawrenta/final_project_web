@@ -91,7 +91,6 @@ export default function UpdateMaintenanceBlockPage() {
       const endDate = parseISO(blockData.endDate);
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        console.error("❌ Invalid dates after parsing!");
         return;
       }
 
@@ -129,7 +128,6 @@ export default function UpdateMaintenanceBlockPage() {
       });
       handleCancel();
     } catch (error) {
-      console.error("Failed to update maintenance block:", error);
     }
   };
   if (blocksLoading) {

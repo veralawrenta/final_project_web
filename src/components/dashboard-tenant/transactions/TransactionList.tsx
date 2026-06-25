@@ -18,12 +18,14 @@ import { toast } from "sonner";
 
 interface TransactionListProps {
   transactions: TransactionManagementPayload[];
+  onConfirm: (transactions: Transactions) => void;
   onViewTransaction?: (transactions: Transactions) => void;
   onCancelRequest: (transactions: Transactions) => void;
 }
 
 const TransactionList = ({
   transactions,
+  onConfirm,
   onViewTransaction,
   onCancelRequest,
 }: TransactionListProps) => {
@@ -73,17 +75,18 @@ const TransactionList = ({
             >
               {/* Guest */}
               <div className="flex items-center gap-3">
-                  {t.user.avatar ? (
-                    <img
-                      src={t.user.avatar}
-                      alt="user-avatar"
-                      className="w-9 h-9 rounded-xl"
-                    />
-                  ) : (
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
-                     {t.user.firstName?.[0]}{t.user.lastName?.[0]}
-                    </div>
-                  )}
+                {t.user.avatar ? (
+                  <img
+                    src={t.user.avatar}
+                    alt="user-avatar"
+                    className="w-9 h-9 rounded-xl"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary shrink-0">
+                    {t.user.firstName?.[0]}
+                    {t.user.lastName?.[0]}
+                  </div>
+                )}
 
                 <div className="min-w-0">
                   <p className="font-medium text-sm truncate">{`${t.user.firstName} ${t.user.lastName}`}</p>
@@ -141,11 +144,7 @@ const TransactionList = ({
                       <Eye className="h-4 w-4 mr-2" /> View Details
                     </DropdownMenuItem>
                     {t.displayStatus === "PENDING" && (
-                      <DropdownMenuItem
-                        onClick={() =>
-                          toast.success(`Transaction no. ${t.id} confirmed!`)
-                        }
-                      >
+                      <DropdownMenuItem onClick={() => onConfirm(t)}>
                         <CheckCircle className="h-4 w-4 mr-2" /> Confirm
                       </DropdownMenuItem>
                     )}

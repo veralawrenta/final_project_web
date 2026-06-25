@@ -38,10 +38,6 @@ export default function UpdateSeasonalRatePage() {
     const endDate = parseISO(seasonalRate.endDate);
     
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-      console.error("Invalid dates:", {
-        startDate: seasonalRate.startDate,
-        endDate: seasonalRate.endDate,
-      });
       return;
     }
     form.reset({

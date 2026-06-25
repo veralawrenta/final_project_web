@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTenantActivity } from "@/hooks/useTenantTransactions";
+import { statusToDisplayStatus, TransactionStatus } from "@/types/transaction";
 
 const TenantActivity = () => {
   const { data: tenantActivity, isPending } = useTenantActivity();
@@ -38,7 +39,7 @@ const TenantActivity = () => {
             <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
             <div>
               <p className="font-medium text-slate-800 dark:text-slate-200">
-                New Booking — {tx.status}
+                New Booking — {statusToDisplayStatus[tx.status as TransactionStatus]}
               </p>
               <p className="text-xs text-muted-foreground">
                 {tx.user.firstName} {tx.user.lastName} booked {tx.room.name} at{" "}

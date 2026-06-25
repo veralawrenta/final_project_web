@@ -14,6 +14,7 @@ import { useDebounceValue } from "usehooks-ts";
 import MaintenanceDeleteDialog from "./maintenance/MaintenanceDeleteDialog";
 import MaintenanceList from "./maintenance/MaintenanceList";
 import Image from "next/image";
+import PendingLoader from "../PendingLoader";
 
 const MaintenanceManagementTab = () => {
   const router = useRouter();
@@ -68,23 +69,7 @@ const MaintenanceManagementTab = () => {
 
       <div className="pt-6">
         {listLoading && !paginatedRecords ? (
-          <div className="flex flex-col items-center justify-center py-32 space-y-4 w-full border-2 border-dashed border-border/60 rounded-[3rem] bg-muted/5">
-            <div className="relative h-20 w-20 animate-pulse">
-              <Image
-                src="/images/nuit-logo.png"
-                fill
-                alt="Loading..."
-                className="object-contain"
-                priority
-              />
-            </div>
-            <div className="flex flex-col items-center space-y-2">
-              <div className="h-5 w-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm font-medium text-muted-foreground">
-                Syncing maintenance records...
-              </p>
-            </div>
-          </div>
+         <PendingLoader context="maintenance" />
         ) : paginatedRecords?.data?.length === 0 && !search ? (
           <div className="relative overflow-hidden flex flex-col items-center justify-center py-24 px-8 border-2 border-dashed border-border/60 rounded-[3rem] bg-linear-to-b from-muted/20 to-transparent">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-primary/5 blur-[100px] -z-10" />
